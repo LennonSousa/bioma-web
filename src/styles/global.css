@@ -1,0 +1,24 @@
+:root {
+    --background: #f2f3f5;
+    --background-dark: #dddddd;
+    --white: #fff;
+    --green: #069140;
+    --green-light: #7ABC3E;
+    --green-dark: #0B722B;
+}
+
+body {
+    background-color: var(--background-dark);
+}
+
+body, input, button, textarea {
+    font: 600 18px Nunito, sans-serif;
+}
+
+.content-page {
+    background-color: var(--background);
+    border-radius: 10px;
+    box-shadow: 3px 3px 10px rgb(0 0 0 / 32%);
+    margin-bottom: 2rem;
+    padding: 1rem 1rem;
+}

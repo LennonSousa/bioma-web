@@ -1,0 +1,40 @@
+.sideBarContainer {
+    width: 10rem;
+    height: 100%;
+    padding: 1rem 0.5rem;
+
+    background: var(--green);
+    color: var(--white);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.accordionContainer {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.menuCard {
+    background-color: var(--green-dark) !important;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.menuCardHeader {
+    width: 100%;
+    justify-content: space-evenly;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background-color: var(--green-dark) !important;
+}
+
+.menuCardHeader span {
+    font: 200 16px Nunito, sans-serif;
+}
