@@ -12,12 +12,16 @@ body {
 }
 
 body, input, button, textarea {
-    font: 600 18px Nunito, sans-serif;
+    font: Nunito, sans-serif;
+}
+
+a {
+    text-decoration: none;
 }
 
 .content-page {
     background-color: var(--background);
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: 3px 3px 10px rgb(0 0 0 / 32%);
     margin-bottom: 2rem;
     padding: 1rem 1rem;

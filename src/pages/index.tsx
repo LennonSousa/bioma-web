@@ -1,7 +1,13 @@
+import { NextSeo } from 'next-seo';
+import { Container } from 'react-bootstrap';
+
 export default function Home() {
   return (
-    <div>
-      <h1>Hello world!</h1>
-    </div>
+    <>
+      <NextSeo title="Plataforma de gerenciamento." />
+      <Container className="content-page">
+        <h1>Hello world!</h1>
+      </Container>
+    </>
   )
 }

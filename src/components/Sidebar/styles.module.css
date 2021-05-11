@@ -1,6 +1,5 @@
 .sideBarContainer {
     width: 10rem;
-    height: 100%;
     padding: 1rem 0.5rem;
 
     background: var(--green);
@@ -10,6 +9,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+}
+
+.sideBarContainer a{
+    color: var(--white);
+}
+
+.sideBarContainer a:hover{
+    color: var(--white);
 }
 
 .accordionContainer {
@@ -33,8 +40,33 @@
     flex-direction: column;
     flex: 1;
     background-color: var(--green-dark) !important;
+    cursor: pointer;
 }
 
 .menuCardHeader span {
     font: 200 16px Nunito, sans-serif;
+}
+
+.menuCardBody {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background-color: var(--green-dark) !important;
+}
+
+.menuCardBodyItem {
+    margin-bottom: 0.5rem;
+    transition-duration: 0.4s;
+    border-radius: 2px;
+    padding: 0.2rem 0;
+}
+
+.menuCardBodyItem:hover {
+    background-color: var(--green) !important;
+}
+
+.menuCardBody span {
+    font: 200 14px Nunito, sans-serif;
 }

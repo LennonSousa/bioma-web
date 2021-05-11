@@ -1,3 +1,5 @@
+import Head from 'next/head';
+import { NextSeo } from 'next-seo';
 import { Header } from '../components/Header';
 import Sidebar from '../components/Sidebar';
 
@@ -7,16 +9,25 @@ import '../styles/global.css';
 import styles from '../styles/app.module.css';
 
 function MyApp({ Component, pageProps }) {
-  return <div className={styles.wrapper}>
-    <Header />
-    <div className={styles.main}>
-      <Sidebar />
+  return <>
+    <NextSeo titleTemplate="Bioma | %s" defaultTitle="Plataforma de gerenciamento." />
 
-      <section className={styles.content}>
-        <Component {...pageProps} />
-      </section>
+    <Head>
+      <meta charSet="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </Head>
+
+    <div className={styles.wrapper}>
+      <Header />
+      <div className={styles.main}>
+        <Sidebar />
+
+        <section className={styles.content}>
+          <Component {...pageProps} />
+        </section>
+      </div>
     </div>
-  </div>
+  </>
 }
 
 export default MyApp

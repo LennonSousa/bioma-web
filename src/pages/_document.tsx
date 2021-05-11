@@ -7,8 +7,6 @@ export default class MyDocument extends Document {
                 <Head>
                     <link rel="preconnect" href="https://fonts.gstatic.com" />
                     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;700;800&display=swap" rel="stylesheet" />
-
-                    <title>Bioma | Plataforma de gerenciamento.</title>
                 </Head>
 
                 <body>
