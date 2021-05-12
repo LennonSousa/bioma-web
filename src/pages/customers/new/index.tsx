@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Alert, Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
-import { Formik } from 'formik';
+import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
+import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
 import { format } from 'date-fns';
 
@@ -8,6 +8,7 @@ import api from '../../../services/api';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
+import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
@@ -28,6 +29,7 @@ const validationSchema = Yup.object().shape({
 export default function NewCustomer() {
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
+    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
     const [documentType, setDocumentType] = useState("CPF");
     const [warnings, setWarnings] = useState(false);
     const [cities, setCities] = useState<string[]>([])
@@ -54,12 +56,51 @@ export default function NewCustomer() {
                 state: '',
                 owner: '',
                 notes: '',
-                warnings,
+                warnings: false,
                 birth: format(new Date(), 'yyyy-MM-dd'),
                 docs: [],
             }}
             onSubmit={async values => {
+                setTypeMessage("waiting");
+                setMessageShow(true);
 
+                const docs = docsCustomer.map(doc => {
+                    let checked = false;
+
+                    console.log(values.docs);
+
+                    values.docs.forEach(item => { if (item === doc.id) checked = true });
+
+                    return { checked, doc: doc.id }
+                });
+
+                try {
+                    await api.post('customers', {
+                        name: values.name,
+                        document: values.document,
+                        phone: values.phone,
+                        cellphone: values.cellphone,
+                        contacts: values.contacts,
+                        email: values.email,
+                        address: values.address,
+                        city: values.city,
+                        state: values.state,
+                        owner: values.owner,
+                        notes: values.notes,
+                        warnings: values.warnings,
+                        birth: values.birth,
+                        docs,
+                    });
+
+                    setTypeMessage("success");
+                }
+                catch {
+                    setTypeMessage("error");
+
+                    setTimeout(() => {
+                        setMessageShow(false);
+                    }, 4000);
+                }
             }}
             validationSchema={validationSchema}
         >
@@ -228,7 +269,7 @@ export default function NewCustomer() {
                                 name="state"
                                 isInvalid={!!errors.state && touched.state}
                             >
-                                <option hidden>Escolha</option>
+                                <option hidden>...</option>
                                 {
                                     statesCities.estados.map((estado, index) => {
                                         return <option key={index} value={estado.nome}>{estado.nome}</option>
@@ -249,7 +290,7 @@ export default function NewCustomer() {
                                 isInvalid={!!errors.city && touched.city}
                                 disabled={!!!values.state}
                             >
-                                <option hidden>Escolha</option>
+                                <option hidden>...</option>
                                 {
                                     !!values.state && cities.map((city, index) => {
                                         return <option key={index} value={city}>{city}</option>
@@ -261,14 +302,9 @@ export default function NewCustomer() {
                     </Row>
 
                     <Form.Row className="mb-2">
-                        <Form.Group as={Col} controlId="formGridWarnings">
-                            <Form.Check
-                                type="switch"
-                                id="custom-switch-warnings"
-                                label="Observações"
-                                onChange={() => { setWarnings(!warnings) }}
-                            />
-                        </Form.Group>
+                        <label>
+                            <Field type="checkbox" name="warnings" /> Observações
+                        </label>
                     </Form.Row>
 
                     <Form.Row className="mb-3">
@@ -276,8 +312,12 @@ export default function NewCustomer() {
                             <Form.Control
                                 as="textarea"
                                 rows={4}
-                                disabled={!warnings}
+                                disabled={!values.warnings}
                                 style={{ resize: 'none' }}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.notes}
+                                name="notes"
                             />
                         </Form.Group>
                     </Form.Row>
@@ -293,13 +333,14 @@ export default function NewCustomer() {
                                         return <ListGroup.Item key={index} action as="div" variant="light">
                                             <Row>
                                                 <Col>
-                                                    <Form.Check
-                                                        type="checkbox"
-                                                        label={doc.name}
-                                                        name="docs"
-                                                        id={`formHorizontalRadios${doc.id}`}
-                                                        value={doc.id}
-                                                    />
+                                                    <label>
+                                                        <Field
+                                                            type="checkbox"
+                                                            name="docs"
+                                                            value={doc.id}
+                                                        />
+                                                        {doc.name}
+                                                    </label>
                                                 </Col>
                                             </Row>
                                         </ListGroup.Item>
@@ -309,21 +350,15 @@ export default function NewCustomer() {
                         </Form.Group>
                     </Form.Row>
 
-                    {
-                        messageShow ? <Alert variant="danger" onClose={() => setMessageShow(false)} dismissible>
-                            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
-                            <p>
-                                Change this and that and try again. Duis mollis, est non commodo
-                                luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
-                                Cras mattis consectetur purus sit amet fermentum.
-                        </p>
-                        </Alert> : <Row className="justify-content-end text-end">
-                            <Col sm={2}>
-                                <Button variant="success" type="submit">Salvar</Button>
-                            </Col>
+                    <Row className="justify-content-end text-end">
+                        {
+                            messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
+                                <Col sm={2}>
+                                    <Button variant="success" type="submit">Salvar</Button>
+                                </Col>
 
-                        </Row>
-                    }
+                        }
+                    </Row>
                 </Form>
             )}
         </Formik>
