@@ -1,6 +1,6 @@
 import { ListGroup, Row, Col } from 'react-bootstrap';
 
-import { Customer } from './customers';
+import { Customer } from '../Customers';
 
 interface CustomerItemProps {
     customer: Customer;
