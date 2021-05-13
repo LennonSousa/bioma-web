@@ -1,3 +1,5 @@
+import { CustomerDocs } from '../CustomerDocs';
+
 export interface Customer {
     id: string;
     name: string;
@@ -15,4 +17,5 @@ export interface Customer {
     birth: Date;
     created_by: string;
     created_at: Date;
+    docs: CustomerDocs[];
 }

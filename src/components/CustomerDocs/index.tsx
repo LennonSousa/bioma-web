@@ -1,6 +1,11 @@
-export interface DocsCustomer {
+import { Customer } from '../Customers';
+import { DocsCustomer } from '../DocsCustomer';
+
+export interface CustomerDocs {
     id: string;
-    name: string;
-    active: boolean;
-    order: number;
+    path: string;
+    received_at: Date;
+    checked: boolean;
+    customer: Customer;
+    doc: DocsCustomer;
 }

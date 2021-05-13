@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
@@ -31,8 +32,9 @@ export default function NewCustomer() {
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
     const [documentType, setDocumentType] = useState("CPF");
-    const [warnings, setWarnings] = useState(false);
-    const [cities, setCities] = useState<string[]>([])
+    const [cities, setCities] = useState<string[]>([]);
+
+    const router = useRouter();
 
     useEffect(() => {
         api.get('docs/customer').then(res => {
@@ -67,15 +69,13 @@ export default function NewCustomer() {
                 const docs = docsCustomer.map(doc => {
                     let checked = false;
 
-                    console.log(values.docs);
-
                     values.docs.forEach(item => { if (item === doc.id) checked = true });
 
                     return { checked, doc: doc.id }
                 });
 
                 try {
-                    await api.post('customers', {
+                    const res = await api.post('customers', {
                         name: values.name,
                         document: values.document,
                         phone: values.phone,
@@ -93,6 +93,10 @@ export default function NewCustomer() {
                     });
 
                     setTypeMessage("success");
+
+                    setTimeout(() => {
+                        router.push(`/customers/details/${res.data.id}`)
+                    }, 2000);
                 }
                 catch {
                     setTypeMessage("error");
