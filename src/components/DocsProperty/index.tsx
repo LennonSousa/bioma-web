@@ -7,16 +7,16 @@ import * as Yup from 'yup';
 import api from '../../services/api';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 
-export interface DocsCustomer {
+export interface DocsProperty {
     id: string;
     name: string;
     active: boolean;
     order: number;
 }
 
-interface DocsCustomerProps {
-    doc: DocsCustomer;
-    listDocs: DocsCustomer[];
+interface DocsPropertyProps {
+    doc: DocsProperty;
+    listDocs: DocsProperty[];
     handleListDocs(): Promise<void>;
 }
 
@@ -26,7 +26,7 @@ const validationSchema = Yup.object().shape({
     order: Yup.number().required(),
 });
 
-const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDocs }) => {
+const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDocs }) => {
     const [showModalEditDoc, setShowModalEditDoc] = useState(false);
 
     const handleCloseModalEditDoc = () => { setShowModalEditDoc(false); setIconDeleteConfirm(false); setIconDelete(true); }
@@ -40,11 +40,11 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);
 
-    const togglePauseCategory = async () => {
+    const togglePauseProperty = async () => {
         setCategoryPausing(true);
 
         try {
-            await api.put(`docs/customer/${doc.id}`, {
+            await api.put(`docs/property/${doc.id}`, {
                 name: doc.name,
                 active: !doc.active,
                 order: doc.order,
@@ -72,13 +72,13 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
         setMessageShow(true);
 
         try {
-            await api.delete(`docs/customer/${doc.id}`);
+            await api.delete(`docs/property/${doc.id}`);
 
             const list = listDocs.filter(item => { return item.id !== doc.id });
 
             list.forEach(async (doc, index) => {
                 try {
-                    await api.put(`docs/customer/${doc.id}`, {
+                    await api.put(`docs/property/${doc.id}`, {
                         name: doc.name,
                         active: doc.active,
                         order: index
@@ -104,7 +104,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
                 setMessageShow(false);
             }, 4000);
 
-            console.log("Error to delete product");
+            console.log("Error to delete doc property");
             console.log(err);
         }
     }
@@ -122,7 +122,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
                     <Button
                         variant="outline-danger"
                         className="button-link"
-                        onClick={togglePauseCategory}>
+                        onClick={togglePauseProperty}>
                         {
                             categoryPausing ? <Spinner
                                 as="span"
@@ -158,7 +158,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
 
                         try {
                             if (listDocs) {
-                                await api.put(`docs/customer/${doc.id}`, {
+                                await api.put(`docs/property/${doc.id}`, {
                                     name: values.name,
                                     active: doc.active,
                                     order: doc.order
@@ -175,7 +175,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
                             }
                         }
                         catch (err) {
-                            console.log('error create category.');
+                            console.log('error edit doc property.');
                             console.log(err);
 
                             setTypeMessage("error");
@@ -236,4 +236,4 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
     )
 }
 
-export default DocsCustomer;
+export default DocsProperty;

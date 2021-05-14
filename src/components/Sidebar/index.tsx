@@ -54,14 +54,18 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
                                 </a>
                             </Link>
 
-                            <Row className={styles.menuCardBodyItem}>
-                                <Col sm={1}>
-                                    <FaIdCard size={14} />
-                                </Col>
-                                <Col>
-                                    <span>Documentos</span>
-                                </Col>
-                            </Row>
+                            <Link href="/docs/customer">
+                                <a title="Listar os documentos para clientes" data-title="Listar os documentos para clientes">
+                                    <Row className={styles.menuCardBodyItem}>
+                                        <Col sm={1}>
+                                            <FaIdCard size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Documentos</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
 
                             <Dropdown.Divider />
 
@@ -83,14 +87,18 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
                                 </Col>
                             </Row>
 
-                            <Row className={styles.menuCardBodyItem}>
-                                <Col sm={1}>
-                                    <FaFileSignature size={14} />
-                                </Col>
-                                <Col>
-                                    <span>Documentos</span>
-                                </Col>
-                            </Row>
+                            <Link href="/docs/property">
+                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
+                                    <Row className={styles.menuCardBodyItem}>
+                                        <Col sm={1}>
+                                            <FaFileSignature size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Documentos</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
 
                         </Card.Body>
                     </Accordion.Collapse>

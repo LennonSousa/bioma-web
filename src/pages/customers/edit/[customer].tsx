@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { FaLongArrowAltLeft } from 'react-icons/fa';
 
 import api from '../../../services/api';
+import { Customer } from '../../../components/Customers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
@@ -30,19 +31,21 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function NewCustomer() {
+    const router = useRouter();
+    const { customer } = router.query;
+
+    const [customerData, setCustomerData] = useState<Customer>();
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
     const [documentType, setDocumentType] = useState("CPF");
     const [cities, setCities] = useState<string[]>([]);
 
-    const router = useRouter();
-
     useEffect(() => {
-        api.get('docs/customer').then(res => {
+        api.get(`docs/customer${customer}`).then(res => {
             setDocsCustomer(res.data);
         }).catch(err => {
-            console.log('Error to get docs customer, ', err);
+            console.log('Error to get customer to edit, ', err);
         })
     }, []);
 

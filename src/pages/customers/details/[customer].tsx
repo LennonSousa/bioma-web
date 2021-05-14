@@ -12,13 +12,18 @@ import styles from './styles.module.css';
 
 export default function CustomerDetails() {
     const router = useRouter();
-    const [customerData, setCustomerData] = useState<Customer>();
     const { customer } = router.query;
+
+    const [customerData, setCustomerData] = useState<Customer>();
+    const [documentType, setDocumentType] = useState("CPF");
 
     useEffect(() => {
         if (customer) {
             api.get(`customers/${customer}`).then(res => {
                 setCustomerData(res.data);
+
+                if (res.data.document.length > 14)
+                    setDocumentType("CNPJ");
             }).catch(err => {
                 console.log('Error to get customer: ', err);
             });
@@ -56,7 +61,7 @@ export default function CustomerDetails() {
                             <Col sm={4} >
                                 <Row>
                                     <Col>
-                                        <span className="text-success">CPJ/CNPJ</span>
+                                        <span className="text-success">{documentType}</span>
                                     </Col>
                                 </Row>
 
