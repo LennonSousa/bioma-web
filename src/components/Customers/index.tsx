@@ -1,4 +1,5 @@
 import { CustomerDocs } from '../CustomerDocs';
+import { CustomerAttachment } from '../CustomerAttachments';
 
 export interface Customer {
     id: string;
@@ -18,4 +19,5 @@ export interface Customer {
     created_by: string;
     created_at: Date;
     docs: CustomerDocs[];
+    attachments: CustomerAttachment[];
 }

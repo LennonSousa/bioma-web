@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Row, Col, ListGroup, Modal, Form, Button, Spinner } from 'react-bootstrap';
-import { BsFillPauseFill, BsFillPlayFill, BsPencil, BsList } from 'react-icons/bs';
+import { FaPause, FaPlay, FaPencilAlt, FaBars } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
@@ -113,7 +113,7 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
         <ListGroup.Item variant={doc.active ? "light" : "danger"}>
             <Row>
                 <Col sm={1}>
-                    <BsList />
+                    <FaBars />
                 </Col>
 
                 <Col><span>{doc.name}</span></Col>
@@ -130,13 +130,13 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
                                 size="sm"
                                 role="status"
                                 aria-hidden="true"
-                            /> : doc.active ? (<><BsFillPauseFill /> Pausar</>) : (<><BsFillPlayFill /> Pausado</>)
+                            /> : doc.active ? (<><FaPause /> Pausar</>) : (<><FaPlay /> Pausado</>)
                         }
                     </Button>
                 </Col>
 
                 <Col className="text-right">
-                    <Button variant="outline-danger" className="button-link" onClick={handleShowModalEditDoc}><BsPencil /> Editar</Button>
+                    <Button variant="outline-danger" className="button-link" onClick={handleShowModalEditDoc}><FaPencilAlt /> Editar</Button>
                 </Col>
             </Row>
 
