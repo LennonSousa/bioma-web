@@ -7,7 +7,7 @@ import { FaLongArrowAltLeft, FaFileAlt, FaIdCard, FaExclamationCircle, FaCheck, 
 
 import api from '../../../services/api';
 import { Customer } from '../../../components/Customers';
-
+import CustomerAttachments from '../../../components/CustomerAttachments';
 import styles from './styles.module.css';
 
 export default function CustomerDetails() {
@@ -29,6 +29,8 @@ export default function CustomerDetails() {
             });
         }
     }, [customer]);
+
+    async function handleListAttachments() { }
 
     return <Container className="content-page">
         {
@@ -252,7 +254,7 @@ export default function CustomerDetails() {
                         </Row>
 
                         <Row className="mb-3">
-                            <Col sm={5}>
+                            <Col>
                                 <Row>
                                     <Col>
                                         <h6 className="text-success">Anexos <FaFileAlt /></h6>
@@ -261,16 +263,15 @@ export default function CustomerDetails() {
 
                                 <Row>
                                     <Col>
-                                        <ListGroup className="mb-3">
+                                        <ListGroup>
                                             {
-                                                customerData.docs.map((doc, index) => {
-                                                    return <ListGroup.Item key={index} action as="div" variant="light">
-                                                        <Row>
-                                                            <Col>
-                                                                {doc.checked && <FaCheck />} <label>{doc.doc.name} </label>
-                                                            </Col>
-                                                        </Row>
-                                                    </ListGroup.Item>
+                                                customerData.attachments.map((attachment, index) => {
+                                                    return <CustomerAttachments
+                                                        key={index}
+                                                        attachment={attachment}
+                                                        canEdit={false}
+                                                        handleListAttachments={handleListAttachments}
+                                                    />
                                                 })
                                             }
                                         </ListGroup>

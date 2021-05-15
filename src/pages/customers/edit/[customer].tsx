@@ -51,6 +51,7 @@ export default function NewCustomer() {
     const [customerData, setCustomerData] = useState<Customer>();
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
+    const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
     const [documentType, setDocumentType] = useState("CPF");
     const [cities, setCities] = useState<string[]>([]);
@@ -71,6 +72,14 @@ export default function NewCustomer() {
         if (customer) {
             api.get(`customers/${customer}`).then(res => {
                 setCustomerData(res.data);
+
+                try {
+                    const stateCities = statesCities.estados.find(item => { return item.nome === res.data.state })
+
+                    if (stateCities)
+                        setCities(stateCities.cidades);
+                }
+                catch { }
 
                 api.get('docs/customer').then(res => {
                     setDocsCustomer(res.data);
@@ -101,7 +110,6 @@ export default function NewCustomer() {
 
             setFilePreview(imagesToPreview);
         }
-
     }
 
     return <Container className="content-page">
@@ -136,7 +144,7 @@ export default function NewCustomer() {
                     });
 
                     try {
-                        const res = await api.post('customers', {
+                        const res = await api.put(`customers/${customerData.id}`, {
                             name: values.name,
                             document: values.document,
                             phone: values.phone,
@@ -338,7 +346,7 @@ export default function NewCustomer() {
                                             setCities(stateCities.cidades);
                                     }}
                                     onBlur={handleBlur}
-                                    value={values.state}
+                                    value={values.state ? values.state : '...'}
                                     name="state"
                                     isInvalid={!!errors.state && touched.state}
                                 >
@@ -358,7 +366,7 @@ export default function NewCustomer() {
                                     as="select"
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    value={values.city}
+                                    value={values.city ? values.city : '...'}
                                     name="city"
                                     isInvalid={!!errors.city && touched.city}
                                     disabled={!!!values.state}
@@ -489,7 +497,7 @@ export default function NewCustomer() {
                     }
                     onSubmit={async values => {
                         setTypeMessage("waiting");
-                        setMessageShow(true);
+                        setMessageShowNewAttachment(true);
 
                         try {
                             const data = new FormData();
@@ -511,9 +519,9 @@ export default function NewCustomer() {
                             setTypeMessage("success");
 
                             setTimeout(() => {
-                                setMessageShow(false);
+                                setMessageShowNewAttachment(false);
                                 handleCloseModalNewAttachment();
-                            }, 2000);
+                            }, 1000);
                         }
                         catch (err) {
                             console.log('error create attachment.');
@@ -522,7 +530,7 @@ export default function NewCustomer() {
                             setTypeMessage("error");
 
                             setTimeout(() => {
-                                setMessageShow(false);
+                                setMessageShowNewAttachment(false);
                             }, 4000);
                         }
                     }}
@@ -636,7 +644,7 @@ export default function NewCustomer() {
                             </Modal.Body>
                             <Modal.Footer>
                                 {
-                                    messageShow ? <AlertMessage status={typeMessage} /> :
+                                    messageShowNewAttachment ? <AlertMessage status={typeMessage} /> :
                                         <>
                                             <Button variant="secondary" onClick={handleCloseModalNewAttachment}>Cancelar</Button>
                                             <Button variant="success" type="submit">Salvar</Button>

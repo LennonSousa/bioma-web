@@ -23,6 +23,7 @@ export interface CustomerAttachment {
 
 interface CustomerAttachmentsProps {
     attachment: CustomerAttachment;
+    canEdit?: boolean;
     handleListAttachments(): Promise<void>;
 }
 
@@ -34,7 +35,7 @@ const validationSchema = Yup.object().shape({
     renewal: Yup.string().notRequired(),
 });
 
-const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, handleListAttachments }) => {
+const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, canEdit = true, handleListAttachments }) => {
     const [showModalEditDoc, setShowModalEditDoc] = useState(false);
 
     const handleCloseModalEditDoc = () => { setShowModalEditDoc(false); setIconDeleteConfirm(false); setIconDelete(true); }
@@ -56,7 +57,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
 
             setAttachmentExpireTime(formatDistanceToNow(new Date(attachment.expire_at), { addSuffix: true, locale: br }));
         }
-    }, [attachment.expire, attachment.expire_at]);
+    }, [attachment.expire, attachment.expire_at, attachmentExpired]);
 
     async function handleDownloadAttachment() {
         try {
@@ -79,7 +80,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
         setMessageShow(true);
 
         try {
-            await api.delete(`docs/customer/${attachment.id}`);
+            await api.delete(`customers/attachments/${attachment.id}`);
 
             handleCloseModalEditDoc();
 
@@ -116,16 +117,24 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
                     </Col>
 
                     <Col sm={3} className="text-right">
-                        {attachment.expire && attachment.renewal} {Number(attachment.renewal) === 1 ? `dia` : `dias`} para renovar
+                        {attachment.expire && `${attachment.renewal} ${Number(attachment.renewal) === 1 ? `dia` : `dias`} para renovar`}
                     </Col>
 
                     <Col sm={1} className="text-right">
                         <Button variant="outline-success" className="button-link" onClick={handleDownloadAttachment}><FaCloudDownloadAlt /></Button>
                     </Col>
 
-                    <Col sm={2} className="text-right">
-                        <Button variant="outline-success" className="button-link" onClick={handleShowModalEditDoc}><FaPencilAlt /> Editar</Button>
-                    </Col>
+                    {
+                        canEdit && <Col sm={2} className="text-right">
+                            <Button
+                                variant="outline-success"
+                                className="button-link"
+                                onClick={handleShowModalEditDoc}
+                            >
+                                <FaPencilAlt /> Editar
+                            </Button>
+                        </Col>
+                    }
                 </Row>
             </ListGroup.Item>
 
@@ -163,7 +172,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
                             setTimeout(() => {
                                 setMessageShow(false);
                                 handleCloseModalEditDoc();
-                            }, 2000);
+                            }, 1000);
                         }
                         catch (err) {
                             console.log('error create category.');
