@@ -1,16 +1,14 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Row, Col, ListGroup, Modal, Form, Button, Spinner } from 'react-bootstrap';
-import { FaHourglassHalf, FaHourglassEnd, FaPencilAlt, FaCloudDownloadAlt, FaPlus } from 'react-icons/fa';
+import { Row, Col, ListGroup, Modal, Form, Button } from 'react-bootstrap';
+import { FaHourglassHalf, FaHourglassEnd, FaPencilAlt, FaCloudDownloadAlt } from 'react-icons/fa';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
-import { format, formatDistanceToNow, isAfter } from 'date-fns';
+import { format, formatDistanceToNow, isBefore } from 'date-fns';
 import br from 'date-fns/locale/pt-BR';
 
 import api from '../../services/api';
 import { Customer } from '../Customers';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
-
-import styles from './styles.module.css';
 
 export interface CustomerAttachment {
     id: string;
@@ -19,7 +17,7 @@ export interface CustomerAttachment {
     received_at: Date;
     expire: boolean;
     expire_at: Date;
-    renewal: string;
+    renewal: number;
     customer: Customer;
 }
 
@@ -30,12 +28,10 @@ interface CustomerAttachmentsProps {
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
-    path: Yup.string().required('Obrigatório!'),
     received_at: Yup.date().required('Obrigatório!'),
     expire: Yup.boolean().notRequired(),
     expire_at: Yup.date().required('Obrigatório!'),
     renewal: Yup.string().notRequired(),
-    customer: Yup.string().required('Obrigatório!'),
 });
 
 const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, handleListAttachments }) => {
@@ -47,9 +43,6 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
     const [attachmentExpired, setAttachmentExpired] = useState(false);
     const [attachmentExpireTime, setAttachmentExpireTime] = useState('');
 
-    const [fileToSave, setFileToSave] = useState<File>();
-    const [filePreview, setFilePreview] = useState('');
-
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
@@ -57,11 +50,13 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);
 
     useEffect(() => {
-        if (attachment.expire && attachment.expire_at && isAfter(attachment.expire_at, new Date())) {
-            setAttachmentExpired(true);
-            setAttachmentExpireTime(formatDistanceToNow(attachment.expire_at, { addSuffix: true, locale: br }))
+        if (attachment.expire) {
+            if (attachment.expire_at && isBefore(new Date(attachment.expire_at), new Date()))
+                setAttachmentExpired(true);
+
+            setAttachmentExpireTime(formatDistanceToNow(new Date(attachment.expire_at), { addSuffix: true, locale: br }));
         }
-    }, []);
+    }, [attachment.expire, attachment.expire_at]);
 
     async function handleDownloadAttachment() {
         try {
@@ -70,16 +65,6 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
             console.log("Error to pause category");
             console.log(err);
         }
-    }
-
-    function handleImages(event: ChangeEvent<HTMLInputElement>) {
-        const image = event.target.files[0];
-
-        setFileToSave(image);
-
-        const imagesToPreview = image.name;
-
-        setFilePreview(imagesToPreview);
     }
 
     async function deleteProduct() {
@@ -116,25 +101,33 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
     }
 
     return (
-        <ListGroup.Item variant={attachmentExpired ? "warning" : "light"}>
-            <Row>
-                <Col><span>{attachment.name}</span></Col>
+        <>
+            <ListGroup.Item variant={attachmentExpired ? "warning" : "light"}>
+                <Row className="align-items-center">
+                    <Col><span>{attachment.name}</span></Col>
 
-                <Col sm={3}>
-                    {
-                        attachmentExpired ? <>Expirado {attachmentExpireTime} <FaHourglassEnd /></> :
-                            <>Expira {attachmentExpireTime} <FaHourglassHalf /> </>
-                    }
-                </Col>
+                    <Col sm={3}>
+                        {
+                            attachment.expire && (
+                                attachmentExpired ? <><FaHourglassEnd /> Expirado {attachmentExpireTime}</> :
+                                    <><FaHourglassHalf /> Expira {attachmentExpireTime}</>
+                            )
+                        }
+                    </Col>
 
-                <Col sm={1} className="text-right">
-                    <Button variant="outline-danger" className="button-link" onClick={handleDownloadAttachment}><FaCloudDownloadAlt /></Button>
-                </Col>
+                    <Col sm={3} className="text-right">
+                        {attachment.expire && attachment.renewal} {Number(attachment.renewal) === 1 ? `dia` : `dias`} para renovar
+                    </Col>
 
-                <Col sm={2} className="text-right">
-                    <Button variant="outline-danger" className="button-link" onClick={handleShowModalEditDoc}><FaPencilAlt /> Editar</Button>
-                </Col>
-            </Row>
+                    <Col sm={1} className="text-right">
+                        <Button variant="outline-success" className="button-link" onClick={handleDownloadAttachment}><FaCloudDownloadAlt /></Button>
+                    </Col>
+
+                    <Col sm={2} className="text-right">
+                        <Button variant="outline-success" className="button-link" onClick={handleShowModalEditDoc}><FaPencilAlt /> Editar</Button>
+                    </Col>
+                </Row>
+            </ListGroup.Item>
 
             <Modal show={showModalEditDoc} onHide={handleCloseModalEditDoc}>
                 <Modal.Header closeButton>
@@ -144,10 +137,9 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
                     initialValues={
                         {
                             name: attachment.name,
-                            path: attachment.path,
-                            received_at: format(attachment.received_at, 'yyyy-MM-dd'),
+                            received_at: format(new Date(attachment.received_at), 'yyyy-MM-dd'),
                             expire: attachment.expire,
-                            expire_at: format(attachment.expire_at, 'yyyy-MM-dd'),
+                            expire_at: format(new Date(attachment.expire_at), 'yyyy-MM-dd'),
                             renewal: attachment.renewal,
                         }
                     }
@@ -156,9 +148,8 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
                         setMessageShow(true);
 
                         try {
-                            await api.put(`docs/customer/${attachment.id}`, {
+                            await api.put(`customers/attachments/${attachment.id}`, {
                                 name: values.name,
-                                path: values.path,
                                 received_at: values.received_at,
                                 expire: values.expire,
                                 expire_at: values.expire_at,
@@ -190,65 +181,60 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
                     {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                         <Form onSubmit={handleSubmit}>
                             <Modal.Body>
-                                <Form.Group controlId="attachmentFormGridName">
-                                    <Form.Label>Nome do documento</Form.Label>
-                                    <Form.Control type="text"
-                                        placeholder="Nome"
-                                        onChange={handleChange}
-                                        onBlur={handleBlur}
-                                        value={values.name}
-                                        name="name"
-                                        isInvalid={!!errors.name && touched.name}
-                                    />
-                                    <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                    <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
-                                </Form.Group>
-
-                                <Row className="mb-3">
-                                    <label htmlFor="fileAttachement" className={styles.productImageButton}>
-                                        <Row>
-                                            <Col>
-                                                <FaPlus />
-                                            </Col>
-                                        </Row>
-
-                                        <Row>
-                                            <Col>
-                                                Anexo
-                                        </Col>
-                                        </Row>
-                                        <input
-                                            type="file" accept=".jpg, .jpeg, .png, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf"
-                                            onChange={handleImages}
-                                            id="fileAttachement"
+                                <Row className="align-items-end mb-3">
+                                    <Form.Group as={Col} sm={10} controlId="formGridName">
+                                        <Form.Label>Nome do anexo</Form.Label>
+                                        <Form.Control type="text"
+                                            placeholder="Nome"
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            value={values.name}
+                                            name="name"
+                                            isInvalid={!!errors.name && touched.name}
                                         />
-                                    </label>
-                                    <label>{filePreview}</label>
+                                        <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                    </Form.Group>
+
+                                    <Form.Group as={Col} sm={2} controlId="formGridReceivedAt">
+                                        <Button
+                                            variant="outline-success"
+                                            className="button-link"
+                                            onClick={handleDownloadAttachment}
+                                        >
+                                            <FaCloudDownloadAlt />
+                                        </Button>
+                                    </Form.Group>
                                 </Row>
 
                                 <Row className="mb-3">
-                                    <Form.Group as={Col} sm={4} controlId="formGridReceivedAt">
-                                        <Form.Label>Data do recebimento</Form.Label>
-                                        <Form.Control
-                                            type="date"
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            value={values.received_at}
-                                            name="received_at"
-                                            isInvalid={!!errors.received_at && touched.received_at}
-                                        />
-                                        <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
+                                    <Form.Group as={Row} controlId="formGridReceivedAt">
+                                        <Form.Label column sm={7}>Data do recebimento</Form.Label>
+                                        <Col sm={5}>
+                                            <Form.Control
+                                                type="date"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.received_at}
+                                                name="received_at"
+                                                isInvalid={!!errors.received_at && touched.received_at}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
+                                        </Col>
                                     </Form.Group>
+                                </Row>
 
+                                <Row className="mb-3">
                                     <Form.Group as={Col} sm={4} controlId="formGridExpire">
                                         <label>
                                             <Field type="checkbox" name="expire" /> Expira?
                                         </label>
                                     </Form.Group>
+                                </Row>
 
-                                    {
-                                        values.expire && <Form.Group as={Col} sm={4} controlId="formGridExpireAt">
-                                            <Form.Label>Nascimento</Form.Label>
+                                {
+                                    values.expire && <Row className="mb-3">
+                                        <Form.Group as={Col} sm={6} controlId="formGridExpireAt">
+                                            <Form.Label>Data de expiração</Form.Label>
                                             <Form.Control
                                                 type="date"
                                                 onChange={handleChange}
@@ -259,23 +245,21 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
                                             />
                                             <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
                                         </Form.Group>
-                                    }
-                                </Row>
 
-                                <Row className="mb-3">
-                                    <Form.Group as={Col} sm={2} controlId="formGridName">
-                                        <Form.Label>Dias para renovar</Form.Label>
-                                        <Form.Control
-                                            type="number"
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            value={Number(values.renewal)}
-                                            name="renewal"
-                                            isInvalid={!!errors.renewal && touched.renewal}
-                                        />
-                                        <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                    </Form.Group>
-                                </Row>
+                                        <Form.Group as={Col} sm={6} controlId="formGridName">
+                                            <Form.Label>Dias para renovar</Form.Label>
+                                            <Form.Control
+                                                type="number"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={Number(values.renewal)}
+                                                name="renewal"
+                                                isInvalid={!!errors.renewal && touched.renewal}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Row>
+                                }
                             </Modal.Body>
                             <Modal.Footer>
                                 {
@@ -304,7 +288,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, h
                     )}
                 </Formik>
             </Modal>
-        </ListGroup.Item>
+        </>
     )
 }
 

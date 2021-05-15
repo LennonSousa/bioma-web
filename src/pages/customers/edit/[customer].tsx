@@ -33,6 +33,17 @@ const validationSchema = Yup.object().shape({
     birth: Yup.date().required('Obrigatório!'),
 });
 
+const attachmentValidationSchema = Yup.object().shape({
+    name: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
+    path: Yup.string().required('Obrigatório!'),
+    size: Yup.number().lessThan(5 * 1024 * 1024, 'O arquivo não pode ultrapassar 5MB.').notRequired(),
+    received_at: Yup.date().required('Obrigatório!'),
+    expire: Yup.boolean().notRequired(),
+    expire_at: Yup.date().required('Obrigatório!'),
+    renewal: Yup.string().notRequired(),
+    customer: Yup.string().required('Obrigatório!'),
+});
+
 export default function NewCustomer() {
     const router = useRouter();
     const { customer } = router.query;
@@ -47,24 +58,30 @@ export default function NewCustomer() {
     const [showModalNewAttachment, setShowModalNewAttachment] = useState(false);
 
     const handleCloseModalNewAttachment = () => setShowModalNewAttachment(false);
-    const handleShowModalNewAttachment = () => setShowModalNewAttachment(true);
+    const handleShowModalNewAttachment = () => {
+        setFileToSave(undefined);
+        setFilePreview('');
+        setShowModalNewAttachment(true);
+    }
 
     const [fileToSave, setFileToSave] = useState<File>();
     const [filePreview, setFilePreview] = useState('');
 
     useEffect(() => {
-        api.get(`customers/${customer}`).then(res => {
-            setCustomerData(res.data);
+        if (customer) {
+            api.get(`customers/${customer}`).then(res => {
+                setCustomerData(res.data);
 
-            api.get(`docs/customer${customer}`).then(res => {
-                setDocsCustomer(res.data);
+                api.get('docs/customer').then(res => {
+                    setDocsCustomer(res.data);
+                }).catch(err => {
+                    console.log('Error to get docs customer to edit, ', err);
+                })
             }).catch(err => {
-                console.log('Error to get docs customer to edit, ', err);
-            })
-        }).catch(err => {
-            console.log('Error to get customer to edit, ', err);
-        });
-    }, []);
+                console.log('Error to get customer to edit, ', err);
+            });
+        }
+    }, [customer]);
 
     async function handleListAttachments() {
         const res = await api.get(`customers/${customer}`);
@@ -75,13 +92,16 @@ export default function NewCustomer() {
     }
 
     function handleImages(event: ChangeEvent<HTMLInputElement>) {
-        const image = event.target.files[0];
+        if (event.target.files[0]) {
+            const image = event.target.files[0];
 
-        setFileToSave(image);
+            setFileToSave(image);
 
-        const imagesToPreview = image.name;
+            const imagesToPreview = image.name;
 
-        setFilePreview(imagesToPreview);
+            setFilePreview(imagesToPreview);
+        }
+
     }
 
     return <Container className="content-page">
@@ -100,7 +120,7 @@ export default function NewCustomer() {
                     owner: customerData.owner,
                     notes: customerData.notes,
                     warnings: customerData.warnings,
-                    birth: format(customerData.birth, 'yyyy-MM-dd'),
+                    birth: format(new Date(customerData.birth), 'yyyy-MM-dd'),
                     docs: [],
                 }}
                 onSubmit={async values => {
@@ -377,7 +397,7 @@ export default function NewCustomer() {
 
                         <Col className="border-top mb-3"></Col>
 
-                        <Form.Row>
+                        <Form.Row className="mb-4">
                             <Form.Group as={Col} sm={5} controlId="formGridDocs">
                                 <Form.Label>Documentação</Form.Label>
                                 <ListGroup className="mb-3">
@@ -404,30 +424,34 @@ export default function NewCustomer() {
                         </Form.Row>
 
                         <Form.Row className="mb-3">
-                            <Form.Group as={Col} sm={5} controlId="formGridDocs">
+                            <Form.Group as={Col} controlId="formGridDocs">
                                 <Row>
-                                    <Col>
+                                    <Col sm={2}>
                                         <Form.Label>Anexos</Form.Label>
                                     </Col>
 
-                                    <Col>
+                                    <Col sm={1}>
                                         <Button variant="outline-success" onClick={handleShowModalNewAttachment}>
                                             <FaPlus />
                                         </Button>
                                     </Col>
                                 </Row>
 
-                                <ListGroup className="mb-3">
-                                    {
-                                        customerData.attachments.map((attachment, index) => {
-                                            return <CustomerAttachments
-                                                key={index}
-                                                attachment={attachment}
-                                                handleListAttachments={handleListAttachments}
-                                            />
-                                        })
-                                    }
-                                </ListGroup>
+                                <Row className="mt-2">
+                                    <Col>
+                                        <ListGroup>
+                                            {
+                                                customerData.attachments.map((attachment, index) => {
+                                                    return <CustomerAttachments
+                                                        key={index}
+                                                        attachment={attachment}
+                                                        handleListAttachments={handleListAttachments}
+                                                    />
+                                                })
+                                            }
+                                        </ListGroup>
+                                    </Col>
+                                </Row>
                             </Form.Group>
                         </Form.Row>
 
@@ -445,163 +469,184 @@ export default function NewCustomer() {
             </Formik>
         }
 
-        <Modal show={showModalNewAttachment} onHide={handleCloseModalNewAttachment}>
-            <Modal.Header closeButton>
-                <Modal.Title>Criar um anexo</Modal.Title>
-            </Modal.Header>
-            <Formik
-                initialValues={
-                    {
-                        name: '',
-                        path: '',
-                        received_at: format(new Date(), 'yyyy-MM-dd'),
-                        expire: false,
-                        expire_at: format(new Date(), 'yyyy-MM-dd'),
-                        renewal: 0,
+        {
+            customerData && <Modal show={showModalNewAttachment} onHide={handleCloseModalNewAttachment}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Criar um anexo</Modal.Title>
+                </Modal.Header>
+                <Formik
+                    initialValues={
+                        {
+                            name: '',
+                            path: '',
+                            size: 0,
+                            received_at: format(new Date(), 'yyyy-MM-dd'),
+                            expire: false,
+                            expire_at: format(new Date(), 'yyyy-MM-dd'),
+                            renewal: 0,
+                            customer: customerData.id,
+                        }
                     }
-                }
-                onSubmit={async values => {
-                    setTypeMessage("waiting");
-                    setMessageShow(true);
+                    onSubmit={async values => {
+                        setTypeMessage("waiting");
+                        setMessageShow(true);
 
-                    try {
-                        const data = new FormData();
+                        try {
+                            const data = new FormData();
 
-                        data.append('name', values.name);
+                            data.append('name', values.name);
 
-                        data.append('file', fileToSave);
+                            data.append('file', fileToSave);
 
-                        data.append('received_at', values.received_at);
-                        data.append('expire', String(values.expire));
-                        data.append('expire_at', values.expire_at);
-                        data.append('renewal', String(values.renewal));
+                            data.append('received_at', values.received_at);
+                            data.append('expire', String(values.expire));
+                            data.append('expire_at', values.expire_at);
+                            data.append('renewal', String(values.renewal));
+                            data.append('customer', values.customer);
 
-                        await api.post('customers/attachments', data);
+                            await api.post('customers/attachments', data);
 
-                        await handleListAttachments();
+                            await handleListAttachments();
 
-                        setTypeMessage("success");
+                            setTypeMessage("success");
 
-                        setTimeout(() => {
-                            setMessageShow(false);
-                            handleCloseModalNewAttachment();
-                        }, 2000);
-                    }
-                    catch (err) {
-                        console.log('error create attachment.');
-                        console.log(err);
+                            setTimeout(() => {
+                                setMessageShow(false);
+                                handleCloseModalNewAttachment();
+                            }, 2000);
+                        }
+                        catch (err) {
+                            console.log('error create attachment.');
+                            console.log(err);
 
-                        setTypeMessage("error");
+                            setTypeMessage("error");
 
-                        setTimeout(() => {
-                            setMessageShow(false);
-                        }, 4000);
-                    }
-                }}
-                validationSchema={validationSchema}
-            >
-                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                    <Form onSubmit={handleSubmit}>
-                        <Modal.Body>
-                            <Form.Group controlId="attachmentFormGridName">
-                                <Form.Label>Nome do documento</Form.Label>
-                                <Form.Control type="text"
-                                    placeholder="Nome"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.name}
-                                    name="name"
-                                    isInvalid={!!errors.name && touched.name}
-                                />
-                                <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
-                            </Form.Group>
-
-                            <Row className="mb-3">
-                                <label htmlFor="fileAttachement" className={styles.productImageButton}>
-                                    <Row>
-                                        <Col>
-                                            <FaPlus />
-                                        </Col>
-                                    </Row>
-
-                                    <Row>
-                                        <Col>
-                                            Anexo
-                                        </Col>
-                                    </Row>
-                                    <input
-                                        type="file" accept=".jpg, .jpeg, .png, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf"
-                                        onChange={handleImages}
-                                        id="fileAttachement"
-                                    />
-                                </label>
-                                <label>{filePreview}</label>
-                            </Row>
-
-                            <Row className="mb-3">
-                                <Form.Group as={Col} sm={4} controlId="formGridReceivedAt">
-                                    <Form.Label>Data do recebimento</Form.Label>
-                                    <Form.Control
-                                        type="date"
+                            setTimeout(() => {
+                                setMessageShow(false);
+                            }, 4000);
+                        }
+                    }}
+                    validationSchema={attachmentValidationSchema}
+                >
+                    {({ handleChange, handleBlur, handleSubmit, setFieldValue, setFieldTouched, values, errors, touched }) => (
+                        <Form onSubmit={handleSubmit}>
+                            <Modal.Body>
+                                <Form.Group controlId="attachmentFormGridName">
+                                    <Form.Label>Nome do documento</Form.Label>
+                                    <Form.Control type="text"
+                                        placeholder="Nome"
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        value={values.received_at}
-                                        name="received_at"
-                                        isInvalid={!!errors.received_at && touched.received_at}
-                                    />
-                                    <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
-                                </Form.Group>
-
-                                <Form.Group as={Col} sm={4} controlId="formGridExpire">
-                                    <label>
-                                        <Field type="checkbox" name="expire" /> Expira?
-                                        </label>
-                                </Form.Group>
-
-                                {
-                                    values.expire && <Form.Group as={Col} sm={4} controlId="formGridExpireAt">
-                                        <Form.Label>Nascimento</Form.Label>
-                                        <Form.Control
-                                            type="date"
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            value={values.expire_at}
-                                            name="expire_at"
-                                            isInvalid={!!errors.expire_at && touched.expire_at}
-                                        />
-                                        <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
-                                    </Form.Group>
-                                }
-                            </Row>
-
-                            <Row className="mb-3">
-                                <Form.Group as={Col} sm={2} controlId="formGridName">
-                                    <Form.Label>Dias para renovar</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        onChange={handleChange}
-                                        onBlur={handleBlur}
-                                        value={Number(values.renewal)}
-                                        name="renewal"
-                                        isInvalid={!!errors.renewal && touched.renewal}
+                                        value={values.name}
+                                        name="name"
+                                        isInvalid={!!errors.name && touched.name}
                                     />
                                     <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                    <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
                                 </Form.Group>
-                            </Row>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            {
-                                messageShow ? <AlertMessage status={typeMessage} /> :
-                                    <>
-                                        <Button variant="secondary" onClick={handleCloseModalNewAttachment}>Cancelar</Button>
-                                        <Button variant="success" type="submit">Salvar</Button>
-                                    </>
-                            }
-                        </Modal.Footer>
-                    </Form>
-                )}
-            </Formik>
-        </Modal>
+
+                                <Row className="mb-3">
+                                    <Col sm={4}>
+                                        <label htmlFor="fileAttachement" className={styles.productImageButton}>
+                                            <Row>
+                                                <Col>
+                                                    <FaPlus />
+                                                </Col>
+                                            </Row>
+
+                                            <Row>
+                                                <Col>Anexo</Col>
+                                            </Row>
+                                            <input
+                                                type="file" accept=".jpg, .jpeg, .png, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .psd"
+                                                onChange={(e) => {
+                                                    handleImages(e);
+                                                    if (e.target.files[0]) {
+                                                        setFieldValue('path', e.target.files[0].name);
+                                                        setFieldValue('size', e.target.files[0].size);
+                                                    }
+                                                }}
+                                                id="fileAttachement"
+                                            />
+                                        </label>
+                                    </Col>
+
+                                    <Col>
+                                        <label>{filePreview}</label>
+                                    </Col>
+
+                                    <label className="invalid-feedback" style={{ display: 'block' }}>{errors.path}</label>
+                                    <label className="invalid-feedback" style={{ display: 'block' }}>{errors.size}</label>
+                                </Row>
+
+                                <Row className="mb-3">
+                                    <Form.Group as={Row} controlId="formGridReceivedAt">
+                                        <Form.Label column sm={7}>Data do recebimento</Form.Label>
+                                        <Col sm={5}>
+                                            <Form.Control
+                                                type="date"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.received_at}
+                                                name="received_at"
+                                                isInvalid={!!errors.received_at && touched.received_at}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
+                                        </Col>
+                                    </Form.Group>
+                                </Row>
+
+                                <Row className="mb-3">
+                                    <Form.Group as={Col} sm={4} controlId="formGridExpire">
+                                        <label>
+                                            <Field type="checkbox" name="expire" /> Expira?
+                                        </label>
+                                    </Form.Group>
+                                </Row>
+
+                                {
+                                    values.expire && <Row className="mb-3">
+                                        <Form.Group as={Col} sm={6} controlId="formGridExpireAt">
+                                            <Form.Label>Data de expiração</Form.Label>
+                                            <Form.Control
+                                                type="date"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.expire_at}
+                                                name="expire_at"
+                                                isInvalid={!!errors.expire_at && touched.expire_at}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
+                                        </Form.Group>
+
+                                        <Form.Group as={Col} sm={6} controlId="formGridName">
+                                            <Form.Label>Dias para renovar</Form.Label>
+                                            <Form.Control
+                                                type="number"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={Number(values.renewal)}
+                                                name="renewal"
+                                                isInvalid={!!errors.renewal && touched.renewal}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Row>
+                                }
+                            </Modal.Body>
+                            <Modal.Footer>
+                                {
+                                    messageShow ? <AlertMessage status={typeMessage} /> :
+                                        <>
+                                            <Button variant="secondary" onClick={handleCloseModalNewAttachment}>Cancelar</Button>
+                                            <Button variant="success" type="submit">Salvar</Button>
+                                        </>
+                                }
+                            </Modal.Footer>
+                        </Form>
+                    )}
+                </Formik>
+            </Modal>
+        }
     </Container>
 }
