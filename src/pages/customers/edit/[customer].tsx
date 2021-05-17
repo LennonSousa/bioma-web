@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
@@ -142,6 +142,18 @@ export default function NewCustomer() {
         setCustomerData({ ...customerData, docs: updatedDocs });
     }
 
+    function handleReceivedAt(docId: string, value: string) {
+        const updatedDocs = customerData.docs.map(customerDoc => {
+
+            if (customerDoc.doc.id === docId)
+                return { ...customerDoc, received_at: new Date(new Date(`${value} 12:00:00`)) }
+
+            return customerDoc;
+        });
+
+        setCustomerData({ ...customerData, docs: updatedDocs });
+    }
+
     return <Container className="content-page">
         {
             customerData && <Formik
@@ -178,7 +190,7 @@ export default function NewCustomer() {
                             owner: values.owner,
                             notes: values.notes,
                             warnings: values.warnings,
-                            birth: values.birth,
+                            birth: new Date(`${values.birth} 12:00:00`),
                         });
 
                         customerData.docs.forEach(async doc => {
@@ -445,14 +457,14 @@ export default function NewCustomer() {
                         <Col className="border-top mb-3"></Col>
 
                         <Form.Row className="mb-4">
-                            <Form.Group as={Col} sm={5} controlId="formGridDocs">
+                            <Form.Group as={Col} controlId="formGridDocs">
                                 <Form.Label>Documentação</Form.Label>
                                 <ListGroup className="mb-3">
                                     {
                                         customerData.docs.map((doc, index) => {
                                             return <ListGroup.Item key={index} action as="div" variant="light">
                                                 <Row>
-                                                    <Col>
+                                                    <Col sm={8}>
                                                         <Form.Check
                                                             checked={doc.checked}
                                                             type="checkbox"
@@ -461,6 +473,17 @@ export default function NewCustomer() {
                                                             id={`formCustomerDocs${doc.doc.id}`}
                                                             value={doc.doc.id}
                                                             onChange={handleChecks}
+                                                        />
+                                                    </Col>
+
+                                                    <Form.Label column sm={2}>Data do recebimento</Form.Label>
+                                                    <Col sm={2}>
+                                                        <Form.Control
+                                                            type="date"
+                                                            className="form-control"
+                                                            onChange={e => handleReceivedAt(doc.doc.id, e.target.value)}
+                                                            value={format(new Date(doc.received_at), 'yyyy-MM-dd')}
+                                                            name={`receivedAt${doc.doc.id}`}
                                                         />
                                                     </Col>
                                                 </Row>

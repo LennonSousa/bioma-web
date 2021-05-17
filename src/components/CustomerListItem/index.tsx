@@ -1,21 +1,67 @@
 import Link from 'next/link';
-import { ListGroup, Row, Col } from 'react-bootstrap';
+import { useRouter } from 'next/router';
+import { Button, ButtonGroup, Row, Col } from 'react-bootstrap';
+import { FaFileAlt, FaMapSigns, FaPencilAlt, FaFileContract, FaExclamationCircle } from 'react-icons/fa'
 
 import { Customer } from '../Customers';
+
+import styles from './styles.module.css';
 
 interface CustomerItemProps {
     customer: Customer;
 }
 
 const CustomerItem: React.FC<CustomerItemProps> = ({ customer }) => {
+    const router = useRouter();
+
+    function goToEdit() {
+        router.push(`/customers/edit/${customer.id}`);
+    }
+
     return (
-        <ListGroup.Item action>
-            <Link href={`/customers/details/${customer.id}`}>
+        <Col sm={4}>
+            <div className={styles.itemContainer}>
                 <Row className="align-items-center">
-                    <Col>{customer.name}</Col>
+                    <Col sm={11}>
+                        <Link href={`/customers/details/${customer.id}`}>
+                            <a>
+                                <h4 className={`form-control-plaintext text-success ${styles.itemText}`}>{customer.name}</h4>
+                            </a>
+                        </Link>
+                    </Col>
+                    <Col className="text-warning" sm={1}>{customer.warnings && <FaExclamationCircle />}</Col>
                 </Row>
-            </Link>
-        </ListGroup.Item>
+
+                <Row>
+                    <Col>
+                        <span
+                            className={`form-control-plaintext text-secondary ${styles.itemText}`}
+                        >
+                            {!!customer.document ? customer.document : <br />}
+                        </span>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col>
+                        <span
+                            className={`form-control-plaintext text-secondary ${styles.itemText}`}
+                        >
+                            {!!customer.address ? customer.address : <br />}
+                        </span>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <ButtonGroup size="sm">
+                        <Button variant="success"><FaFileAlt /></Button>
+                        <Button variant="success"><FaMapSigns /></Button>
+                        <Button variant="success"><FaFileContract /></Button>
+                        <Button variant="success" onClick={goToEdit} ><FaPencilAlt /></Button>
+                    </ButtonGroup>
+                </Row>
+            </div>
+        </Col >
     )
 }
 

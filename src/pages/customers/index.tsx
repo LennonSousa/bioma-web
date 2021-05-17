@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, ListGroup } from 'react-bootstrap';
+import { Container, Row } from 'react-bootstrap';
 
 import { Customer } from '../../components/Customers';
 import CustomerItem from '../../components/CustomerListItem';
@@ -18,20 +18,14 @@ export default function Customers() {
     }, []);
 
     return (
-        <>
-            <Container className="content-page">
-                <Row>
-                    <Col>
-                        <ListGroup>
-                            {
-                                customers.map((customer, index) => {
-                                    return <CustomerItem key={index} customer={customer} />
-                                })
-                            }
-                        </ListGroup>
-                    </Col>
-                </Row>
-            </Container>
-        </>
+        <Container>
+            <Row>
+                {
+                    customers.map((customer, index) => {
+                        return <CustomerItem key={index} customer={customer} />
+                    })
+                }
+            </Row>
+        </Container>
     )
 }
