@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
@@ -49,7 +49,6 @@ export default function NewCustomer() {
     const { customer } = router.query;
 
     const [customerData, setCustomerData] = useState<Customer>();
-    const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -71,7 +70,7 @@ export default function NewCustomer() {
     useEffect(() => {
         if (customer) {
             api.get(`customers/${customer}`).then(res => {
-                setCustomerData(res.data);
+                let customerRes: Customer = res.data;
 
                 try {
                     const stateCities = statesCities.estados.find(item => { return item.nome === res.data.state })
@@ -82,7 +81,27 @@ export default function NewCustomer() {
                 catch { }
 
                 api.get('docs/customer').then(res => {
-                    setDocsCustomer(res.data);
+                    const documentsRes: DocsCustomer[] = res.data;
+
+                    customerRes = {
+                        ...customerRes, docs: documentsRes.map(doc => {
+                            const customerDoc = customerRes.docs.find(item => { return item.doc.id === doc.id });
+
+                            if (customerDoc)
+                                return { ...customerDoc, customer: customerRes };
+
+                            return {
+                                id: '0',
+                                path: '',
+                                received_at: new Date(),
+                                checked: false,
+                                customer: customerRes,
+                                doc: doc,
+                            };
+                        })
+                    }
+
+                    setCustomerData(customerRes);
                 }).catch(err => {
                     console.log('Error to get docs customer to edit, ', err);
                 })
@@ -112,6 +131,17 @@ export default function NewCustomer() {
         }
     }
 
+    function handleChecks(event: ChangeEvent<HTMLInputElement>) {
+        const updatedDocs = customerData.docs.map(customerDoc => {
+            if (customerDoc.doc.id === event.target.value)
+                return { ...customerDoc, checked: !customerDoc.checked }
+
+            return customerDoc;
+        });
+
+        setCustomerData({ ...customerData, docs: updatedDocs });
+    }
+
     return <Container className="content-page">
         {
             customerData && <Formik
@@ -129,22 +159,13 @@ export default function NewCustomer() {
                     notes: customerData.notes,
                     warnings: customerData.warnings,
                     birth: format(new Date(customerData.birth), 'yyyy-MM-dd'),
-                    docs: [],
                 }}
                 onSubmit={async values => {
                     setTypeMessage("waiting");
                     setMessageShow(true);
 
-                    const docs = docsCustomer.map(doc => {
-                        let checked = false;
-
-                        values.docs.forEach(item => { if (item === doc.id) checked = true });
-
-                        return { checked, doc: doc.id }
-                    });
-
                     try {
-                        const res = await api.put(`customers/${customerData.id}`, {
+                        await api.put(`customers/${customerData.id}`, {
                             name: values.name,
                             document: values.document,
                             phone: values.phone,
@@ -158,13 +179,31 @@ export default function NewCustomer() {
                             notes: values.notes,
                             warnings: values.warnings,
                             birth: values.birth,
-                            docs,
+                        });
+
+                        customerData.docs.forEach(async doc => {
+                            if (doc.id === '0') {
+                                await api.post('customers/docs', {
+                                    path: doc.path,
+                                    received_at: doc.received_at,
+                                    checked: doc.checked,
+                                    customer: doc.customer.id,
+                                    doc: doc.doc.id,
+                                });
+                                return
+                            }
+
+                            await api.put(`customers/docs/${doc.id}`, {
+                                ...doc,
+                                customer: doc.customer.id,
+                                doc: doc.doc.id,
+                            });
                         });
 
                         setTypeMessage("success");
 
                         setTimeout(() => {
-                            router.push(`/customers/details/${res.data.id}`)
+                            router.push(`/customers/details/${customerData.id}`)
                         }, 2000);
                     }
                     catch {
@@ -410,18 +449,19 @@ export default function NewCustomer() {
                                 <Form.Label>Documentação</Form.Label>
                                 <ListGroup className="mb-3">
                                     {
-                                        docsCustomer.map((doc, index) => {
+                                        customerData.docs.map((doc, index) => {
                                             return <ListGroup.Item key={index} action as="div" variant="light">
                                                 <Row>
                                                     <Col>
-                                                        <label>
-                                                            <Field
-                                                                type="checkbox"
-                                                                name="docs"
-                                                                value={doc.id}
-                                                            />
-                                                            {doc.name}
-                                                        </label>
+                                                        <Form.Check
+                                                            checked={doc.checked}
+                                                            type="checkbox"
+                                                            label={doc.doc.name}
+                                                            name="type"
+                                                            id={`formCustomerDocs${doc.doc.id}`}
+                                                            value={doc.doc.id}
+                                                            onChange={handleChecks}
+                                                        />
                                                     </Col>
                                                 </Row>
                                             </ListGroup.Item>
