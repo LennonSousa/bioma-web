@@ -3,10 +3,20 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
-import { FaLongArrowAltLeft, FaFileAlt, FaIdCard, FaExclamationCircle, FaCheck, FaPencilAlt, FaPlus } from 'react-icons/fa';
+import {
+    FaLongArrowAltLeft,
+    FaFileAlt,
+    FaIdCard,
+    FaExclamationCircle,
+    FaCheck,
+    FaPencilAlt,
+    FaPlus,
+    FaRegFile
+} from 'react-icons/fa';
 
 import api from '../../../services/api';
 import { Customer } from '../../../components/Customers';
+import { DocsCustomer } from '../../../components/DocsCustomer';
 import CustomerAttachments from '../../../components/CustomerAttachments';
 import styles from './styles.module.css';
 
@@ -20,10 +30,36 @@ export default function CustomerDetails() {
     useEffect(() => {
         if (customer) {
             api.get(`customers/${customer}`).then(res => {
-                setCustomerData(res.data);
+                let customerRes: Customer = res.data;
 
-                if (res.data.document.length > 14)
+                if (customerRes.document.length > 14)
                     setDocumentType("CNPJ");
+
+                api.get('docs/customer').then(res => {
+                    const documentsRes: DocsCustomer[] = res.data;
+
+                    customerRes = {
+                        ...customerRes, docs: documentsRes.map(doc => {
+                            const customerDoc = customerRes.docs.find(item => { return item.doc.id === doc.id });
+
+                            if (customerDoc)
+                                return { ...customerDoc, customer: customerRes };
+
+                            return {
+                                id: '0',
+                                path: '',
+                                received_at: new Date(),
+                                checked: false,
+                                customer: customerRes,
+                                doc: doc,
+                            };
+                        })
+                    }
+
+                    setCustomerData(customerRes);
+                }).catch(err => {
+                    console.log('Error to get docs customer to edit, ', err);
+                });
             }).catch(err => {
                 console.log('Error to get customer: ', err);
             });
@@ -226,7 +262,7 @@ export default function CustomerDetails() {
                         <Col className="border-top mb-3"></Col>
 
                         <Row className="mb-3">
-                            <Col sm={5}>
+                            <Col>
                                 <Row>
                                     <Col>
                                         <h6 className="text-success">Documentação <FaIdCard /></h6>
@@ -240,9 +276,21 @@ export default function CustomerDetails() {
                                                 customerData.docs.map((doc, index) => {
                                                     return <ListGroup.Item key={index} action as="div" variant="light">
                                                         <Row>
-                                                            <Col>
-                                                                {doc.checked && <FaCheck />} <label>{doc.doc.name} </label>
+                                                            <Col sm={8}>
+                                                                {
+                                                                    doc.checked ? <FaCheck /> :
+                                                                        <FaRegFile />} <label>{doc.doc.name} </label>
                                                             </Col>
+
+                                                            {
+                                                                doc.checked && <>
+                                                                    <Col sm={2}>Data do recebimento</Col>
+
+                                                                    <Col sm={2}>
+                                                                        {format(new Date(doc.received_at), 'dd/MM/yyyy')}
+                                                                    </Col>
+                                                                </>
+                                                            }
                                                         </Row>
                                                     </ListGroup.Item>
                                                 })

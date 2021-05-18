@@ -72,6 +72,9 @@ export default function NewCustomer() {
             api.get(`customers/${customer}`).then(res => {
                 let customerRes: Customer = res.data;
 
+                if (customerRes.document.length > 14)
+                    setDocumentType("CNPJ");
+
                 try {
                     const stateCities = statesCities.estados.find(item => { return item.nome === res.data.state })
 
@@ -104,7 +107,7 @@ export default function NewCustomer() {
                     setCustomerData(customerRes);
                 }).catch(err => {
                     console.log('Error to get docs customer to edit, ', err);
-                })
+                });
             }).catch(err => {
                 console.log('Error to get customer to edit, ', err);
             });
