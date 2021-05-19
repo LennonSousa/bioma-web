@@ -74,23 +74,31 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
 
                             <Dropdown.Divider />
 
-                            <Row className={styles.menuCardBodyItem}>
-                                <Col sm={1}>
-                                    <FaMapSigns size={14} />
-                                </Col>
-                                <Col>
-                                    <span>Imóveis</span>
-                                </Col>
-                            </Row>
+                            <Link href="/properties">
+                                <a title="Listar todos os imóveis" data-title="Listar todos os imóveis">
+                                    <Row className={styles.menuCardBodyItem}>
+                                        <Col sm={1}>
+                                            <FaMapSigns size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Imóveis</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
 
-                            <Row className={styles.menuCardBodyItem}>
-                                <Col sm={1}>
-                                    <FaPlus size={14} />
-                                </Col>
-                                <Col>
-                                    <span>Novo</span>
-                                </Col>
-                            </Row>
+                            <Link href="/properties/new">
+                                <a title="Criar um novo imóvel" data-title="Criar um novo imóvel">
+                                    <Row className={styles.menuCardBodyItem}>
+                                        <Col sm={1}>
+                                            <FaPlus size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Novo</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
 
                             <Link href="/docs/property">
                                 <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
