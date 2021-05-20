@@ -1,5 +1,6 @@
 import { CustomerDocs } from '../CustomerDocs';
 import { Property } from '../Properties';
+import { Project } from '../Projects';
 import { CustomerAttachment } from '../CustomerAttachments';
 
 export interface Customer {
@@ -21,5 +22,6 @@ export interface Customer {
     created_at: Date;
     docs: CustomerDocs[];
     properties: Property[];
+    projects: Project[];
     attachments: CustomerAttachment[];
 }

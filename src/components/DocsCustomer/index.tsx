@@ -111,16 +111,16 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
 
     return (
         <ListGroup.Item variant={doc.active ? "light" : "danger"}>
-            <Row>
+            <Row className="align-items-center">
                 <Col sm={1}>
                     <FaBars />
                 </Col>
 
                 <Col><span>{doc.name}</span></Col>
 
-                <Col>
+                <Col className="text-end">
                     <Button
-                        variant="outline-danger"
+                        variant="outline-success"
                         className="button-link"
                         onClick={togglePauseCategory}>
                         {
@@ -135,8 +135,8 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
                     </Button>
                 </Col>
 
-                <Col className="text-right">
-                    <Button variant="outline-danger" className="button-link" onClick={handleShowModalEditDoc}><FaPencilAlt /> Editar</Button>
+                <Col className="text-end">
+                    <Button variant="outline-success" className="button-link" onClick={handleShowModalEditDoc}><FaPencilAlt /> Editar</Button>
                 </Col>
             </Row>
 

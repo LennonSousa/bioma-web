@@ -1,38 +1,36 @@
 import { useState } from 'react';
-import { Row, Col, ListGroup, Modal, Form, Button, Spinner } from 'react-bootstrap';
-import { FaPause, FaPlay, FaPencilAlt, FaBars } from 'react-icons/fa';
+import { Row, Col, ListGroup, Modal, Form, Button } from 'react-bootstrap';
+import { FaPencilAlt, FaBars } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import api from '../../services/api';
+import { Project } from '../Projects';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 
-export interface DocsProperty {
+export interface ProjectStatus {
     id: string;
     name: string;
-    active: boolean;
     order: number;
+    projects: Project[];
 }
 
-interface DocsPropertyProps {
-    doc: DocsProperty;
-    listDocs: DocsProperty[];
-    handleListDocs(): Promise<void>;
+interface ProjectStatusProps {
+    status: ProjectStatus;
+    listStatus: ProjectStatus[];
+    handleListStatus(): Promise<void>;
 }
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
-    active: Yup.boolean(),
     order: Yup.number().required(),
 });
 
-const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDocs }) => {
-    const [showModalEditDoc, setShowModalEditDoc] = useState(false);
+const ProjectStatusItem: React.FC<ProjectStatusProps> = ({ status, listStatus, handleListStatus }) => {
+    const [showModalEditStatus, setShowModalEditStatus] = useState(false);
 
-    const handleCloseModalEditDoc = () => { setShowModalEditDoc(false); setIconDeleteConfirm(false); setIconDelete(true); }
-    const handleShowModalEditDoc = () => setShowModalEditDoc(true);
-
-    const [categoryPausing, setCategoryPausing] = useState(false);
+    const handleCloseModalEditStatus = () => { setShowModalEditStatus(false); setIconDeleteConfirm(false); setIconDelete(true); }
+    const handleShowModalEditStatus = () => setShowModalEditStatus(true);
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -40,27 +38,7 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);
 
-    const togglePauseProperty = async () => {
-        setCategoryPausing(true);
-
-        try {
-            await api.put(`docs/property/${doc.id}`, {
-                name: doc.name,
-                active: !doc.active,
-                order: doc.order,
-            });
-
-            await handleListDocs();
-        }
-        catch (err) {
-            console.log("Error to pause category");
-            console.log(err);
-        }
-
-        setCategoryPausing(false);
-    }
-
-    async function deleteProduct() {
+    async function deleteStatus() {
         if (iconDelete) {
             setIconDelete(false);
             setIconDeleteConfirm(true);
@@ -72,27 +50,26 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
         setMessageShow(true);
 
         try {
-            await api.delete(`docs/property/${doc.id}`);
+            await api.delete(`projects/status/${status.id}`);
 
-            const list = listDocs.filter(item => { return item.id !== doc.id });
+            const list = listStatus.filter(item => { return item.id !== status.id });
 
-            list.forEach(async (doc, index) => {
+            list.forEach(async (status, index) => {
                 try {
-                    await api.put(`docs/property/${doc.id}`, {
-                        name: doc.name,
-                        active: doc.active,
+                    await api.put(`projects/status/${status.id}`, {
+                        name: status.name,
                         order: index
                     });
                 }
                 catch (err) {
-                    console.log('error to save docs order after deleting.');
+                    console.log('error to save status order after deleting.');
                     console.log(err)
                 }
             });
 
-            handleCloseModalEditDoc();
+            handleCloseModalEditStatus();
 
-            handleListDocs();
+            handleListStatus();
         }
         catch (err) {
             setIconDeleteConfirm(false);
@@ -104,52 +81,34 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
                 setMessageShow(false);
             }, 4000);
 
-            console.log("Error to delete doc property");
+            console.log("Error to delete status");
             console.log(err);
         }
     }
 
     return (
-        <ListGroup.Item variant={doc.active ? "light" : "danger"}>
+        <ListGroup.Item variant="light">
             <Row className="align-items-center">
                 <Col sm={1}>
                     <FaBars />
                 </Col>
 
-                <Col><span>{doc.name}</span></Col>
+                <Col><span>{status.name}</span></Col>
 
                 <Col className="text-end">
-                    <Button
-                        variant="outline-success"
-                        className="button-link"
-                        onClick={togglePauseProperty}>
-                        {
-                            categoryPausing ? <Spinner
-                                as="span"
-                                animation="border"
-                                size="sm"
-                                role="status"
-                                aria-hidden="true"
-                            /> : doc.active ? (<><FaPause /> Pausar</>) : (<><FaPlay /> Pausado</>)
-                        }
-                    </Button>
-                </Col>
-
-                <Col className="text-end">
-                    <Button variant="outline-success" className="button-link" onClick={handleShowModalEditDoc}><FaPencilAlt /> Editar</Button>
+                    <Button variant="outline-success" className="button-link" onClick={handleShowModalEditStatus}><FaPencilAlt /> Editar</Button>
                 </Col>
             </Row>
 
-            <Modal show={showModalEditDoc} onHide={handleCloseModalEditDoc}>
+            <Modal show={showModalEditStatus} onHide={handleCloseModalEditStatus}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Edtiar documento</Modal.Title>
+                    <Modal.Title>Edtiar item</Modal.Title>
                 </Modal.Header>
                 <Formik
                     initialValues={
                         {
-                            name: doc.name,
-                            active: doc.active,
-                            order: doc.order,
+                            name: status.name,
+                            order: status.order,
                         }
                     }
                     onSubmit={async values => {
@@ -157,25 +116,24 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
                         setMessageShow(true);
 
                         try {
-                            if (listDocs) {
-                                await api.put(`docs/property/${doc.id}`, {
+                            if (listStatus) {
+                                await api.put(`projects/status/${status.id}`, {
                                     name: values.name,
-                                    active: doc.active,
-                                    order: doc.order
+                                    order: status.order
                                 });
 
-                                await handleListDocs();
+                                await handleListStatus();
 
                                 setTypeMessage("success");
 
                                 setTimeout(() => {
                                     setMessageShow(false);
-                                    handleCloseModalEditDoc();
+                                    handleCloseModalEditStatus();
                                 }, 2000);
                             }
                         }
                         catch (err) {
-                            console.log('error edit doc property.');
+                            console.log('error edit status.');
                             console.log(err);
 
                             setTypeMessage("error");
@@ -190,8 +148,8 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
                     {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                         <Form onSubmit={handleSubmit}>
                             <Modal.Body>
-                                <Form.Group controlId="categoryFormGridName">
-                                    <Form.Label>Nome do documento</Form.Label>
+                                <Form.Group controlId="lineFormGridName">
+                                    <Form.Label>Nome</Form.Label>
                                     <Form.Control type="text"
                                         placeholder="Nome"
                                         onChange={handleChange}
@@ -209,11 +167,11 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
                                 {
                                     messageShow ? <AlertMessage status={typeMessage} /> :
                                         <>
-                                            <Button variant="secondary" onClick={handleCloseModalEditDoc}>Cancelar</Button>
+                                            <Button variant="secondary" onClick={handleCloseModalEditStatus}>Cancelar</Button>
                                             <Button
-                                                title="Delete product"
+                                                title="Excluir item"
                                                 variant={iconDelete ? "outline-danger" : "outline-warning"}
-                                                onClick={deleteProduct}
+                                                onClick={deleteStatus}
                                             >
                                                 {
                                                     iconDelete && "Excluir"
@@ -236,4 +194,4 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
     )
 }
 
-export default DocsProperty;
+export default ProjectStatusItem;

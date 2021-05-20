@@ -125,7 +125,7 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
                     </Accordion.Toggle>
                     <Accordion.Collapse eventKey="1">
                         <Card.Body className={styles.menuCardBody}>
-                            <Link href="/customers">
+                            <Link href="/projects">
                                 <a title="Listar todos os clientes" data-title="Listar todos os clientes">
                                     <Row className={styles.menuCardBodyItem}>
                                         <Col sm={1}>
@@ -138,7 +138,7 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
                                 </a>
                             </Link>
 
-                            <Link href="/customers/new">
+                            <Link href="/projects/new">
                                 <a title="Criar um novo cliente" data-title="Criar um novo cliente">
                                     <Row className={styles.menuCardBodyItem}>
                                         <Col sm={1}>
@@ -151,23 +151,10 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
                                 </a>
                             </Link>
 
-                            <Link href="/docs/customer">
-                                <a title="Listar os documentos para clientes" data-title="Listar os documentos para clientes">
-                                    <Row className={styles.menuCardBodyItem}>
-                                        <Col sm={1}>
-                                            <FaIdCard size={14} />
-                                        </Col>
-                                        <Col>
-                                            <span>Documentos</span>
-                                        </Col>
-                                    </Row>
-                                </a>
-                            </Link>
-
                             <Dropdown.Divider />
 
-                            <Link href="/docs/property">
-                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
+                            <Link href="/projects/types">
+                                <a title="Listar os tipos" data-title="Listar os tipos">
                                     <Row className={styles.menuCardBodyItem}>
                                         <Col sm={1}>
                                             <FaProjectDiagram size={14} />
@@ -179,8 +166,8 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
                                 </a>
                             </Link>
 
-                            <Link href="/docs/property">
-                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
+                            <Link href="/projects/status">
+                                <a title="Listar as situações" data-title="Listar as situações">
                                     <Row className={styles.menuCardBodyItem}>
                                         <Col sm={1}>
                                             <FaClipboardList size={14} />
@@ -192,8 +179,8 @@ const Sidebar: React.FC<SidebarProps> = ({ showItem }) => {
                                 </a>
                             </Link>
 
-                            <Link href="/docs/property">
-                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
+                            <Link href="/projects/lines">
+                                <a title="Listar as linhas de crédito" data-title="Listar as linhas de crédito">
                                     <Row className={styles.menuCardBodyItem}>
                                         <Col sm={1}>
                                             <FaLayerGroup size={14} />
