@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
@@ -22,21 +22,23 @@ const validationSchema = Yup.object().shape({
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
     customer: Yup.string().required('Obrigatório!'),
+    customerName: Yup.string().required('Obrigatório!'),
 });
 
 export default function NewCustomer() {
     const router = useRouter();
 
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
     const [docsProperty, setDocsProperty] = useState<DocsProperty[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
     const [cities, setCities] = useState<string[]>([]);
 
-    const [showModalNewDoc, setShowModalNewDoc] = useState(false);
+    const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
 
-    const handleCloseModalNewDoc = () => setShowModalNewDoc(false);
-    const handleShowModalNewDoc = () => setShowModalNewDoc(true);
+    const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
+    const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
 
     useEffect(() => {
         api.get('customers').then(res => {
@@ -52,6 +54,27 @@ export default function NewCustomer() {
         });
     }, []);
 
+    function handleSearch(event: ChangeEvent<HTMLInputElement>) {
+        if (customers) {
+            const term = event.target.value;
+
+            if (term === "") {
+                setCustomerResults([]);
+                return;
+            }
+
+            let resultsUpdated: Customer[] = [];
+
+            const customersFound = customers.filter(product => {
+                return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
+            });
+
+            if (customersFound.length > 0) resultsUpdated = customersFound;
+
+            setCustomerResults(resultsUpdated);
+        }
+    }
+
     return <Container className="content-page">
         <Formik
             initialValues={{
@@ -64,6 +87,7 @@ export default function NewCustomer() {
                 notes: '',
                 warnings: false,
                 customer: '',
+                customerName: '',
                 docs: [],
             }}
             onSubmit={async values => {
@@ -140,24 +164,24 @@ export default function NewCustomer() {
                                     type="name"
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    value={values.customer}
-                                    name="customer"
-                                    aria-label="Input group example"
+                                    value={values.customerName}
+                                    name="customerName"
+                                    aria-label="Nome do cliente"
                                     aria-describedby="btnGroupAddon"
-                                    isInvalid={!!errors.customer && touched.customer}
+                                    isInvalid={!!errors.customerName}
                                     readOnly
                                 />
                                 <InputGroup.Prepend>
                                     <Button
                                         id="btnGroupAddon"
                                         variant="success"
-                                        onClick={handleShowModalNewDoc}
+                                        onClick={handleShowModalChooseCustomer}
                                     >
                                         <FaSearchPlus />
                                     </Button>
                                 </InputGroup.Prepend>
                             </InputGroup>
-                            <Form.Control.Feedback type="invalid">{touched.customer && errors.customer}</Form.Control.Feedback>
+                            <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
                         </Col>
                     </Row>
 
@@ -289,7 +313,7 @@ export default function NewCustomer() {
                                                             name="docs"
                                                             value={doc.id}
                                                         />
-                                                        {doc.name}
+                                                        {` ${doc.name}`}
                                                     </label>
                                                 </Col>
                                             </Row>
@@ -309,51 +333,64 @@ export default function NewCustomer() {
 
                         }
                     </Row>
+
+                    <Modal show={showModalChooseCustomer} onHide={handleCloseModalChooseCustomer}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Lista de clientes</Modal.Title>
+                        </Modal.Header>
+
+                        <Modal.Body>
+                            <Form.Group controlId="categoryFormGridName">
+                                <Form.Label>Nome do cliente</Form.Label>
+                                <Form.Control type="search"
+                                    placeholder="Digite para pesquisar"
+                                    autoComplete="off"
+                                    onChange={handleSearch}
+                                />
+                            </Form.Group>
+                        </Modal.Body>
+
+                        <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
+                            <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
+                                <Row>
+                                    <Col>
+                                        <ListGroup className="mt-3 mb-3">
+                                            {
+                                                customerResults.map((customer, index) => {
+                                                    return <ListGroup.Item
+                                                        key={index}
+                                                        action
+                                                        variant="light"
+                                                        onClick={() => {
+                                                            setFieldValue('customer', customer.id);
+                                                            setFieldValue('customerName', customer.name);
+                                                            handleCloseModalChooseCustomer();
+                                                        }}
+                                                    >
+                                                        <Row>
+                                                            <Col>
+                                                                <h6>{customer.name}</h6>
+                                                            </Col>
+                                                        </Row>
+                                                        <Row>
+                                                            <Col>
+                                                                <span className="text-italic">{`${customer.document} - ${customer.city}/${customer.state}`}</span>
+                                                            </Col>
+                                                        </Row>
+                                                    </ListGroup.Item>
+                                                })
+                                            }
+                                        </ListGroup>
+                                    </Col>
+                                </Row>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="secondary" onClick={handleCloseModalChooseCustomer}>Cancelar</Button>
+                            </Modal.Footer>
+                        </Modal.Dialog>
+                    </Modal>
                 </Form>
             )}
         </Formik>
-
-        <Modal show={showModalNewDoc} onHide={handleCloseModalNewDoc}>
-            <Modal.Header closeButton>
-                <Modal.Title>Criar um documento</Modal.Title>
-            </Modal.Header>
-            <Formik
-                initialValues={
-                    {
-                        customer: '',
-                    }
-                }
-                onSubmit={async values => {
-
-                }}
-                validationSchema={validationSchema}
-            >
-                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                    <Form onSubmit={handleSubmit}>
-                        <Modal.Body>
-                            <Form.Group controlId="categoryFormGridName">
-                                <Form.Label>Nome do documento</Form.Label>
-                                <Form.Control type="text"
-                                    placeholder="Digite para pesquisar"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.customer}
-                                    name="customer"
-                                    isInvalid={!!errors.customer && touched.customer}
-                                />
-                                <Form.Control.Feedback type="invalid">{touched.customer && errors.customer}</Form.Control.Feedback>
-                            </Form.Group>
-
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={handleCloseModalNewDoc}>
-                                Cancelar
-                                        </Button>
-                            <Button variant="success" type="submit">Salvar</Button>
-                        </Modal.Footer>
-                    </Form>
-                )}
-            </Formik>
-        </Modal>
     </Container>
 }

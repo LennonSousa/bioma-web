@@ -17,6 +17,7 @@ import {
 import api from '../../../services/api';
 import { Customer } from '../../../components/Customers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
+import PropertyListItem from '../../../components/PropertyListItem';
 import CustomerAttachments from '../../../components/CustomerAttachments';
 import styles from './styles.module.css';
 
@@ -349,9 +350,18 @@ export default function CustomerDetails() {
                                         </Row>
 
                                         <Row className={styles.relationsContent}>
-                                            <Col>
-                                                <span className="text-success">Nenhum imóvel registrado.</span>
-                                            </Col>
+                                            {
+                                                customerData.properties.length > 0 ? customerData.properties.map((property, index) => {
+                                                    return <PropertyListItem
+                                                        key={index}
+                                                        property={property}
+                                                        showCustomer={false}
+                                                    />
+                                                }) :
+                                                    <Col>
+                                                        <span className="text-success">Nenhum imóvel registrado.</span>
+                                                    </Col>
+                                            }
                                         </Row>
                                     </Col>
                                 </Row>

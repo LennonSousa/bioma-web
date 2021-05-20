@@ -6,6 +6,6 @@ export interface PropertyDocs {
     path: string;
     received_at: Date;
     checked: boolean;
-    customer: Property;
+    property: Property;
     doc: DocsProperty;
 }
