@@ -6,6 +6,16 @@ export function cep(e: string) {
     return e;
 }
 
+export function percent(e: string) {
+    let value = e;
+    value = value.replace(/\D/g, "");
+    value = value.replace(/(\d)(\d{1})$/, "$1,$2");
+    value = value.replace(/(?=(\d{3})+(\D))\B/g, ".");
+
+    e = value;
+    return e;
+}
+
 export function currency(e: string) {
     let value = e;
     value = value.replace(/\D/g, "");

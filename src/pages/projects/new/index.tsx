@@ -8,21 +8,26 @@ import { FaLongArrowAltLeft, FaSearchPlus } from 'react-icons/fa';
 
 import api from '../../../services/api';
 import { Customer } from '../../../components/Customers';
-import { DocsProperty } from '../../../components/DocsProperty';
-import { statesCities } from '../../../components/StatesCities';
+import { ProjectType } from '../../../components/ProjectTypes';
+import { ProjectLine } from '../../../components/ProjectLines';
+import { ProjectStatus } from '../../../components/ProjectStatus';
+import { Bank } from '../../../components/Banks';
+import { Property } from '../../../components/Properties';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
+import { prettifyCurrency } from '../../../components/InputMask/masks';
 
 const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Obrigatório!'),
-    registration: Yup.string().notRequired(),
-    route: Yup.string().notRequired(),
-    city: Yup.string().required('Obrigatório!'),
-    state: Yup.string().required('Obrigatório!'),
-    area: Yup.string().required('Obrigatório!'),
+    value: Yup.string().notRequired(),
+    deal: Yup.string().notRequired(),
+    contract: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
     customer: Yup.string().required('Obrigatório!'),
-    customerName: Yup.string().required('Obrigatório!'),
+    type: Yup.string().required('Obrigatório!'),
+    line: Yup.string().required('Obrigatório!'),
+    status: Yup.string().required('Obrigatório!'),
+    bank: Yup.string().required('Obrigatório!'),
+    property: Yup.string().required('Obrigatório!'),
 });
 
 export default function NewCustomer() {
@@ -30,10 +35,14 @@ export default function NewCustomer() {
 
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
-    const [docsProperty, setDocsProperty] = useState<DocsProperty[]>([]);
+    const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
+    const [projectLines, setProjectLines] = useState<ProjectLine[]>([]);
+    const [projectStatus, setProjectStatus] = useState<ProjectStatus[]>([]);
+    const [banks, setBanks] = useState<Bank[]>([]);
+    const [properties, setProperties] = useState<Property[]>([]);
+
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
-    const [cities, setCities] = useState<string[]>([]);
 
     const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
 
@@ -43,14 +52,32 @@ export default function NewCustomer() {
     useEffect(() => {
         api.get('customers').then(res => {
             setCustomers(res.data);
-
-            api.get('docs/property').then(res => {
-                setDocsProperty(res.data);
-            }).catch(err => {
-                console.log('Error to get docs property, ', err);
-            });
         }).catch(err => {
-            console.log('Error to get customers, ', err);
+            console.log('Error to get project status, ', err);
+        });
+
+        api.get('projects/types').then(res => {
+            setProjectTypes(res.data);
+        }).catch(err => {
+            console.log('Error to get project types, ', err);
+        });
+
+        api.get('projects/lines').then(res => {
+            setProjectLines(res.data);
+        }).catch(err => {
+            console.log('Error to get project lines, ', err);
+        });
+
+        api.get('projects/status').then(res => {
+            setProjectStatus(res.data);
+        }).catch(err => {
+            console.log('Error to get project status, ', err);
+        });
+
+        api.get('banks').then(res => {
+            setBanks(res.data);
+        }).catch(err => {
+            console.log('Error to get banks, ', err);
         });
     }, []);
 
@@ -78,48 +105,42 @@ export default function NewCustomer() {
     return <Container className="content-page">
         <Formik
             initialValues={{
-                name: '',
-                registration: '',
-                route: '',
-                city: '',
-                state: '',
-                area: '',
+                value: '0,00',
+                deal: '0,0',
+                contract: '',
                 notes: '',
                 warnings: false,
                 customer: '',
                 customerName: '',
-                docs: [],
+                type: '',
+                line: '',
+                status: '',
+                bank: '',
+                property: '',
             }}
             onSubmit={async values => {
                 setTypeMessage("waiting");
                 setMessageShow(true);
 
-                const docs = docsProperty.map(doc => {
-                    let checked = false;
-
-                    values.docs.forEach(item => { if (item === doc.id) checked = true });
-
-                    return { checked, doc: doc.id }
-                });
-
                 try {
-                    const res = await api.post('properties', {
-                        name: values.name,
-                        registration: values.registration,
-                        route: values.route,
-                        city: values.city,
-                        state: values.state,
-                        area: values.area,
+                    const res = await api.post('projects', {
+                        value: Number(values.value.replace(".", "").replace(",", ".")),
+                        deal: Number(values.deal.replace(".", "").replace(",", ".")),
+                        contract: values.contract,
                         notes: values.notes,
                         warnings: values.warnings,
                         customer: values.customer,
-                        docs,
+                        type: values.type,
+                        line: values.line,
+                        status: values.status,
+                        bank: values.bank,
+                        property: values.property,
                     });
 
                     setTypeMessage("success");
 
                     setTimeout(() => {
-                        router.push(`/properties/details/${res.data.id}`)
+                        router.push(`/projects/details/${res.data.id}`);
                     }, 2000);
                 }
                 catch {
@@ -135,27 +156,14 @@ export default function NewCustomer() {
             {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                 <Form onSubmit={handleSubmit}>
                     <Row className="mb-3">
-                        <Link href="/properties">
-                            <a title="Voltar para a lista de imóveis" data-title="Voltar para a lista de imóveis">
+                        <Link href="/projects">
+                            <a title="Voltar para a lista de projetos" data-title="Voltar para a lista de projetos">
                                 <FaLongArrowAltLeft /> voltar
                                 </a>
                         </Link>
                     </Row>
 
                     <Row className="mb-3">
-                        <Form.Group as={Col} sm={6} controlId="formGridName">
-                            <Form.Label>Nome do imóvel/fazenda*</Form.Label>
-                            <Form.Control
-                                type="name"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.name}
-                                name="name"
-                                isInvalid={!!errors.name && touched.name}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                        </Form.Group>
-
                         <Col sm={6}>
                             <Form.Label>Cliente</Form.Label>
                             <InputGroup className="mb-2">
@@ -183,95 +191,178 @@ export default function NewCustomer() {
                             </InputGroup>
                             <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
                         </Col>
-                    </Row>
 
-                    <Row className="mb-2">
-                        <Form.Group as={Col} sm={4} controlId="formGridRegistration">
-                            <Form.Label>Matrícula</Form.Label>
-                            <Form.Control
-                                type="text"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.registration}
-                                name="registration"
-                                isInvalid={!!errors.registration && touched.registration}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.registration && errors.registration}</Form.Control.Feedback>
-                        </Form.Group>
-
-                        <Form.Group as={Col} sm={3} controlId="formGridArea">
-                            <Form.Label>Área do imóvel</Form.Label>
-                            <Form.Control
-                                type="text"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.area}
-                                name="area"
-                                isInvalid={!!errors.area && touched.area}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.area && errors.area}</Form.Control.Feedback>
-                        </Form.Group>
-                    </Row>
-
-                    <Row className="mb-2">
-                        <Form.Group as={Col} sm={6} controlId="formGridAddress">
-                            <Form.Label>Roteiro</Form.Label>
-                            <Form.Control
-                                type="address"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.route}
-                                name="route"
-                                isInvalid={!!errors.route && touched.route}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.route && errors.route}</Form.Control.Feedback>
-                        </Form.Group>
-
-                        <Form.Group as={Col} sm={2} controlId="formGridState">
-                            <Form.Label>Estado</Form.Label>
-                            <Form.Control
-                                as="select"
-                                onChange={(e) => {
-                                    setFieldValue('state', e.target.value);
-                                    const stateCities = statesCities.estados.find(item => { return item.nome === e.target.value })
-
-                                    if (stateCities)
-                                        setCities(stateCities.cidades);
-                                }}
-                                onBlur={handleBlur}
-                                value={values.state}
-                                name="state"
-                                isInvalid={!!errors.state && touched.state}
-                            >
-                                <option hidden>...</option>
-                                {
-                                    statesCities.estados.map((estado, index) => {
-                                        return <option key={index} value={estado.nome}>{estado.nome}</option>
-                                    })
-                                }
-                            </Form.Control>
-                            <Form.Control.Feedback type="invalid">{touched.state && errors.state}</Form.Control.Feedback>
-                        </Form.Group>
-
-                        <Form.Group as={Col} sm={4} controlId="formGridCity">
-                            <Form.Label>Cidade</Form.Label>
+                        <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                            <Form.Label>Fazenda/imóvel</Form.Label>
                             <Form.Control
                                 as="select"
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                value={values.city}
-                                name="city"
-                                isInvalid={!!errors.city && touched.city}
-                                disabled={!!!values.state}
+                                value={values.property}
+                                name="property"
+                                disabled={!!!values.customer}
+                                isInvalid={!!errors.property && touched.property}
                             >
                                 <option hidden>...</option>
                                 {
-                                    !!values.state && cities.map((city, index) => {
-                                        return <option key={index} value={city}>{city}</option>
+                                    properties.map((property, index) => {
+                                        return <option key={index} value={property.id}>{property.name}</option>
                                     })
                                 }
                             </Form.Control>
-                            <Form.Control.Feedback type="invalid">{touched.city && errors.city}</Form.Control.Feedback>
+                            <Form.Control.Feedback type="invalid">{touched.property && errors.property}</Form.Control.Feedback>
+                        </Form.Group>
+                    </Row>
+
+                    <Row className="mb-3">
+                        <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                            <Form.Label>Tipo de projeto/processo</Form.Label>
+                            <Form.Control
+                                as="select"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.type}
+                                name="type"
+                                isInvalid={!!errors.type && touched.type}
+                            >
+                                <option hidden>...</option>
+                                {
+                                    projectTypes.map((type, index) => {
+                                        return <option key={index} value={type.id}>{type.name}</option>
+                                    })
+                                }
+                            </Form.Control>
+                            <Form.Control.Feedback type="invalid">{touched.type && errors.type}</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                            <Form.Label>Linha de crédito</Form.Label>
+                            <Form.Control
+                                as="select"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.line}
+                                name="line"
+                                isInvalid={!!errors.line && touched.line}
+                            >
+                                <option hidden>...</option>
+                                {
+                                    projectLines.map((line, index) => {
+                                        return <option key={index} value={line.id}>{line.name}</option>
+                                    })
+                                }
+                            </Form.Control>
+                            <Form.Control.Feedback type="invalid">{touched.line && errors.line}</Form.Control.Feedback>
+                        </Form.Group>
+                    </Row>
+
+                    <Row className="mb-3">
+                        <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                            <Form.Label>Banco</Form.Label>
+                            <Form.Control
+                                as="select"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.bank}
+                                name="bank"
+                                isInvalid={!!errors.bank && touched.bank}
+                            >
+                                <option hidden>...</option>
+                                {
+                                    banks.map((bank, index) => {
+                                        return <option
+                                            key={index}
+                                            value={bank.id}
+                                        >
+                                            {`${bank.institution.name} - ${bank.sector}`}
+                                        </option>
+                                    })
+                                }
+                            </Form.Control>
+                            <Form.Control.Feedback type="invalid">{touched.bank && errors.bank}</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group as={Col} sm={6} controlId="formGridStatus">
+                            <Form.Label>Fase do projeto/processo</Form.Label>
+                            <Form.Control
+                                as="select"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.status}
+                                name="status"
+                                isInvalid={!!errors.status && touched.status}
+                            >
+                                <option hidden>...</option>
+                                {
+                                    projectStatus.map((status, index) => {
+                                        return <option key={index} value={status.id}>{status.name}</option>
+                                    })
+                                }
+                            </Form.Control>
+                            <Form.Control.Feedback type="invalid">{touched.status && errors.status}</Form.Control.Feedback>
+                        </Form.Group>
+                    </Row>
+
+                    <Row className="mb-2">
+                        <Form.Group as={Col} sm={3} controlId="formGridValue">
+                            <Form.Label>Valor</Form.Label>
+                            <InputGroup className="mb-2">
+                                <InputGroup.Prepend>
+                                    <InputGroup.Text id="btnGroupValue">R$</InputGroup.Text>
+                                </InputGroup.Prepend>
+                                <Form.Control
+                                    type="text"
+                                    onChange={(e) => {
+                                        setFieldValue('value', prettifyCurrency(e.target.value));
+                                    }}
+                                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                        setFieldValue('value', prettifyCurrency(e.target.value));
+                                    }}
+                                    value={values.value}
+                                    name="value"
+                                    isInvalid={!!errors.value && touched.value}
+                                    aria-label="Nome do cliente"
+                                    aria-describedby="btnGroupValue"
+                                />
+                            </InputGroup>
+                            <Form.Control.Feedback type="invalid">{touched.value && errors.value}</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group as={Col} sm={3} controlId="formGridValue">
+                            <Form.Label>Acordo</Form.Label>
+                            <InputGroup className="mb-2">
+                                <InputGroup.Prepend>
+                                    <InputGroup.Text id="btnGroupDeal">%</InputGroup.Text>
+                                </InputGroup.Prepend>
+                                <Form.Control
+                                    type="text"
+                                    onChange={(e) => {
+                                        setFieldValue('deal', prettifyCurrency(e.target.value));
+                                    }}
+                                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                        setFieldValue('deal', prettifyCurrency(e.target.value));
+                                    }}
+                                    value={values.deal}
+                                    name="deal"
+                                    isInvalid={!!errors.deal && touched.deal}
+                                    aria-label="Nome do cliente"
+                                    aria-describedby="btnGroupDeal"
+                                />
+                            </InputGroup>
+                            <Form.Control.Feedback type="invalid">{touched.deal && errors.deal}</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group as={Col} sm={6} controlId="formGridContract">
+                            <Form.Label>Contrato</Form.Label>
+                            <Form.Control
+                                type="text"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.contract}
+                                name="contract"
+                                isInvalid={!!errors.contract && touched.contract}
+                            />
+                            <Form.Control.Feedback type="invalid">{touched.contract && errors.contract}</Form.Control.Feedback>
                         </Form.Group>
                     </Row>
 
@@ -297,32 +388,6 @@ export default function NewCustomer() {
                     </Form.Row>
 
                     <Col className="border-top mb-3"></Col>
-
-                    <Form.Row>
-                        <Form.Group as={Col} sm={5} controlId="formGridDocs">
-                            <Form.Label>Documentação</Form.Label>
-                            <ListGroup className="mb-3">
-                                {
-                                    docsProperty.map((doc, index) => {
-                                        return <ListGroup.Item key={index} action as="div" variant="light">
-                                            <Row>
-                                                <Col>
-                                                    <label>
-                                                        <Field
-                                                            type="checkbox"
-                                                            name="docs"
-                                                            value={doc.id}
-                                                        />
-                                                        {` ${doc.name}`}
-                                                    </label>
-                                                </Col>
-                                            </Row>
-                                        </ListGroup.Item>
-                                    })
-                                }
-                            </ListGroup>
-                        </Form.Group>
-                    </Form.Row>
 
                     <Row className="justify-content-end text-end">
                         {
@@ -365,6 +430,12 @@ export default function NewCustomer() {
                                                             setFieldValue('customer', customer.id);
                                                             setFieldValue('customerName', customer.name);
                                                             handleCloseModalChooseCustomer();
+
+                                                            api.get(`customers/${customer.id}/properties`).then(res => {
+                                                                setProperties(res.data);
+                                                            }).catch(err => {
+                                                                console.log('Error to get customer properties ', err);
+                                                            });
                                                         }}
                                                     >
                                                         <Row>
@@ -374,7 +445,11 @@ export default function NewCustomer() {
                                                         </Row>
                                                         <Row>
                                                             <Col>
-                                                                <span className="text-italic">{`${customer.document} - ${customer.city}/${customer.state}`}</span>
+                                                                <span
+                                                                    className="text-italic"
+                                                                >
+                                                                    {`${customer.document} - ${customer.city}/${customer.state}`}
+                                                                </span>
                                                             </Col>
                                                         </Row>
                                                     </ListGroup.Item>

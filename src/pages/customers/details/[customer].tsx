@@ -244,21 +244,23 @@ export default function CustomerDetails() {
                             </Col>
                         </Row>
 
-                        <Row className="mb-3">
-                            <Col >
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-success">Observação {customerData.warnings && <FaExclamationCircle />}</h6>
-                                    </Col>
-                                </Row>
+                        {
+                            customerData.warnings && <Row className="mb-3">
+                                <Col >
+                                    <Row>
+                                        <Col>
+                                            <h6 className="text-success">Observação {customerData.warnings && <FaExclamationCircle />}</h6>
+                                        </Col>
+                                    </Row>
 
-                                <Row>
-                                    <Col>
-                                        <span className="text-secondary text-wrap">{customerData.notes}</span>
-                                    </Col>
-                                </Row>
-                            </Col>
-                        </Row>
+                                    <Row>
+                                        <Col>
+                                            <span className="text-secondary text-wrap">{customerData.notes}</span>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                            </Row>
+                        }
 
                         <Col className="border-top mb-3"></Col>
 

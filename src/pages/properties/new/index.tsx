@@ -119,7 +119,7 @@ export default function NewCustomer() {
                     setTypeMessage("success");
 
                     setTimeout(() => {
-                        router.push(`/properties/details/${res.data.id}`)
+                        router.push(`/properties/details/${res.data.id}`);
                     }, 2000);
                 }
                 catch {

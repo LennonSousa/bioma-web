@@ -1,25 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
     FaLongArrowAltLeft,
-    FaIdCard,
     FaExclamationCircle,
-    FaCheck,
     FaMapSigns,
     FaPencilAlt,
-    FaPlus,
     FaPlusSquare,
-    FaRegFile
 } from 'react-icons/fa';
 
 import api from '../../../services/api';
 import { Project } from '../../../components/Projects';
-import ProjectListItem from '../../../components/ProjectListItem';
-
-import styles from './styles.module.css';
 
 export default function PropertyDetails() {
     const router = useRouter();
@@ -131,7 +124,11 @@ export default function PropertyDetails() {
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{projectData.value}</h6>
+                                        <h6
+                                            className="text-secondary"
+                                        >
+                                            {`R$ ${Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(projectData.value)}`}
+                                        </h6>
                                     </Col>
                                 </Row>
                             </Col>
@@ -153,13 +150,13 @@ export default function PropertyDetails() {
                             <Col sm={4} >
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Acordo</span>
+                                        <span className="text-success">Acordo %</span>
                                     </Col>
                                 </Row>
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{projectData.deal}</h6>
+                                        <h6 className="text-secondary">{String(projectData.deal).replace(".", ",")}</h6>
                                     </Col>
                                 </Row>
                             </Col>
@@ -209,86 +206,23 @@ export default function PropertyDetails() {
                             </Col>
                         </Row>
 
-                        <Row className="mb-3">
-                            <Col >
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-success">Observação {projectData.warnings && <FaExclamationCircle />}</h6>
-                                    </Col>
-                                </Row>
+                        {
+                            projectData.warnings && <Row className="mb-3">
+                                <Col >
+                                    <Row>
+                                        <Col>
+                                            <h6 className="text-success">Observação {projectData.warnings && <FaExclamationCircle />}</h6>
+                                        </Col>
+                                    </Row>
 
-                                <Row>
-                                    <Col>
-                                        <span className="text-secondary text-wrap">{projectData.notes}</span>
-                                    </Col>
-                                </Row>
-                            </Col>
-                        </Row>
-
-                        <Col className="border-top mb-3"></Col>
-
-                        <Tabs defaultActiveKey="projects" id="relations-customer">
-                            <Tab eventKey="projects" title="Projetos">
-                                <Row className={styles.relationsContainer}>
-                                    <Col>
-                                        <Row className={styles.relationsButtonsContent}>
-                                            <Col>
-                                                <Link href={`/projects/new/customer/${projectData.id}`}>
-                                                    <a
-                                                        className="btn btn-outline-success"
-                                                        title="Criar um novo projeto para esse cliente"
-                                                        data-title="Criar um novo projeto para esse cliente"
-                                                    >
-                                                        <FaPlus /> Criar um projeto
-                                                    </a>
-                                                </Link>
-                                            </Col>
-                                        </Row>
-
-                                        <Row className={styles.relationsContent}>
-                                            <Col>
-                                                <span className="text-success">Nenhum projeto registrado.</span>
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                </Row>
-                            </Tab>
-
-                            <Tab eventKey="projects" title="Outros projetos">
-                                <Row className={styles.relationsContainer}>
-                                    <Col>
-                                        <Row className={styles.relationsButtonsContent}>
-                                            <Col>
-                                                <Link href={`/projects/new?customer=${projectData.customer.id}`}>
-                                                    <a
-                                                        className="btn btn-outline-success"
-                                                        title="Criar um novo projeto para este cliente."
-                                                        data-title="Criar um novo projeto para este cliente."
-                                                    >
-                                                        <FaPlus /> Criar um projeto
-                                                    </a>
-                                                </Link>
-                                            </Col>
-                                        </Row>
-
-                                        <Row className={styles.relationsContent}>
-                                            {
-                                                projectData.customer.projects.length > 0 ? projectData.customer.projects.map((project, index) => {
-                                                    return <ProjectListItem
-                                                        key={index}
-                                                        project={project}
-                                                        showCustomer={false}
-                                                    />
-                                                }) :
-                                                    <Col>
-                                                        <span className="text-success">Nenhum projecto registrado.</span>
-                                                    </Col>
-                                            }
-                                        </Row>
-                                    </Col>
-                                </Row>
-                            </Tab>
-                        </Tabs>
+                                    <Row>
+                                        <Col>
+                                            <span className="text-secondary text-wrap">{projectData.notes}</span>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                            </Row>
+                        }
                     </Col>
                 </Row>
         }
