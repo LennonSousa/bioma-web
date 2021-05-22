@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Col, Container, ListGroup, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
     FaLongArrowAltLeft,
     FaExclamationCircle,
+    FaHistory,
     FaMapSigns,
     FaPencilAlt,
     FaPlusSquare,
@@ -13,6 +14,8 @@ import {
 
 import api from '../../../services/api';
 import { Project } from '../../../components/Projects';
+import EventsProject from '../../../components/EventsProject';
+import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
 export default function PropertyDetails() {
     const router = useRouter();
@@ -29,6 +32,8 @@ export default function PropertyDetails() {
             });
         }
     }, [project]);
+
+    async function handleListEvents() { }
 
     return <Container className="content-page">
         {
@@ -223,6 +228,63 @@ export default function PropertyDetails() {
                                 </Col>
                             </Row>
                         }
+
+                        <Col className="border-top mt-3 mb-3"></Col>
+
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Histórico <FaHistory /></h6>
+                                    </Col>
+                                </Row>
+
+                                <Row className="mt-2">
+                                    {
+                                        projectData.events.length > 0 ? <Col>
+                                            <Row className="mb-2" style={{ padding: '0 1rem' }}>
+                                                <Col sm={5}>
+                                                    <h6>Descrição</h6>
+                                                </Col>
+
+                                                <Col className="text-center">
+                                                    <h6>Data de registro</h6>
+                                                </Col>
+
+                                                <Col className="text-center">
+                                                    <h6>Conluído</h6>
+                                                </Col>
+
+                                                <Col className="text-center">
+                                                    <h6>Data de conclusão</h6>
+                                                </Col>
+                                            </Row>
+
+                                            <Row>
+                                                <Col>
+                                                    <ListGroup>
+                                                        {
+                                                            projectData.events.map((event, index) => {
+                                                                return <EventsProject
+                                                                    key={index}
+                                                                    event={event}
+                                                                    handleListEvents={handleListEvents}
+                                                                    canEdit={false}
+                                                                />
+                                                            })
+                                                        }
+                                                    </ListGroup>
+                                                </Col>
+                                            </Row>
+                                        </Col> :
+                                            <AlertMessage
+                                                status="warning"
+                                                message="Nenhum evento registrado para esse projeto."
+                                            />
+                                    }
+                                </Row>
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
         }

@@ -4,39 +4,52 @@ import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 import styles from './styles.module.css';
 
-export let statusModal: 'waiting' | 'success' | 'error';
+export let statusModal: 'waiting' | 'success' | 'warning' | 'error';
 
 interface WaitingModalProps {
-    status: 'waiting' | 'success' | 'error',
+    status: 'waiting' | 'success' | 'warning' | 'error',
     message?: string;
 }
 
 const AlertMessage: React.FC<WaitingModalProps> = ({ status, message = "" }) => {
     const [circleWaiting, setCircleWaiting] = useState(true);
     const [successWaiting, setSuccessWaiting] = useState(false);
+    const [warningWaiting, setWarningWaiting] = useState(false);
     const [errorWaiting, setErrorWaiting] = useState(false);
-    const [variantColor, setVariantColor] = useState<"info" | "success" | "danger">("info");
+    const [variantColor, setVariantColor] = useState<"info" | "success" | "warning" | "danger">("info");
 
     useEffect(() => {
         handleAlert(status);
     }, [status, message]);
 
-    function handleAlert(status: 'waiting' | 'success' | 'error') {
+    function handleAlert(status: 'waiting' | 'success' | 'warning' | 'error') {
         if (status === 'waiting') {
             setVariantColor("info");
             setCircleWaiting(true);
             setSuccessWaiting(false);
             setErrorWaiting(false);
+            return;
         }
-        else if (status === 'success') {
+
+        if (status === 'success') {
             setVariantColor("success");
             setCircleWaiting(false);
             setSuccessWaiting(true);
+            return;
         }
-        else if (status === 'error') {
+
+        if (status === 'warning') {
+            setVariantColor("warning");
+            setCircleWaiting(false);
+            setWarningWaiting(true);
+            return;
+        }
+
+        if (status === 'error') {
             setVariantColor("danger");
             setCircleWaiting(false);
             setErrorWaiting(true);
+            return;
         }
     }
 
@@ -47,6 +60,9 @@ const AlertMessage: React.FC<WaitingModalProps> = ({ status, message = "" }) => 
             }
             {
                 successWaiting && <><FaCheckCircle /> {!!message ? message : "sucesso!"}</>
+            }
+            {
+                warningWaiting && <><FaTimesCircle /> {!!message ? message : "aviso!"}</>
             }
             {
                 errorWaiting && <><FaTimesCircle /> {!!message ? message : "algo deu errado!"}</>

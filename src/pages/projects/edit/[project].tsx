@@ -1,10 +1,10 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { FaCheck, FaClock, FaHistory, FaLongArrowAltLeft, FaPlus, FaSearchPlus } from 'react-icons/fa';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
-import { FaLongArrowAltLeft, FaSearchPlus } from 'react-icons/fa';
 
 import api from '../../../services/api';
 import { Project } from '../../../components/Projects';
@@ -14,6 +14,7 @@ import { ProjectLine } from '../../../components/ProjectLines';
 import { ProjectStatus } from '../../../components/ProjectStatus';
 import { Bank } from '../../../components/Banks';
 import { Property } from '../../../components/Properties';
+import EventsProject from '../../../components/EventsProject';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 import { prettifyCurrency } from '../../../components/InputMask/masks';
 
@@ -29,6 +30,13 @@ const validationSchema = Yup.object().shape({
     status: Yup.string().required('Obrigatório!'),
     bank: Yup.string().required('Obrigatório!'),
     property: Yup.string().required('Obrigatório!'),
+});
+
+const validationSchemaEvents = Yup.object().shape({
+    description: Yup.string().required('Obrigatório!'),
+    done: Yup.boolean().required('Obrigatório!'),
+    finished_at: Yup.date().notRequired(),
+    project: Yup.string().required('Obrigatório!'),
 });
 
 export default function NewCustomer() {
@@ -51,6 +59,11 @@ export default function NewCustomer() {
 
     const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
     const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
+
+    const [showModalNewEvent, setShowModalNewEvent] = useState(false);
+
+    const handleCloseModalNewEvent = () => setShowModalNewEvent(false);
+    const handleShowModalNewEvent = () => setShowModalNewEvent(true);
 
     useEffect(() => {
         if (project) {
@@ -99,6 +112,12 @@ export default function NewCustomer() {
             });
         }
     }, [project]);
+
+    async function handleListEvents() {
+        const res = await api.get(`projects/${project}`);
+
+        setProjectData(res.data);
+    }
 
     function handleSearch(event: ChangeEvent<HTMLInputElement>) {
         if (customers) {
@@ -235,7 +254,7 @@ export default function NewCustomer() {
                         </Row>
 
                         <Row className="mb-3">
-                            <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                            <Form.Group as={Col} sm={6} controlId="formGridType">
                                 <Form.Label>Tipo de projeto/processo</Form.Label>
                                 <Form.Control
                                     as="select"
@@ -255,7 +274,7 @@ export default function NewCustomer() {
                                 <Form.Control.Feedback type="invalid">{touched.type && errors.type}</Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                            <Form.Group as={Col} sm={6} controlId="formGridLine">
                                 <Form.Label>Linha de crédito</Form.Label>
                                 <Form.Control
                                     as="select"
@@ -277,7 +296,7 @@ export default function NewCustomer() {
                         </Row>
 
                         <Row className="mb-3">
-                            <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                            <Form.Group as={Col} sm={6} controlId="formGridBank">
                                 <Form.Label>Banco</Form.Label>
                                 <Form.Control
                                     as="select"
@@ -348,7 +367,7 @@ export default function NewCustomer() {
                                 <Form.Control.Feedback type="invalid">{touched.value && errors.value}</Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group as={Col} sm={3} controlId="formGridValue">
+                            <Form.Group as={Col} sm={3} controlId="formGridDeal">
                                 <Form.Label>Acordo</Form.Label>
                                 <InputGroup className="mb-2">
                                     <InputGroup.Prepend>
@@ -406,8 +425,6 @@ export default function NewCustomer() {
                                 />
                             </Form.Group>
                         </Form.Row>
-
-                        <Col className="border-top mb-3"></Col>
 
                         <Row className="justify-content-end text-end">
                             {
@@ -489,6 +506,170 @@ export default function NewCustomer() {
                     </Form>
                 )}
             </Formik>
+        }
+
+        {
+            projectData && <>
+                <Col className="border-top mt-3 mb-3"></Col>
+
+                <Row className="mb-3">
+                    <Col>
+                        <Row>
+                            <Col sm={2}>
+                                <h6 className="text-success">Histórico <FaHistory /></h6>
+                            </Col>
+
+                            <Col sm={1}>
+                                <Button variant="outline-success" onClick={handleShowModalNewEvent}>
+                                    <FaPlus />
+                                </Button>
+                            </Col>
+                        </Row>
+
+                        <Row className="mt-2">
+                            {
+                                projectData.events.length > 0 ? <Col>
+                                    <Row className="mb-2" style={{ padding: '0 1rem' }}>
+                                        <Col sm={5}>
+                                            <h6>Descrição</h6>
+                                        </Col>
+
+                                        <Col className="text-center">
+                                            <h6>Data de registro</h6>
+                                        </Col>
+
+                                        <Col className="text-center">
+                                            <h6>Conluído</h6>
+                                        </Col>
+
+                                        <Col className="text-center">
+                                            <h6>Data de conclusão</h6>
+                                        </Col>
+                                    </Row>
+
+                                    <Row>
+                                        <Col>
+                                            <ListGroup>
+                                                {
+                                                    projectData.events.map((event, index) => {
+                                                        return <EventsProject
+                                                            key={index}
+                                                            event={event}
+                                                            handleListEvents={handleListEvents}
+                                                        />
+                                                    })
+                                                }
+                                            </ListGroup>
+                                        </Col>
+                                    </Row>
+
+                                </Col> :
+                                    <AlertMessage
+                                        status="warning"
+                                        message="Nenhum evento registrado para esse projeto."
+                                    />
+                            }
+                        </Row>
+                    </Col>
+                </Row>
+
+                <Modal show={showModalNewEvent} onHide={handleCloseModalNewEvent}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Criar evento</Modal.Title>
+                    </Modal.Header>
+                    <Formik
+                        initialValues={
+                            {
+                                description: '',
+                                done: false,
+                                finished_at: new Date(),
+                                project: projectData.id,
+                            }
+                        }
+                        onSubmit={async values => {
+                            setTypeMessage("waiting");
+                            setMessageShow(true);
+
+                            try {
+                                await api.post('events/project', {
+                                    description: values.description,
+                                    done: values.done,
+                                    finished_at: values.finished_at,
+                                    project: values.project,
+                                });
+
+                                await handleListEvents();
+
+                                setTypeMessage("success");
+
+                                setTimeout(() => {
+                                    setMessageShow(false);
+                                    handleCloseModalNewEvent();
+                                }, 1000);
+                            }
+                            catch (err) {
+                                console.log('error to create event.');
+                                console.log(err);
+
+                                setTypeMessage("error");
+
+                                setTimeout(() => {
+                                    setMessageShow(false);
+                                }, 4000);
+                            }
+                        }}
+                        validationSchema={validationSchemaEvents}
+                    >
+                        {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                            <Form onSubmit={handleSubmit}>
+                                <Modal.Body>
+                                    <Row className="mb-3">
+                                        <Form.Group controlId="eventFormGridDescription">
+                                            <Form.Label>Descrição</Form.Label>
+                                            <Form.Control
+                                                as="textarea"
+                                                rows={4}
+                                                style={{ resize: 'none' }}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.description}
+                                                name="description"
+                                                isInvalid={!!errors.description && touched.description}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Row>
+
+                                    <Row className="mb-3">
+                                        <Button
+                                            variant={values.done ? 'success' : 'secondary'}
+                                            onClick={() => {
+                                                setFieldValue('done', !values.done);
+                                            }}
+                                        >
+                                            {
+                                                values.done ? <span><FaCheck /> concluído</span> :
+                                                    <span><FaClock /> marcar como concluído</span>
+                                            }
+                                        </Button>
+                                    </Row>
+
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    {
+                                        messageShow ? <AlertMessage status={typeMessage} /> :
+                                            <>
+                                                <Button variant="secondary" onClick={handleCloseModalNewEvent}>Cancelar</Button>
+                                                <Button variant="success" type="submit">Salvar</Button>
+                                            </>
+
+                                    }
+                                </Modal.Footer>
+                            </Form>
+                        )}
+                    </Formik>
+                </Modal>
+            </>
         }
     </Container>
 }
