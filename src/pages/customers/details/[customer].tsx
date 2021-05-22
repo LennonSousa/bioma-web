@@ -19,6 +19,8 @@ import { Customer } from '../../../components/Customers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import PropertyListItem from '../../../components/PropertyListItem';
 import CustomerAttachments from '../../../components/CustomerAttachments';
+import PageBack from '../../../components/PageBack';
+
 import styles from './styles.module.css';
 
 export default function CustomerDetails() {
@@ -75,11 +77,9 @@ export default function CustomerDetails() {
                 <Row>
                     <Col>
                         <Row className="mb-3">
-                            <Link href="/customers">
-                                <a title="Voltar para a lista de clientes" data-title="Voltar para a lista de clientes">
-                                    <FaLongArrowAltLeft /> voltar
-                                </a>
-                            </Link>
+                            <Col>
+                                <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
+                            </Col>
                         </Row>
 
                         <Row className="mb-3">

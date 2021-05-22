@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Col, Form, ListGroup, Modal, Row } from 'react-bootstrap';
-import { FaCheck, FaClock, FaPencilAlt } from 'react-icons/fa';
+import { FaCheck, FaClock } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format } from 'date-fns';
@@ -167,41 +167,35 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                     {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                         <Form onSubmit={handleSubmit}>
                             <Modal.Body>
-                                <Row className="mb-3">
-                                    <Form.Group controlId="eventFormGridDescription">
-                                        <Form.Label>Descrição</Form.Label>
-                                        <Form.Control
-                                            as="textarea"
-                                            rows={4}
-                                            style={{ resize: 'none' }}
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            value={values.description}
-                                            name="description"
-                                            isInvalid={!!errors.description && touched.description}
-                                        />
-                                        <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
-                                        <span>{errors.description}</span>
-                                        <span>{errors.done}</span>
-                                        <span>{errors.finished_at}</span>
-                                    </Form.Group>
-                                </Row>
+                                <Form.Group controlId="eventFormGridDescription">
+                                    <Form.Label>Descrição</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={4}
+                                        style={{ resize: 'none' }}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.description}
+                                        name="description"
+                                        isInvalid={!!errors.description && touched.description}
+                                    />
+                                    <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
+                                </Form.Group>
 
-                                <Row className="mb-3">
-                                    <Button
-                                        variant={values.done ? 'success' : 'secondary'}
-                                        type="button"
-                                        onClick={() => {
-                                            setFieldValue('done', !values.done);
-                                            setFieldValue('finished_at', new Date());
-                                        }}
-                                    >
-                                        {
-                                            values.done ? <span><FaCheck /> concluído</span> :
-                                                <span><FaClock /> marcar como concluído</span>
-                                        }
-                                    </Button>
-                                </Row>
+                                <Button
+                                    variant={values.done ? 'success' : 'secondary'}
+                                    type="button"
+                                    onClick={() => {
+                                        setFieldValue('done', !values.done);
+                                        setFieldValue('finished_at', new Date());
+                                    }}
+                                    style={{ width: '100%' }}
+                                >
+                                    {
+                                        values.done ? <span><FaCheck /> concluído</span> :
+                                            <span><FaClock /> marcar como concluído</span>
+                                    }
+                                </Button>
 
                             </Modal.Body>
                             <Modal.Footer>

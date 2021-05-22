@@ -1,7 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { FaCheck, FaClock, FaHistory, FaLongArrowAltLeft, FaPlus, FaSearchPlus } from 'react-icons/fa';
+import { FaCheck, FaClock, FaHistory, FaPlus, FaSearchPlus } from 'react-icons/fa';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
@@ -15,6 +14,7 @@ import { ProjectStatus } from '../../../components/ProjectStatus';
 import { Bank } from '../../../components/Banks';
 import { Property } from '../../../components/Properties';
 import EventsProject from '../../../components/EventsProject';
+import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 import { prettifyCurrency } from '../../../components/InputMask/masks';
 
@@ -53,6 +53,7 @@ export default function NewCustomer() {
     const [properties, setProperties] = useState<Property[]>([]);
 
     const [messageShow, setMessageShow] = useState(false);
+    const [eventMessageShow, setEventMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
     const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
@@ -195,11 +196,9 @@ export default function NewCustomer() {
                 {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                     <Form onSubmit={handleSubmit}>
                         <Row className="mb-3">
-                            <Link href="/projects">
-                                <a title="Voltar para a lista de projetos" data-title="Voltar para a lista de projetos">
-                                    <FaLongArrowAltLeft /> voltar
-                                </a>
-                            </Link>
+                            <Col>
+                                <PageBack href={`/projects/details/${projectData.id}`} subTitle="Voltar para detalhes do projeto" />
+                            </Col>
                         </Row>
 
                         <Row className="mb-3">
@@ -406,9 +405,12 @@ export default function NewCustomer() {
                         </Row>
 
                         <Form.Row className="mb-2">
-                            <label>
-                                <Field type="checkbox" name="warnings" /> Observações
-                        </label>
+                            <Form.Switch
+                                id="warnings"
+                                label="Observações"
+                                checked={values.warnings}
+                                onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                            />
                         </Form.Row>
 
                         <Form.Row className="mb-3">
@@ -426,10 +428,10 @@ export default function NewCustomer() {
                             </Form.Group>
                         </Form.Row>
 
-                        <Row className="justify-content-end text-end">
+                        <Row className="justify-content-end">
                             {
                                 messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                    <Col sm={2}>
+                                    <Col sm={1}>
                                         <Button variant="success" type="submit">Salvar</Button>
                                     </Col>
 
@@ -466,12 +468,13 @@ export default function NewCustomer() {
                                                             onClick={() => {
                                                                 setFieldValue('customer', customer.id);
                                                                 setFieldValue('customerName', customer.name);
-                                                                handleCloseModalChooseCustomer();
 
                                                                 api.get(`customers/${customer.id}/properties`).then(res => {
                                                                     setProperties(res.data);
 
                                                                     setFieldValue('property', '');
+
+                                                                    handleCloseModalChooseCustomer();
                                                                 }).catch(err => {
                                                                     console.log('Error to get customer properties ', err);
                                                                 });
@@ -588,7 +591,7 @@ export default function NewCustomer() {
                         }
                         onSubmit={async values => {
                             setTypeMessage("waiting");
-                            setMessageShow(true);
+                            setEventMessageShow(true);
 
                             try {
                                 await api.post('events/project', {
@@ -603,7 +606,7 @@ export default function NewCustomer() {
                                 setTypeMessage("success");
 
                                 setTimeout(() => {
-                                    setMessageShow(false);
+                                    setEventMessageShow(false);
                                     handleCloseModalNewEvent();
                                 }, 1000);
                             }
@@ -614,7 +617,7 @@ export default function NewCustomer() {
                                 setTypeMessage("error");
 
                                 setTimeout(() => {
-                                    setMessageShow(false);
+                                    setEventMessageShow(false);
                                 }, 4000);
                             }
                         }}
@@ -623,41 +626,38 @@ export default function NewCustomer() {
                         {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Body>
-                                    <Row className="mb-3">
-                                        <Form.Group controlId="eventFormGridDescription">
-                                            <Form.Label>Descrição</Form.Label>
-                                            <Form.Control
-                                                as="textarea"
-                                                rows={4}
-                                                style={{ resize: 'none' }}
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                value={values.description}
-                                                name="description"
-                                                isInvalid={!!errors.description && touched.description}
-                                            />
-                                            <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
-                                        </Form.Group>
-                                    </Row>
+                                    <Form.Group controlId="eventFormGridDescription">
+                                        <Form.Label>Descrição</Form.Label>
+                                        <Form.Control
+                                            as="textarea"
+                                            rows={4}
+                                            style={{ resize: 'none' }}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            value={values.description}
+                                            name="description"
+                                            isInvalid={!!errors.description && touched.description}
+                                        />
+                                        <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
+                                    </Form.Group>
 
-                                    <Row className="mb-3">
-                                        <Button
-                                            variant={values.done ? 'success' : 'secondary'}
-                                            onClick={() => {
-                                                setFieldValue('done', !values.done);
-                                            }}
-                                        >
-                                            {
-                                                values.done ? <span><FaCheck /> concluído</span> :
-                                                    <span><FaClock /> marcar como concluído</span>
-                                            }
-                                        </Button>
-                                    </Row>
+                                    <Button
+                                        variant={values.done ? 'success' : 'secondary'}
+                                        onClick={() => {
+                                            setFieldValue('done', !values.done);
+                                        }}
+                                        style={{ width: '100%' }}
+                                    >
+                                        {
+                                            values.done ? <span><FaCheck /> concluído</span> :
+                                                <span><FaClock /> marcar como concluído</span>
+                                        }
+                                    </Button>
 
                                 </Modal.Body>
                                 <Modal.Footer>
                                     {
-                                        messageShow ? <AlertMessage status={typeMessage} /> :
+                                        eventMessageShow ? <AlertMessage status={typeMessage} /> :
                                             <>
                                                 <Button variant="secondary" onClick={handleCloseModalNewEvent}>Cancelar</Button>
                                                 <Button variant="success" type="submit">Salvar</Button>

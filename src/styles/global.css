@@ -16,9 +16,6 @@ body, input, button, textarea {
     font: Nunito, sans-serif;
 }
 
-label {
-    color: var(--gray);
-}
 
 a {
     color: var(--green);
@@ -27,7 +24,8 @@ a {
 }
 
 a:hover {
-    color: var(--green-dark);
+    color: var(--green-dark) !important;
+    text-decoration: none !important;
 }
 
 .content-page {
@@ -36,6 +34,11 @@ a:hover {
     box-shadow: 3px 3px 10px rgb(0 0 0 / 32%);
     margin-bottom: 2rem;
     padding: 1rem 1rem;
+}
+
+.custom-control-input:checked~.custom-control-label::before {
+    border-color: var(--green) !important;
+    background-color: var(--green) !important;
 }
 
 .nav-tabs .nav-link {

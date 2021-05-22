@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Col, Container, ListGroup, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
-    FaLongArrowAltLeft,
     FaExclamationCircle,
     FaHistory,
     FaMapSigns,
@@ -15,6 +14,7 @@ import {
 import api from '../../../services/api';
 import { Project } from '../../../components/Projects';
 import EventsProject from '../../../components/EventsProject';
+import PageBack from '../../../components/PageBack';
 import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
 export default function PropertyDetails() {
@@ -41,11 +41,9 @@ export default function PropertyDetails() {
                 <Row>
                     <Col>
                         <Row className="mb-3">
-                            <Link href="/projects">
-                                <a title="Voltar para a lista de projetos" data-title="Voltar para a lista de projetos">
-                                    <FaLongArrowAltLeft /> voltar
-                                </a>
-                            </Link>
+                            <Col>
+                                <PageBack href="/projects" subTitle="Voltar para a lista de projetos" />
+                            </Col>
                         </Row>
 
                         <Row className="mb-3">

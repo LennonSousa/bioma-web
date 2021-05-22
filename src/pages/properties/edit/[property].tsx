@@ -12,6 +12,7 @@ import { Property } from '../../../components/Properties';
 import { Customer } from '../../../components/Customers';
 import { DocsProperty } from '../../../components/DocsProperty';
 import { statesCities } from '../../../components/StatesCities';
+import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -207,11 +208,9 @@ export default function NewCustomer() {
                 {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                     <Form onSubmit={handleSubmit}>
                         <Row className="mb-3">
-                            <Link href="/properties">
-                                <a title="Voltar para a lista de imóveis" data-title="Voltar para a lista de imóveis">
-                                    <FaLongArrowAltLeft /> voltar
-                                </a>
-                            </Link>
+                            <Col>
+                                <PageBack href={`/properties/details/${propertyData.id}`} subTitle="Voltar para detalhes do imóvel" />
+                            </Col>
                         </Row>
 
                         <Row className="mb-3">
@@ -348,9 +347,12 @@ export default function NewCustomer() {
                         </Row>
 
                         <Form.Row className="mb-2">
-                            <label>
-                                <Field type="checkbox" name="warnings" /> Observações
-                            </label>
+                            <Form.Switch
+                                id="warnings"
+                                label="Observações"
+                                checked={values.warnings}
+                                onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                            />
                         </Form.Row>
 
                         <Form.Row className="mb-3">
@@ -371,13 +373,13 @@ export default function NewCustomer() {
                         <Col className="border-top mb-3"></Col>
 
                         <Form.Row className="mb-4">
-                            <Form.Group as={Col} controlId="formGridDocs">
+                            <Form.Group as={Col}>
                                 <Form.Label>Documentação</Form.Label>
                                 <ListGroup className="mb-3">
                                     {
                                         propertyData.docs.map((doc, index) => {
                                             return <ListGroup.Item key={index} action as="div" variant="light">
-                                                <Row>
+                                                <Row className="align-items-center">
                                                     <Col sm={8}>
                                                         <Form.Check
                                                             checked={doc.checked}
@@ -408,10 +410,10 @@ export default function NewCustomer() {
                             </Form.Group>
                         </Form.Row>
 
-                        <Row className="justify-content-end text-end">
+                        <Row className="justify-content-end">
                             {
                                 messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                    <Col sm={2}>
+                                    <Col sm={1}>
                                         <Button variant="success" type="submit">Salvar</Button>
                                     </Col>
 

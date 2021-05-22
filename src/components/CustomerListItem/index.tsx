@@ -22,10 +22,10 @@ const CustomerItem: React.FC<CustomerItemProps> = ({ customer }) => {
         <Col sm={4}>
             <div className={styles.itemContainer}>
                 <Row className="align-items-center">
-                    <Col sm={11}>
+                    <Col sm={10}>
                         <Link href={`/customers/details/${customer.id}`}>
                             <a>
-                                <h4 className={`form-control-plaintext text-success ${styles.itemText}`}>{customer.name}</h4>
+                                <h5 className={styles.itemText}>{customer.name}</h5>
                             </a>
                         </Link>
                     </Col>
@@ -53,7 +53,7 @@ const CustomerItem: React.FC<CustomerItemProps> = ({ customer }) => {
                 </Row>
 
                 <Row>
-                    <ButtonGroup size="sm">
+                    <ButtonGroup size="sm" className="col-12">
                         <Button variant="success"><FaFileAlt /></Button>
                         <Button variant="success"><FaMapSigns /></Button>
                         <Button variant="success"><FaFileContract /></Button>

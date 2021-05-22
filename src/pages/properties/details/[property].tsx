@@ -19,6 +19,8 @@ import api from '../../../services/api';
 import { Property } from '../../../components/Properties';
 import PropertyListItem from '../../../components/PropertyListItem';
 import { DocsProperty } from '../../../components/DocsProperty';
+import PageBack from '../../../components/PageBack';
+
 import styles from './styles.module.css';
 
 export default function PropertyDetails() {
@@ -69,11 +71,9 @@ export default function PropertyDetails() {
                 <Row>
                     <Col>
                         <Row className="mb-3">
-                            <Link href="/properties">
-                                <a title="Voltar para a lista de clientes" data-title="Voltar para a lista de clientes">
-                                    <FaLongArrowAltLeft /> voltar
-                                </a>
-                            </Link>
+                            <Col>
+                                <PageBack href="/properties" subTitle="Voltar para a lista de imóveis" />
+                            </Col>
                         </Row>
 
                         <Row className="mb-3">

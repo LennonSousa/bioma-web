@@ -2,10 +2,10 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
-import { Formik, Field } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format } from 'date-fns';
-import { FaLongArrowAltLeft, FaPlus } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 
 import api from '../../../services/api';
 import { Customer } from '../../../components/Customers';
@@ -13,6 +13,7 @@ import { DocsCustomer } from '../../../components/DocsCustomer';
 import CustomerAttachments from '../../../components/CustomerAttachments';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
+import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 import styles from './styles.module.css';
@@ -234,11 +235,9 @@ export default function NewCustomer() {
                 {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                     <Form onSubmit={handleSubmit}>
                         <Row className="mb-3">
-                            <Link href="/customers">
-                                <a title="Voltar para a lista de clientes" data-title="Voltar para a lista de clientes">
-                                    <FaLongArrowAltLeft /> voltar
-                                </a>
-                            </Link>
+                            <Col>
+                                <PageBack href={`/customers/details/${customerData.id}`} subTitle="Voltar para detalhes do cliente" />
+                            </Col>
                         </Row>
 
                         <Row className="mb-3">
@@ -255,7 +254,7 @@ export default function NewCustomer() {
                                 <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group as={Col} sm={4} controlId="formGridDocument">
+                            <Form.Group as={Col} sm={3} controlId="formGridDocument">
                                 <Form.Label>{documentType}</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -281,7 +280,7 @@ export default function NewCustomer() {
                                 <Form.Control.Feedback type="invalid">{touched.document && errors.document}</Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group as={Col} sm={2} controlId="formGridBirth">
+                            <Form.Group as={Col} sm={3} controlId="formGridBirth">
                                 <Form.Label>Nascimento</Form.Label>
                                 <Form.Control
                                     type="date"
@@ -437,9 +436,12 @@ export default function NewCustomer() {
                         </Row>
 
                         <Form.Row className="mb-2">
-                            <label>
-                                <Field type="checkbox" name="warnings" /> Observações
-                            </label>
+                            <Form.Switch
+                                id="warnings"
+                                label="Observações"
+                                checked={values.warnings}
+                                onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                            />
                         </Form.Row>
 
                         <Form.Row className="mb-3">
@@ -466,7 +468,7 @@ export default function NewCustomer() {
                                     {
                                         customerData.docs.map((doc, index) => {
                                             return <ListGroup.Item key={index} action as="div" variant="light">
-                                                <Row>
+                                                <Row className="align-items-center">
                                                     <Col sm={8}>
                                                         <Form.Check
                                                             checked={doc.checked}
@@ -529,10 +531,10 @@ export default function NewCustomer() {
                             </Form.Group>
                         </Form.Row>
 
-                        <Row className="justify-content-end text-end">
+                        <Row className="justify-content-end">
                             {
                                 messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                    <Col sm={2}>
+                                    <Col sm={1}>
                                         <Button variant="success" type="submit">Salvar</Button>
                                     </Col>
 
@@ -649,34 +651,34 @@ export default function NewCustomer() {
                                         <label>{filePreview}</label>
                                     </Col>
 
-                                    <label className="invalid-feedback" style={{ display: 'block' }}>{errors.path}</label>
-                                    <label className="invalid-feedback" style={{ display: 'block' }}>{errors.size}</label>
+                                    <Col className="col-12">
+                                        <label className="invalid-feedback" style={{ display: 'block' }}>{errors.path}</label>
+                                        <label className="invalid-feedback" style={{ display: 'block' }}>{errors.size}</label>
+                                    </Col>
                                 </Row>
 
-                                <Row className="mb-3">
-                                    <Form.Group as={Row} controlId="formGridReceivedAt">
-                                        <Form.Label column sm={7}>Data do recebimento</Form.Label>
-                                        <Col sm={5}>
-                                            <Form.Control
-                                                type="date"
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                value={values.received_at}
-                                                name="received_at"
-                                                isInvalid={!!errors.received_at && touched.received_at}
-                                            />
-                                            <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
-                                        </Col>
-                                    </Form.Group>
-                                </Row>
+                                <Form.Group as={Row} controlId="formGridReceivedAt">
+                                    <Form.Label column sm={7}>Data do recebimento</Form.Label>
+                                    <Col sm={5}>
+                                        <Form.Control
+                                            type="date"
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            value={values.received_at}
+                                            name="received_at"
+                                            isInvalid={!!errors.received_at && touched.received_at}
+                                        />
+                                        <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
+                                    </Col>
+                                </Form.Group>
 
-                                <Row className="mb-3">
-                                    <Form.Group as={Col} sm={4} controlId="formGridExpire">
-                                        <label>
-                                            <Field type="checkbox" name="expire" /> Expira?
-                                        </label>
-                                    </Form.Group>
-                                </Row>
+                                <Form.Group className="mb-3" controlId="formGridExpire">
+                                    <Form.Switch
+                                        label="Expira?"
+                                        checked={values.expire}
+                                        onChange={() => { setFieldValue('expire', !values.expire) }}
+                                    />
+                                </Form.Group>
 
                                 {
                                     values.expire && <Row className="mb-3">

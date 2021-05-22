@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
 import { format } from 'date-fns';
-import { FaLongArrowAltLeft } from 'react-icons/fa';
 
 import api from '../../../services/api';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
+import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -113,11 +112,9 @@ export default function NewCustomer() {
             {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                 <Form onSubmit={handleSubmit}>
                     <Row className="mb-3">
-                        <Link href="/customers">
-                            <a title="Voltar para a lista de clientes" data-title="Voltar para a lista de clientes">
-                                <FaLongArrowAltLeft /> voltar
-                                </a>
-                        </Link>
+                        <Col>
+                            <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
+                        </Col>
                     </Row>
 
                     <Row className="mb-3">
@@ -134,7 +131,7 @@ export default function NewCustomer() {
                             <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
                         </Form.Group>
 
-                        <Form.Group as={Col} sm={4} controlId="formGridDocument">
+                        <Form.Group as={Col} sm={3} controlId="formGridDocument">
                             <Form.Label>{documentType}</Form.Label>
                             <Form.Control
                                 type="text"
@@ -160,7 +157,7 @@ export default function NewCustomer() {
                             <Form.Control.Feedback type="invalid">{touched.document && errors.document}</Form.Control.Feedback>
                         </Form.Group>
 
-                        <Form.Group as={Col} sm={2} controlId="formGridBirth">
+                        <Form.Group as={Col} sm={3} controlId="formGridBirth">
                             <Form.Label>Nascimento</Form.Label>
                             <Form.Control
                                 type="date"
@@ -316,9 +313,12 @@ export default function NewCustomer() {
                     </Row>
 
                     <Form.Row className="mb-2">
-                        <label>
-                            <Field type="checkbox" name="warnings" /> Observações
-                        </label>
+                        <Form.Switch
+                            id="warnings"
+                            label="Observações"
+                            checked={values.warnings}
+                            onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                        />
                     </Form.Row>
 
                     <Form.Row className="mb-3">
@@ -364,10 +364,10 @@ export default function NewCustomer() {
                         </Form.Group>
                     </Form.Row>
 
-                    <Row className="justify-content-end text-end">
+                    <Row className="justify-content-end">
                         {
                             messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                <Col sm={2}>
+                                <Col sm={1}>
                                     <Button variant="success" type="submit">Salvar</Button>
                                 </Col>
 

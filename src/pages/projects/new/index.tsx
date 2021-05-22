@@ -1,10 +1,9 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
-import { FaLongArrowAltLeft, FaSearchPlus } from 'react-icons/fa';
+import { FaSearchPlus } from 'react-icons/fa';
 
 import api from '../../../services/api';
 import { Customer } from '../../../components/Customers';
@@ -13,6 +12,7 @@ import { ProjectLine } from '../../../components/ProjectLines';
 import { ProjectStatus } from '../../../components/ProjectStatus';
 import { Bank } from '../../../components/Banks';
 import { Property } from '../../../components/Properties';
+import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 import { prettifyCurrency } from '../../../components/InputMask/masks';
 
@@ -156,11 +156,9 @@ export default function NewCustomer() {
             {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                 <Form onSubmit={handleSubmit}>
                     <Row className="mb-3">
-                        <Link href="/projects">
-                            <a title="Voltar para a lista de projetos" data-title="Voltar para a lista de projetos">
-                                <FaLongArrowAltLeft /> voltar
-                                </a>
-                        </Link>
+                        <Col>
+                            <PageBack href="/projects" subTitle="Voltar para a lista de projetos" />
+                        </Col>
                     </Row>
 
                     <Row className="mb-3">
@@ -215,7 +213,7 @@ export default function NewCustomer() {
                     </Row>
 
                     <Row className="mb-3">
-                        <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                        <Form.Group as={Col} sm={6} controlId="formGridType">
                             <Form.Label>Tipo de projeto/processo</Form.Label>
                             <Form.Control
                                 as="select"
@@ -235,7 +233,7 @@ export default function NewCustomer() {
                             <Form.Control.Feedback type="invalid">{touched.type && errors.type}</Form.Control.Feedback>
                         </Form.Group>
 
-                        <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                        <Form.Group as={Col} sm={6} controlId="formGridLine">
                             <Form.Label>Linha de crédito</Form.Label>
                             <Form.Control
                                 as="select"
@@ -257,7 +255,7 @@ export default function NewCustomer() {
                     </Row>
 
                     <Row className="mb-3">
-                        <Form.Group as={Col} sm={6} controlId="formGridProperty">
+                        <Form.Group as={Col} sm={6} controlId="formGridBank">
                             <Form.Label>Banco</Form.Label>
                             <Form.Control
                                 as="select"
@@ -328,7 +326,7 @@ export default function NewCustomer() {
                             <Form.Control.Feedback type="invalid">{touched.value && errors.value}</Form.Control.Feedback>
                         </Form.Group>
 
-                        <Form.Group as={Col} sm={3} controlId="formGridValue">
+                        <Form.Group as={Col} sm={3} controlId="formGridDeal">
                             <Form.Label>Acordo</Form.Label>
                             <InputGroup className="mb-2">
                                 <InputGroup.Prepend>
@@ -367,9 +365,12 @@ export default function NewCustomer() {
                     </Row>
 
                     <Form.Row className="mb-2">
-                        <label>
-                            <Field type="checkbox" name="warnings" /> Observações
-                        </label>
+                        <Form.Switch
+                            id="warnings"
+                            label="Observações"
+                            checked={values.warnings}
+                            onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                        />
                     </Form.Row>
 
                     <Form.Row className="mb-3">
@@ -389,10 +390,10 @@ export default function NewCustomer() {
 
                     <Col className="border-top mb-3"></Col>
 
-                    <Row className="justify-content-end text-end">
+                    <Row className="justify-content-end">
                         {
                             messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                <Col sm={2}>
+                                <Col sm={1}>
                                     <Button variant="success" type="submit">Salvar</Button>
                                 </Col>
 
@@ -429,10 +430,11 @@ export default function NewCustomer() {
                                                         onClick={() => {
                                                             setFieldValue('customer', customer.id);
                                                             setFieldValue('customerName', customer.name);
-                                                            handleCloseModalChooseCustomer();
 
                                                             api.get(`customers/${customer.id}/properties`).then(res => {
                                                                 setProperties(res.data);
+
+                                                                handleCloseModalChooseCustomer();
                                                             }).catch(err => {
                                                                 console.log('Error to get customer properties ', err);
                                                             });

@@ -187,7 +187,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                     }}
                     validationSchema={validationSchema}
                 >
-                    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                    {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                         <Form onSubmit={handleSubmit}>
                             <Modal.Body>
                                 <Row className="align-items-end mb-3">
@@ -215,30 +215,28 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                                     </Form.Group>
                                 </Row>
 
-                                <Row className="mb-3">
-                                    <Form.Group as={Row} controlId="formGridReceivedAt">
-                                        <Form.Label column sm={7}>Data do recebimento</Form.Label>
-                                        <Col sm={5}>
-                                            <Form.Control
-                                                type="date"
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                value={values.received_at}
-                                                name="received_at"
-                                                isInvalid={!!errors.received_at && touched.received_at}
-                                            />
-                                            <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
-                                        </Col>
-                                    </Form.Group>
-                                </Row>
+                                <Form.Group as={Row} controlId="formGridReceivedAt">
+                                    <Form.Label column sm={7}>Data do recebimento</Form.Label>
+                                    <Col sm={5}>
+                                        <Form.Control
+                                            type="date"
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            value={values.received_at}
+                                            name="received_at"
+                                            isInvalid={!!errors.received_at && touched.received_at}
+                                        />
+                                        <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
+                                    </Col>
+                                </Form.Group>
 
-                                <Row className="mb-3">
-                                    <Form.Group as={Col} sm={4} controlId="formGridExpire">
-                                        <label>
-                                            <Field type="checkbox" name="expire" /> Expira?
-                                        </label>
-                                    </Form.Group>
-                                </Row>
+                                <Form.Group className="mb-3" controlId="formGridExpire">
+                                    <Form.Switch
+                                        label="Expira?"
+                                        checked={values.expire}
+                                        onChange={() => { setFieldValue('expire', !values.expire) }}
+                                    />
+                                </Form.Group>
 
                                 {
                                     values.expire && <Row className="mb-3">
