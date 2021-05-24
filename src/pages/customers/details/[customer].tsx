@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import { Customer } from '../../../components/Customers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import PropertyListItem from '../../../components/PropertyListItem';
@@ -26,11 +27,15 @@ import styles from './styles.module.css';
 export default function CustomerDetails() {
     const router = useRouter();
     const { customer } = router.query;
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [customerData, setCustomerData] = useState<Customer>();
     const [documentType, setDocumentType] = useState("CPF");
 
     useEffect(() => {
+        handleItemSideBar('customers');
+        handleSelectedMenu('customers-index');
+
         if (customer) {
             api.get(`customers/${customer}`).then(res => {
                 let customerRes: Customer = res.data;

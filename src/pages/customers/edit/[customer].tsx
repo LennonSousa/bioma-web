@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { FaPlus } from 'react-icons/fa';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import { Customer } from '../../../components/Customers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import CustomerAttachments from '../../../components/CustomerAttachments';
@@ -48,6 +49,7 @@ const attachmentValidationSchema = Yup.object().shape({
 export default function NewCustomer() {
     const router = useRouter();
     const { customer } = router.query;
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [customerData, setCustomerData] = useState<Customer>();
     const [messageShow, setMessageShow] = useState(false);
@@ -69,6 +71,9 @@ export default function NewCustomer() {
     const [filePreview, setFilePreview] = useState('');
 
     useEffect(() => {
+        handleItemSideBar('customers');
+        handleSelectedMenu('customers-index');
+
         if (customer) {
             api.get(`customers/${customer}`).then(res => {
                 let customerRes: Customer = res.data;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Col, Container, ListGroup, Row } from 'react-bootstrap';
@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fa';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import { Project } from '../../../components/Projects';
 import EventsProject from '../../../components/EventsProject';
 import PageBack from '../../../components/PageBack';
@@ -20,10 +21,14 @@ import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 export default function PropertyDetails() {
     const router = useRouter();
     const { project } = router.query;
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [projectData, setProjectData] = useState<Project>();
 
     useEffect(() => {
+        handleItemSideBar('projects');
+        handleSelectedMenu('projects-index');
+
         if (project) {
             api.get(`projects/${project}`).then(res => {
                 setProjectData(res.data);

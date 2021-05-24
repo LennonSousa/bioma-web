@@ -16,7 +16,7 @@
 }
 
 .sideBarContainer a:hover{
-    color: var(--white);
+    color: var(--background-dark) !important;
 }
 
 .accordionContainer {
@@ -67,6 +67,14 @@
     background-color: var(--green) !important;
 }
 
+.selectedMenuCardBodyItem {
+    margin-bottom: 0.5rem;
+    transition-duration: 0.4s;
+    padding: 0.2rem 0;
+    background-color: var(--green) !important;
+    border-radius: 2px;
+}
+
 .menuCardBody span {
-    font: 200 14px Nunito, sans-serif;
+    font: 200 13px Nunito, sans-serif;
 }

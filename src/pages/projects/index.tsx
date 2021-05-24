@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Container, Row } from 'react-bootstrap';
 
+import { SideBarContext } from '../../context/SideBarContext';
 import { Project } from '../../components/Projects';
 import ProjectListItem from '../../components/ProjectListItem';
 
 import api from '../../services/api';
 
 export default function Customers() {
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const [projects, setProjects] = useState<Project[]>([]);
 
     useEffect(() => {
+        handleItemSideBar('projects');
+        handleSelectedMenu('projects-index');
+
         api.get('projects').then(res => {
             setProjects(res.data);
         }).catch(err => {

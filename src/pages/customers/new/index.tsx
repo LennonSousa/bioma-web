@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import { format } from 'date-fns';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
@@ -29,6 +30,8 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function NewCustomer() {
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -38,6 +41,9 @@ export default function NewCustomer() {
     const router = useRouter();
 
     useEffect(() => {
+        handleItemSideBar('customers');
+        handleSelectedMenu('customers-new');
+
         api.get('docs/customer').then(res => {
             setDocsCustomer(res.data);
         }).catch(err => {

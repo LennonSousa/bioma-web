@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Button, Col, Container, Form, Image, ListGroup, Modal, Row } from 'react-bootstrap';
 import { FaPlus } from 'react-icons/fa';
@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import produce from 'immer';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import DocProperty, { DocsProperty } from '../../../components/DocsProperty';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
@@ -17,6 +18,8 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function NewCustomer() {
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+
     const [docsProperty, setDocsProperty] = useState<DocsProperty[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -27,6 +30,9 @@ export default function NewCustomer() {
     const handleShowModalNewDoc = () => setShowModalNewDoc(true);
 
     useEffect(() => {
+        handleItemSideBar('customers');
+        handleSelectedMenu('properties-docs');
+
         api.get('docs/property').then(res => {
             setDocsProperty(res.data);
         }).catch(err => {

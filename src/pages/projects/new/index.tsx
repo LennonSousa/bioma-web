@@ -1,11 +1,12 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
-import { Formik, Field } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FaSearchPlus } from 'react-icons/fa';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import { Customer } from '../../../components/Customers';
 import { ProjectType } from '../../../components/ProjectTypes';
 import { ProjectLine } from '../../../components/ProjectLines';
@@ -32,6 +33,7 @@ const validationSchema = Yup.object().shape({
 
 export default function NewCustomer() {
     const router = useRouter();
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
@@ -50,6 +52,9 @@ export default function NewCustomer() {
     const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
 
     useEffect(() => {
+        handleItemSideBar('projects');
+        handleSelectedMenu('projects-new');
+
         api.get('customers').then(res => {
             setCustomers(res.data);
         }).catch(err => {

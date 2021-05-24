@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fa';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import { Property } from '../../../components/Properties';
 import PropertyListItem from '../../../components/PropertyListItem';
 import { DocsProperty } from '../../../components/DocsProperty';
@@ -26,10 +27,14 @@ import styles from './styles.module.css';
 export default function PropertyDetails() {
     const router = useRouter();
     const { property } = router.query;
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [propertyData, setPropertyData] = useState<Property>();
 
     useEffect(() => {
+        handleItemSideBar('customers');
+        handleSelectedMenu('properties-index');
+
         if (property) {
             api.get(`properties/${property}`).then(res => {
                 let propertyRes: Property = res.data;

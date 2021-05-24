@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { FaLongArrowAltLeft, FaSearchPlus } from 'react-icons/fa';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import { Property } from '../../../components/Properties';
 import { Customer } from '../../../components/Customers';
 import { DocsProperty } from '../../../components/DocsProperty';
@@ -31,6 +32,7 @@ const validationSchema = Yup.object().shape({
 export default function NewCustomer() {
     const router = useRouter();
     const { property } = router.query;
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
@@ -45,6 +47,9 @@ export default function NewCustomer() {
     const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
 
     useEffect(() => {
+        handleItemSideBar('customers');
+        handleSelectedMenu('properties-index');
+
         if (property) {
             api.get('customers').then(res => {
                 setCustomers(res.data);

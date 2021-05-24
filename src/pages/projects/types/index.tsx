@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Button, Col, Container, Form, Image, ListGroup, Modal, Row } from 'react-bootstrap';
 import { FaPlus } from 'react-icons/fa';
@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import produce from 'immer';
 
 import api from '../../../services/api';
+import { SideBarContext } from '../../../context/SideBarContext';
 import ProjectTypes, { ProjectType } from '../../../components/ProjectTypes';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
@@ -16,6 +17,7 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function Types() {
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
 
     const [loading, setLoading] = useState(true);
@@ -31,6 +33,9 @@ export default function Types() {
     const handleShowModalNewType = () => setShowModalNewType(true);
 
     useEffect(() => {
+        handleItemSideBar('projects');
+        handleSelectedMenu('projects-types');
+
         api.get('projects/types').then(res => {
             setProjectTypes(res.data);
 
