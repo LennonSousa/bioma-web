@@ -354,16 +354,26 @@ const Sidebar: React.FC = () => {
                 </Card>
 
                 <Card className={styles.menuCard}>
-                    <Accordion.Toggle as={Card.Header} className={styles.menuCardHeader} eventKey="banks">
+                    <Accordion.Toggle
+                        as={Card.Header}
+                        className={styles.menuCardHeader}
+                        eventKey="banks"
+                        onClick={() => handleItemSideBar('banks')}
+                    >
                         <div>
                             <FaUniversity /> <span>Bancos</span>
                         </div>
                     </Accordion.Toggle>
                     <Accordion.Collapse eventKey="banks">
                         <Card.Body className={styles.menuCardBody}>
-                            <Link href="/customers">
-                                <a title="Listar todos os clientes" data-title="Listar todos os clientes">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/banks">
+                                <a title="Listar todos os bancos" data-title="Listar todos os bancos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'banks-index' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
                                             <FaList size={14} />
                                         </Col>
@@ -374,9 +384,14 @@ const Sidebar: React.FC = () => {
                                 </a>
                             </Link>
 
-                            <Link href="/customers/new">
-                                <a title="Criar um novo cliente" data-title="Criar um novo cliente">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/banks/new">
+                                <a title="Criar um novo banco" data-title="Criar um novo banco">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'banks-new' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
                                             <FaPlus size={14} />
                                         </Col>
@@ -389,9 +404,14 @@ const Sidebar: React.FC = () => {
 
                             <Dropdown.Divider />
 
-                            <Link href="/docs/property">
-                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/institutions">
+                                <a title="Listar todas as instituições" data-title="Listar todas as instituições">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'institutions-index' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
                                             <FaCity size={14} />
                                         </Col>
