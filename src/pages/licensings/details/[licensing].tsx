@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Col, Container, ListGroup, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
-    FaExclamationCircle,
     FaHistory,
     FaMapSigns,
     FaPencilAlt,
@@ -13,41 +12,41 @@ import {
 
 import api from '../../../services/api';
 import { SideBarContext } from '../../../context/SideBarContext';
-import { Project } from '../../../components/Projects';
-import EventsProject from '../../../components/EventsProject';
+import { Licensing } from '../../../components/Licensings';
+import EventsLicensing from '../../../components/EventsLicensing';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
 export default function PropertyDetails() {
     const router = useRouter();
-    const { project } = router.query;
+    const { licensing } = router.query;
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
-    const [projectData, setProjectData] = useState<Project>();
+    const [licensingData, setLicensingData] = useState<Licensing>();
 
     useEffect(() => {
-        handleItemSideBar('projects');
-        handleSelectedMenu('projects-index');
+        handleItemSideBar('licensings');
+        handleSelectedMenu('licensings-index');
 
-        if (project) {
-            api.get(`projects/${project}`).then(res => {
-                setProjectData(res.data);
+        if (licensing) {
+            api.get(`licensings/${licensing}`).then(res => {
+                setLicensingData(res.data);
             }).catch(err => {
-                console.log('Error to get project: ', err);
+                console.log('Error to get licensing: ', err);
             });
         }
-    }, [project]);
+    }, [licensing]);
 
     async function handleListEvents() { }
 
     return <Container className="content-page">
         {
-            !projectData ? <h1>Aguarde...</h1> :
+            !licensingData ? <h1>Aguarde...</h1> :
                 <Row>
                     <Col>
                         <Row className="mb-3">
                             <Col>
-                                <PageBack href="/projects" subTitle="Voltar para a lista de projetos" />
+                                <PageBack href="/licensing" subTitle="Voltar para a lista de licenciamentos" />
                             </Col>
                         </Row>
 
@@ -55,20 +54,20 @@ export default function PropertyDetails() {
                             <Col sm={6}>
                                 <Row className="align-items-center">
                                     <Col>
-                                        <h3 className="form-control-plaintext text-success">{projectData.customer.name}</h3>
+                                        <h3 className="form-control-plaintext text-success">{licensingData.customer.name}</h3>
                                     </Col>
 
                                     <Col>
-                                        <Link href={`/projects/edit/${projectData.id}`}>
+                                        <Link href={`/licensing/edit/${licensingData.id}`}>
                                             <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
                                         </Link>
                                     </Col>
 
                                     <Col>
-                                        <Link href={`/projects/new?customer=${projectData.customer.id}`}>
+                                        <Link href={`/licensing/new?customer=${licensingData.customer.id}`}>
                                             <a
-                                                title="Criar um novo imóvel para este cliente"
-                                                data-title="Criar um novo imóvel para este cliente"
+                                                title="Criar um novo licenciamento para este cliente"
+                                                data-title="Criar um novo licenciamento para este cliente"
                                             >
                                                 <FaPlusSquare /><FaMapSigns />
                                             </a>
@@ -76,66 +75,78 @@ export default function PropertyDetails() {
                                     </Col>
                                 </Row>
                             </Col>
-                        </Row>
-
-                        <Row className="mb-3">
-                            <Col sm={4}>
-                                <Row>
-                                    <Col>
-                                        <span className="text-success">Tipo de projeto/processo</span>
-                                    </Col>
-                                </Row>
-
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-secondary">{projectData.type.name}</h6>
-                                    </Col>
-                                </Row>
-                            </Col>
 
                             <Col sm={4} >
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Linha de crédito</span>
+                                        <span className="text-success">Licença/autorização</span>
                                     </Col>
                                 </Row>
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{projectData.line.name}</h6>
-                                    </Col>
-                                </Row>
-                            </Col>
-
-                            <Col sm={4} >
-                                <Row>
-                                    <Col>
-                                        <span className="text-success">Fazenda/imóvel</span>
-                                    </Col>
-                                </Row>
-
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-secondary">{projectData.property.name}</h6>
+                                        <h6 className="text-secondary">{licensingData.authorization}</h6>
                                     </Col>
                                 </Row>
                             </Col>
                         </Row>
 
                         <Row className="mb-3">
-                            <Col sm={4}>
+                            <Col sm={5}>
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Valor</span>
+                                        <span className="text-success">Orgão</span>
                                     </Col>
                                 </Row>
 
                                 <Row>
                                     <Col>
-                                        <h6
-                                            className="text-secondary"
-                                        >
-                                            {`R$ ${Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(projectData.value)}`}
+                                        <h6 className="text-secondary">{licensingData.agency.name}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={5} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Documento emitido</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{licensingData.status.name}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={2} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Validade</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{licensingData.expire ? licensingData.expire : ''}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col sm={4}>
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Renovação</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">
+                                            {licensingData.renovation ? licensingData.renovation : ''}
                                         </h6>
                                     </Col>
                                 </Row>
@@ -144,13 +155,13 @@ export default function PropertyDetails() {
                             <Col sm={4} >
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Situação do projeto/processo</span>
+                                        <span className="text-success">Entrega ao cliente</span>
                                     </Col>
                                 </Row>
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{projectData.status.name}</h6>
+                                        <h6 className="text-secondary">{licensingData.deadline ? licensingData.deadline : ''}</h6>
                                     </Col>
                                 </Row>
                             </Col>
@@ -158,43 +169,63 @@ export default function PropertyDetails() {
                             <Col sm={4} >
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Acordo %</span>
+                                        <span className="text-success">Número de licença</span>
                                     </Col>
                                 </Row>
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{String(projectData.deal).replace(".", ",")}</h6>
+                                        <h6 className="text-secondary">
+                                            {licensingData.process_number ? licensingData.process_number : ''}
+                                        </h6>
                                     </Col>
                                 </Row>
                             </Col>
                         </Row>
 
                         <Row className="mb-3">
-                            <Col sm={4}>
+                            <Col sm={6} >
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Contrato</span>
+                                        <span className="text-success">Imóvel</span>
                                     </Col>
                                 </Row>
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{projectData.contract}</h6>
+                                        <h6 className="text-secondary">{licensingData.property ? licensingData.property.name : ''}</h6>
                                     </Col>
                                 </Row>
                             </Col>
 
-                            <Col sm={4} >
+                            <Col sm={6} >
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Data de criação</span>
+                                        <span className="text-success">Infração</span>
                                     </Col>
                                 </Row>
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{format(new Date(projectData.created_at), 'dd/MM/yyyy')}</h6>
+                                        <h6 className="text-secondary">
+                                            {licensingData.infringement ? licensingData.infringement.name : ''}
+                                        </h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Criado em</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{format(new Date(licensingData.created_at), 'dd/MM/yyyy')}</h6>
                                     </Col>
                                 </Row>
                             </Col>
@@ -208,29 +239,11 @@ export default function PropertyDetails() {
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{format(new Date(projectData.updated_at), 'dd/MM/yyyy')}</h6>
+                                        <h6 className="text-secondary">{format(new Date(licensingData.updated_at), 'dd/MM/yyyy')}</h6>
                                     </Col>
                                 </Row>
                             </Col>
                         </Row>
-
-                        {
-                            projectData.warnings && <Row className="mb-3">
-                                <Col >
-                                    <Row>
-                                        <Col>
-                                            <h6 className="text-success">Observação {projectData.warnings && <FaExclamationCircle />}</h6>
-                                        </Col>
-                                    </Row>
-
-                                    <Row>
-                                        <Col>
-                                            <span className="text-secondary text-wrap">{projectData.notes}</span>
-                                        </Col>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        }
 
                         <Col className="border-top mt-3 mb-3"></Col>
 
@@ -244,7 +257,7 @@ export default function PropertyDetails() {
 
                                 <Row className="mt-2">
                                     {
-                                        projectData.events.length > 0 ? <Col>
+                                        licensingData.events.length > 0 ? <Col>
                                             <Row className="mb-2" style={{ padding: '0 1rem' }}>
                                                 <Col sm={5}>
                                                     <h6>Descrição</h6>
@@ -267,8 +280,8 @@ export default function PropertyDetails() {
                                                 <Col>
                                                     <ListGroup>
                                                         {
-                                                            projectData.events.map((event, index) => {
-                                                                return <EventsProject
+                                                            licensingData.events.map((event, index) => {
+                                                                return <EventsLicensing
                                                                     key={index}
                                                                     event={event}
                                                                     handleListEvents={handleListEvents}
@@ -283,7 +296,7 @@ export default function PropertyDetails() {
                                             <Col>
                                                 <AlertMessage
                                                     status="warning"
-                                                    message="Nenhum evento registrado para esse projeto."
+                                                    message="Nenhum evento registrado para esse licenciamento."
                                                 />
                                             </Col>
                                     }

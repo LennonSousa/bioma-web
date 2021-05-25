@@ -126,7 +126,7 @@ export default function NewCustomer() {
 
                     setTimeout(() => {
                         router.push(`/properties/details/${res.data.id}`);
-                    }, 2000);
+                    }, 1500);
                 }
                 catch {
                     setTypeMessage("error");

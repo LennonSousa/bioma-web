@@ -10,10 +10,10 @@ import styles from './styles.module.css';
 
 interface ProjectListItemProps {
     project: Project;
-    showCustomer?: boolean;
+    showBank?: boolean;
 }
 
-const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, showCustomer = true }) => {
+const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, showBank = true }) => {
     const router = useRouter();
 
     function goToEdit() {
@@ -34,23 +34,23 @@ const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, showCustomer
                     <Col className="text-warning" sm={1}>{project.warnings && <FaExclamationCircle />}</Col>
                 </Row>
 
+                <Row>
+                    <Col>
+                        <span className={`form-control-plaintext text-secondary ${styles.itemText}`} >
+                            {project.status.name}
+                        </span>
+                    </Col>
+                </Row>
+
                 {
-                    showCustomer && <Row>
+                    showBank && <Row>
                         <Col>
                             <span className={`form-control-plaintext text-secondary ${styles.itemText}`} >
-                                {project.status.name}
+                                {`${project.bank.institution.name} - ${project.bank.sector}, ${format(new Date(project.updated_at), 'dd/MM/yyyy')}`}
                             </span>
                         </Col>
                     </Row>
                 }
-
-                <Row>
-                    <Col>
-                        <span className={`form-control-plaintext text-secondary ${styles.itemText}`} >
-                            {`${project.bank.institution.name} - ${project.bank.sector}, ${format(new Date(project.updated_at), 'dd/MM/yyyy')}`}
-                        </span>
-                    </Col>
-                </Row>
 
                 <Row>
                     <ButtonGroup size="sm" className="col-12">

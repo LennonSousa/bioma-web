@@ -140,7 +140,7 @@ export default function NewBank() {
                                 <Form.Control.Feedback type="invalid">{touched.institution && errors.institution}</Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group as={Col} sm={3} controlId="formGridAgency">
+                            <Form.Group as={Col} sm={6} controlId="formGridAgency">
                                 <Form.Label>Agência</Form.Label>
                                 <Form.Control
                                     type="Name"
@@ -274,11 +274,11 @@ export default function NewBank() {
                                     type="Name"
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    value={values.sector}
-                                    name="sector"
-                                    isInvalid={!!errors.sector && touched.sector}
+                                    value={values.department}
+                                    name="department"
+                                    isInvalid={!!errors.department && touched.department}
                                 />
-                                <Form.Control.Feedback type="invalid">{touched.sector && errors.sector}</Form.Control.Feedback>
+                                <Form.Control.Feedback type="invalid">{touched.department && errors.department}</Form.Control.Feedback>
                             </Form.Group>
                         </Row>
 

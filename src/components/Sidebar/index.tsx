@@ -14,6 +14,9 @@ import {
     FaLayerGroup,
     FaUniversity,
     FaCity,
+    FaAward,
+    FaBalanceScaleLeft,
+    FaFileExcel,
 } from 'react-icons/fa';
 
 import { SideBarContext } from '../../context/SideBarContext';
@@ -263,16 +266,26 @@ const Sidebar: React.FC = () => {
                 </Card>
 
                 <Card className={styles.menuCard}>
-                    <Accordion.Toggle as={Card.Header} className={styles.menuCardHeader} eventKey="licensings">
+                    <Accordion.Toggle
+                        as={Card.Header}
+                        className={styles.menuCardHeader}
+                        eventKey="licensings"
+                        onClick={() => handleItemSideBar('licensings')}
+                    >
                         <div>
                             <FaFileAlt /> <span>Licenças</span>
                         </div>
                     </Accordion.Toggle>
                     <Accordion.Collapse eventKey="licensings">
                         <Card.Body className={styles.menuCardBody}>
-                            <Link href="/customers">
-                                <a title="Listar todos os clientes" data-title="Listar todos os clientes">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/licensings">
+                                <a title="Listar todos os licenciamentos" data-title="Listar todos os licenciamentos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'licensings-index' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
                                             <FaList size={14} />
                                         </Col>
@@ -283,9 +296,14 @@ const Sidebar: React.FC = () => {
                                 </a>
                             </Link>
 
-                            <Link href="/customers/new">
-                                <a title="Criar um novo cliente" data-title="Criar um novo cliente">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/licensings/new">
+                                <a title="Criar um novo licenciamento" data-title="Criar um novo licenciamento">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'licensings-new' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
                                             <FaPlus size={14} />
                                         </Col>
@@ -296,37 +314,52 @@ const Sidebar: React.FC = () => {
                                 </a>
                             </Link>
 
-                            <Link href="/docs/customer">
-                                <a title="Listar os documentos para clientes" data-title="Listar os documentos para clientes">
-                                    <Row className={styles.menuCardBodyItem}>
-                                        <Col sm={1}>
-                                            <FaIdCard size={14} />
-                                        </Col>
-                                        <Col>
-                                            <span>Documentos</span>
-                                        </Col>
-                                    </Row>
-                                </a>
-                            </Link>
-
                             <Dropdown.Divider />
 
-                            <Link href="/docs/property">
-                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/licensings/authorizations">
+                                <a title="Listar os tipos" data-title="Listar os tipos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'licensings-authorizations' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
-                                            <FaProjectDiagram size={14} />
+                                            <FaAward size={14} />
                                         </Col>
                                         <Col>
-                                            <span>Tipos</span>
+                                            <span>Licenças</span>
                                         </Col>
                                     </Row>
                                 </a>
                             </Link>
 
-                            <Link href="/docs/property">
-                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/licensings/agencies">
+                                <a title="Listar as orgãos" data-title="Listar os orgãos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'licensings-agencies' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaBalanceScaleLeft size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Orgãos</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
+                            <Link href="/licensings/status">
+                                <a title="Listar as fases" data-title="Listar as fases">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'licensings-status' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
                                             <FaClipboardList size={14} />
                                         </Col>
@@ -337,14 +370,19 @@ const Sidebar: React.FC = () => {
                                 </a>
                             </Link>
 
-                            <Link href="/docs/property">
-                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
-                                    <Row className={styles.menuCardBodyItem}>
+                            <Link href="/licensings/infringements">
+                                <a title="Listar as infrações" data-title="Listar as infrações">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'licensings-infringements' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
                                         <Col sm={1}>
-                                            <FaLayerGroup size={14} />
+                                            <FaFileExcel size={14} />
                                         </Col>
                                         <Col>
-                                            <span>Linhas</span>
+                                            <span>Infrações</span>
                                         </Col>
                                     </Row>
                                 </a>

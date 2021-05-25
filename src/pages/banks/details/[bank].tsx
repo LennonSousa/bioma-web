@@ -24,7 +24,7 @@ export default function CustomerDetails() {
         handleSelectedMenu('banks-index');
 
         if (bank) {
-            api.get(`customers/${bank}`).then(res => {
+            api.get(`banks/${bank}`).then(res => {
                 setBankData(res.data);
             }).catch(err => {
                 console.log('Error to get bank to edit, ', err);
@@ -179,8 +179,8 @@ export default function CustomerDetails() {
 
                         <Col className="border-top mb-3"></Col>
 
-                        <Tabs defaultActiveKey="properties" id="relations-customer">
-                            <Tab eventKey="properties" title="Imóveis">
+                        <Tabs defaultActiveKey="projects" id="relations-projects">
+                            <Tab eventKey="projects" title="Projetos">
                                 <Row className={styles.relationsContainer}>
                                     <Col>
                                         <Row className={styles.relationsContent}>
@@ -189,7 +189,7 @@ export default function CustomerDetails() {
                                                     return <ProjectListItem
                                                         key={index}
                                                         project={project}
-                                                        showCustomer={false}
+                                                        showBank={false}
                                                     />
                                                 }) :
                                                     <Col>
