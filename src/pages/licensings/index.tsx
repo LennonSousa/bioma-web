@@ -2,21 +2,21 @@ import { useContext, useEffect, useState } from 'react';
 import { Container, Row } from 'react-bootstrap';
 
 import { SideBarContext } from '../../context/SideBarContext';
-import { Project } from '../../components/Projects';
-import ProjectListItem from '../../components/ProjectListItem';
+import { Licensing } from '../../components/Licensings';
+import LicensingListItem from '../../components/LicensingListItem';
 
 import api from '../../services/api';
 
-export default function Customers() {
+export default function Licensings() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [licensings, setLicensings] = useState<Licensing[]>([]);
 
     useEffect(() => {
         handleItemSideBar('licensings');
         handleSelectedMenu('licensings-index');
 
         api.get('licensings').then(res => {
-            setProjects(res.data);
+            setLicensings(res.data);
         }).catch(err => {
             console.log('Error to get licensings, ', err);
         })
@@ -26,8 +26,8 @@ export default function Customers() {
         <Container>
             <Row>
                 {
-                    projects.map((project, index) => {
-                        return <ProjectListItem key={index} project={project} />
+                    licensings.map((licensing, index) => {
+                        return <LicensingListItem key={index} licensing={licensing} />
                     })
                 }
             </Row>

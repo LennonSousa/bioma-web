@@ -572,10 +572,12 @@ export default function NewCustomer() {
                                     </Row>
 
                                 </Col> :
-                                    <AlertMessage
-                                        status="warning"
-                                        message="Nenhum evento registrado para esse projeto."
-                                    />
+                                    <Col>
+                                        <AlertMessage
+                                            status="warning"
+                                            message="Nenhum evento registrado para esse projeto."
+                                        />
+                                    </Col>
                             }
                         </Row>
                     </Col>

@@ -35,7 +35,7 @@ const PropertyListItem: React.FC<LicensingListItemProps> = ({ licensing }) => {
                 <Row>
                     <Col>
                         <span className={`form-control-plaintext text-secondary ${styles.itemText}`} >
-                            {licensing.property.name}
+                            {licensing.property ? licensing.property.name : <br />}
                         </span>
                     </Col>
                 </Row>
@@ -43,7 +43,15 @@ const PropertyListItem: React.FC<LicensingListItemProps> = ({ licensing }) => {
                 <Row>
                     <Col>
                         <span className={`form-control-plaintext text-secondary ${styles.itemText}`} >
-                            {`${licensing.authorization} - ${licensing.status.name}`}
+                            {licensing.authorization.department}
+                        </span>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col>
+                        <span className={`form-control-plaintext text-secondary ${styles.itemText}`} >
+                            {licensing.status.name}
                         </span>
                     </Col>
                 </Row>

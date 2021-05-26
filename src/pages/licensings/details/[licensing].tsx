@@ -46,7 +46,7 @@ export default function PropertyDetails() {
                     <Col>
                         <Row className="mb-3">
                             <Col>
-                                <PageBack href="/licensing" subTitle="Voltar para a lista de licenciamentos" />
+                                <PageBack href="/licensings" subTitle="Voltar para a lista de licenciamentos" />
                             </Col>
                         </Row>
 
@@ -58,7 +58,7 @@ export default function PropertyDetails() {
                                     </Col>
 
                                     <Col>
-                                        <Link href={`/licensing/edit/${licensingData.id}`}>
+                                        <Link href={`/licensings/edit/${licensingData.id}`}>
                                             <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
                                         </Link>
                                     </Col>
@@ -85,7 +85,7 @@ export default function PropertyDetails() {
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{licensingData.authorization}</h6>
+                                        <h6 className="text-secondary">{licensingData.authorization.department}</h6>
                                     </Col>
                                 </Row>
                             </Col>

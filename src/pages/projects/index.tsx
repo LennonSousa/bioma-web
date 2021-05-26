@@ -7,7 +7,7 @@ import ProjectListItem from '../../components/ProjectListItem';
 
 import api from '../../services/api';
 
-export default function Customers() {
+export default function Projects() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const [projects, setProjects] = useState<Project[]>([]);
 
