@@ -1,10 +1,11 @@
-import { ChangeEvent, useEffect, useState } from 'react';
-import { Row, Col, ListGroup, Modal, Form, Button } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
+import { Row, Col, ListGroup, Modal, Form, Button, Spinner } from 'react-bootstrap';
 import { FaHourglassHalf, FaHourglassEnd, FaPencilAlt, FaCloudDownloadAlt } from 'react-icons/fa';
-import { Field, Formik } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format, formatDistanceToNow, isBefore } from 'date-fns';
 import br from 'date-fns/locale/pt-BR';
+import FileSaver from 'file-saver';
 
 import api from '../../services/api';
 import { Customer } from '../Customers';
@@ -46,6 +47,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [downloadingAttachment, setDownloadingAttachment] = useState(false);
 
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);
@@ -60,12 +62,23 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
     }, [attachment.expire, attachment.expire_at, attachmentExpired]);
 
     async function handleDownloadAttachment() {
+        setDownloadingAttachment(true);
+
         try {
+            const res = await api.get(`customers/attachments/${attachment.id}`,
+                { responseType: "blob" }
+            );
+
+            const fileName = `${attachment.customer.name} - ${attachment.name}`;
+
+            FileSaver.saveAs(res.data, fileName);
         }
         catch (err) {
-            console.log("Error to pause category");
+            console.log("Error to get attachment");
             console.log(err);
         }
+
+        setDownloadingAttachment(false);
     }
 
     async function deleteProduct() {
@@ -91,6 +104,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
             setIconDelete(true);
 
             setTypeMessage("error");
+            setMessageShow(true);
 
             setTimeout(() => {
                 setMessageShow(false);
@@ -121,7 +135,13 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                     </Col>
 
                     <Col sm={1} className="text-right">
-                        <Button variant="outline-success" className="button-link" onClick={handleDownloadAttachment}><FaCloudDownloadAlt /></Button>
+                        <Button
+                            variant="outline-success"
+                            className="button-link"
+                            onClick={handleDownloadAttachment}
+                        >
+                            {downloadingAttachment ? <Spinner animation="border" variant="success" size="sm" /> : <FaCloudDownloadAlt />}
+                        </Button>
                     </Col>
 
                     {
