@@ -21,27 +21,27 @@ import styles from './styles.module.css';
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
     document: Yup.string().min(14, 'CPF inválido!').max(18, 'CNPJ inválido!').required('Obrigatório!'),
-    phone: Yup.string().notRequired(),
-    cellphone: Yup.string().notRequired(),
-    contacts: Yup.string().notRequired(),
-    email: Yup.string().email('E-mail inválido!').notRequired(),
-    address: Yup.string().notRequired(),
+    phone: Yup.string().notRequired().nullable(),
+    cellphone: Yup.string().notRequired().nullable(),
+    contacts: Yup.string().notRequired().nullable(),
+    email: Yup.string().email('E-mail inválido!').notRequired().nullable(),
+    address: Yup.string().notRequired().nullable(),
     city: Yup.string().required('Obrigatório!'),
     state: Yup.string().required('Obrigatório!'),
-    owner: Yup.string().notRequired(),
-    notes: Yup.string().notRequired(),
-    warnings: Yup.boolean().notRequired(),
+    owner: Yup.string().notRequired().nullable(),
+    notes: Yup.string().notRequired().nullable(),
+    warnings: Yup.boolean().notRequired().nullable(),
     birth: Yup.date().required('Obrigatório!'),
 });
 
 const attachmentValidationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
     path: Yup.string().required('Obrigatório!'),
-    size: Yup.number().lessThan(5 * 1024 * 1024, 'O arquivo não pode ultrapassar 5MB.').notRequired(),
+    size: Yup.number().lessThan(5 * 1024 * 1024, 'O arquivo não pode ultrapassar 5MB.').notRequired().nullable(),
     received_at: Yup.date().required('Obrigatório!'),
-    expire: Yup.boolean().notRequired(),
+    expire: Yup.boolean().notRequired().nullable(),
     expire_at: Yup.date().required('Obrigatório!'),
-    renewal: Yup.string().notRequired(),
+    renewal: Yup.string().notRequired().nullable(),
     customer: Yup.string().required('Obrigatório!'),
 });
 
