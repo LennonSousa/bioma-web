@@ -5,7 +5,7 @@ import { SideBarContext } from '../../context/SideBarContext';
 import { Licensing } from '../../components/Licensings';
 import LicensingListItem from '../../components/LicensingListItem';
 
-import api from '../../services/api';
+import api from '../../api/api';
 
 export default function Licensings() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);

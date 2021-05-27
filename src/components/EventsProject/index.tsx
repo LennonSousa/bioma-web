@@ -5,7 +5,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format } from 'date-fns';
 
-import api from '../../services/api';
+import api from '../../api/api';
 import { Project } from '../Projects';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 

@@ -6,7 +6,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import produce from 'immer';
 
-import api from '../../../services/api';
+import api from '../../../api/api';
 import { SideBarContext } from '../../../context/SideBarContext';
 import ProjectLines, { ProjectLine } from '../../../components/ProjectLines';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';

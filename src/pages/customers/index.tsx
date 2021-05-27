@@ -4,7 +4,7 @@ import { Container, Row } from 'react-bootstrap';
 import { Customer } from '../../components/Customers';
 import CustomerItem from '../../components/CustomerListItem';
 
-import api from '../../services/api';
+import api from '../../api/api';
 import { SideBarContext } from '../../context/SideBarContext';
 
 export default function Customers() {

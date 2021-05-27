@@ -5,7 +5,7 @@ import { SideBarContext } from '../../context/SideBarContext';
 import { Project } from '../../components/Projects';
 import ProjectListItem from '../../components/ProjectListItem';
 
-import api from '../../services/api';
+import api from '../../api/api';
 
 export default function Projects() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);

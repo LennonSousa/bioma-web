@@ -4,7 +4,7 @@ import { FaPlus } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
-import api from '../../services/api';
+import api from '../../api/api';
 import { SideBarContext } from '../../context/SideBarContext';
 import InstitutionItem, { Institution } from '../../components/Institutions';
 import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';

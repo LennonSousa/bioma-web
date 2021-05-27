@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Col, Container, Row, Tabs, Tab } from 'react-bootstrap';
 import { FaPencilAlt } from 'react-icons/fa';
 
-import api from '../../../services/api';
+import api from '../../../api/api';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Bank } from '../../../components/Banks';
 import ProjectListItem from '../../../components/ProjectListItem';

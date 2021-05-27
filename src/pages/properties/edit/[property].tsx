@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 import { format } from 'date-fns';
 import { FaLongArrowAltLeft, FaSearchPlus } from 'react-icons/fa';
 
-import api from '../../../services/api';
+import api from '../../../api/api';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Property } from '../../../components/Properties';
 import { Customer } from '../../../components/Customers';

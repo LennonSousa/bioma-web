@@ -15,7 +15,7 @@ import {
     FaRegFile
 } from 'react-icons/fa';
 
-import api from '../../../services/api';
+import api from '../../../api/api';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Property } from '../../../components/Properties';
 import PropertyListItem from '../../../components/PropertyListItem';

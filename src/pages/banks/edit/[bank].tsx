@@ -4,7 +4,7 @@ import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
-import api from '../../../services/api';
+import api from '../../../api/api';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Bank } from '../../../components/Banks';
 import { Institution } from '../../../components/Institutions';

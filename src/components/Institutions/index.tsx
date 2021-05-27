@@ -4,7 +4,7 @@ import { FaPencilAlt, FaBars } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
-import api from '../../services/api';
+import api from '../../api/api';
 import { Bank } from '../Banks';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 

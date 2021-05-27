@@ -7,7 +7,7 @@ import { format, formatDistanceToNow, isBefore } from 'date-fns';
 import br from 'date-fns/locale/pt-BR';
 import FileSaver from 'file-saver';
 
-import api from '../../services/api';
+import api from '../../api/api';
 import { Customer } from '../Customers';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 
