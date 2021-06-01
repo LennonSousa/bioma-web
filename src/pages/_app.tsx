@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import Head from 'next/head';
 import { NextSeo } from 'next-seo';
 
 import { SideBarProvider } from '../context/SideBarContext';
+import { AuthProvider } from '../context/authContext';
 import { Header } from '../components/Header';
 import Sidebar from '../components/Sidebar';
 
@@ -11,6 +13,8 @@ import '../styles/global.css';
 import styles from '../styles/app.module.css';
 
 function MyApp({ Component, pageProps }) {
+  useEffect(() => { console.log('App...'); }, []);
+
   return <>
     <NextSeo titleTemplate="Bioma | %s" defaultTitle="Plataforma de gerenciamento." />
 
@@ -19,18 +23,20 @@ function MyApp({ Component, pageProps }) {
       <meta name="viewport" content="width=device-width, initial-scale=1" />
     </Head>
 
-    <SideBarProvider>
-      <div className={styles.wrapper}>
-        <Header />
-        <div className={styles.main}>
-          <Sidebar />
+    <AuthProvider>
+      <SideBarProvider>
+        <div className={styles.wrapper}>
+          <Header />
+          <div className={styles.main}>
+            <Sidebar />
 
-          <section className={styles.content}>
-            <Component {...pageProps} />
-          </section>
+            <section className={styles.content}>
+              <Component {...pageProps} />
+            </section>
+          </div>
         </div>
-      </div>
-    </SideBarProvider>
+      </SideBarProvider>
+    </AuthProvider>
   </>
 }
 

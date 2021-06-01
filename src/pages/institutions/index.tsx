@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { GetServerSideProps } from 'next';
 import { Button, Col, Container, Form, Image, ListGroup, Modal, Row } from 'react-bootstrap';
 import { FaPlus } from 'react-icons/fa';
 import { Formik } from 'formik';
@@ -30,6 +31,8 @@ export default function Institutions() {
     const handleShowModalNewInstitution = () => setShowModalNewInstitution(true);
 
     useEffect(() => {
+        console.log('Institutions');
+
         handleItemSideBar('banks');
         handleSelectedMenu('institutions-index');
 
@@ -189,4 +192,32 @@ export default function Institutions() {
             </Formik>
         </Modal>
     </Container>
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { token } = context.req.cookies;
+
+    const tokenVerified = await TokenVerify(token);
+
+    if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        }
+    }
+
+    if (tokenVerified === "error") { // Server error!
+        return {
+            redirect: {
+                destination: '/500',
+                permanent: false,
+            },
+        }
+    }
+
+    return {
+        props: {},
+    }
 }

@@ -1,4 +1,5 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
@@ -729,4 +730,32 @@ export default function NewCustomer() {
             </Modal>
         }
     </Container>
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { token } = context.req.cookies;
+
+    const tokenVerified = await TokenVerify(token);
+
+    if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        }
+    }
+
+    if (tokenVerified === "error") { // Server error!
+        return {
+            redirect: {
+                destination: '/500',
+                permanent: false,
+            },
+        }
+    }
+
+    return {
+        props: {},
+    }
 }

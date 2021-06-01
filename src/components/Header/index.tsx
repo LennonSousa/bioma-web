@@ -1,7 +1,30 @@
-import { Container, Navbar } from 'react-bootstrap';
+import { useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { Button, Container, Form, Navbar } from 'react-bootstrap';
+
+import { AuthContext } from '../../context/authContext';
 
 export function Header() {
-    return <Navbar bg="dark" variant="dark">
+    const router = useRouter();
+    const { signed, handleAuthenticated, handleLogout } = useContext(AuthContext);
+
+    const [showPageHeader, setShowPageHeader] = useState(false);
+
+    const pathsNotShow = ['/'];
+
+    useEffect(() => {
+        handleAuthenticated();
+    }, []);
+
+    useEffect(() => {
+        let show = false;
+
+        if (signed && !pathsNotShow.find(item => { return item === router.route })) show = true;
+
+        setShowPageHeader(show);
+    }, [signed, router.route]);
+
+    return showPageHeader ? <Navbar bg="dark" variant="dark">
         <Container>
             <Navbar.Brand href="#home">
                 <img
@@ -12,6 +35,10 @@ export function Header() {
                     className="d-inline-block align-top"
                 />{' '}Plataforma de gerenciamento
             </Navbar.Brand>
+
+            <Form inline>
+                <Button variant="outline-light" onClick={handleLogout}>Sair</Button>
+            </Form>
         </Container>
-    </Navbar>
+    </Navbar> : <></>
 }

@@ -10,7 +10,7 @@ interface SideBarContextData {
 const SideBarContext = createContext<SideBarContextData>({} as SideBarContextData);
 
 const SideBarProvider: React.FC = ({ children }) => {
-    const [itemSideBar, setItemSideBar] = useState('customers');
+    const [itemSideBar, setItemSideBar] = useState('dashboard');
     const [selectedMenu, setSelectedMenu] = useState('');
 
     function handleItemSideBar(item: string) {

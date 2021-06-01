@@ -1,13 +1,192 @@
-import { NextSeo } from 'next-seo';
-import { Container } from 'react-bootstrap';
+import { useContext, useState } from 'react';
+import { GetServerSideProps } from 'next';
+import Link from 'next/link';
+import { Button, Col, Container, Image, Form, Row } from 'react-bootstrap';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import { FaKey } from 'react-icons/fa';
 
-export default function Home() {
+import api from '../api/api';
+import { AuthContext } from '../context/authContext';
+import { AlertMessage, statusModal } from '../components/interfaces/AlertMessage';
+
+import styles from '../styles/index.module.css';
+
+const validationSchema = Yup.object().shape({
+  email: Yup.string().email('E-mail inválido').required('Obrigatório!'),
+  password: Yup.string().required('Obrigatório!').min(8, 'Mínimo 8 caracteres.')
+});
+
+export default function Login() {
+  const { signed, handleLogin } = useContext(AuthContext);
+
+  const [showModalResetPassword, setShowModalResetPassword] = useState(false);
+
+  const handleCloseModalResetPassword = () => setShowModalResetPassword(false);
+  const handleShowModalResetPassword = () => setShowModalResetPassword(true);
+
+  const [messageShow, setMessageShow] = useState(false);
+  const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+  const [textMessage, setTextMessage] = useState('entrando...');
+
+  const [sentEmail, setSentEmail] = useState(false);
+  const [messageReset, setMessageReset] = useState('');
+  const [isMessageResetSuccess, setIsMessageResetSuccess] = useState(false);
+  const [isWaitingReset, setIsWaitingReset] = useState(false);
+
   return (
-    <>
-      <NextSeo title="Plataforma de gerenciamento." />
-      <Container className="content-page">
-        <h1>Hello world!</h1>
+    <div className={styles.pageContainer}>
+      <Container>
+        <Row className="justify-content-center align-items-center">
+          <Col sm={10} className={`${styles.formContainer} col-11`}>
+            <Row className="justify-content-center align-items-center">
+              <Col md={4} className="mt-1 mb-4">
+                <Image fluid src="/assets/images/logo-bioma.svg" alt="Bioma consultoria." />
+              </Col>
+
+              <Col md={6} className="mt-1 mb-1">
+                <Formik
+                  initialValues={{
+                    email: '',
+                    password: '',
+                  }}
+                  onSubmit={async values => {
+                    setTextMessage('entrando...');
+                    setTypeMessage("waiting");
+                    setMessageShow(true);
+
+                    try {
+                      const resLogin = await handleLogin(values.email, values.password);
+
+                      if (!resLogin) {
+                        setTypeMessage("error");
+                        setTextMessage("E-mail ou senha incorretos!");
+
+                        setTimeout(() => {
+                          setMessageShow(false);
+                        }, 3000);
+
+                        return;
+                      }
+
+                      if (resLogin === "error") {
+                        setTypeMessage("error");
+                        setTextMessage("Erro na conexão!");
+
+                        setTimeout(() => {
+                          setMessageShow(false);
+                        }, 3000);
+
+                        return;
+                      }
+
+                      setTextMessage('');
+                      setTypeMessage("success");
+                    }
+                    catch {
+                      setTypeMessage("error");
+                      setTextMessage("Erro na conexão!");
+
+                      setTimeout(() => {
+                        setMessageShow(false);
+                      }, 4000);
+                    }
+                  }}
+                  validationSchema={validationSchema}
+                  validateOnChange={false}
+                >
+                  {({ handleBlur, handleChange, handleSubmit, values, errors, touched }) => (
+                    <Form onSubmit={handleSubmit}>
+                      <Row>
+                        <Col>
+                          <Form.Group className="mb-4" controlId="formLogintEmail">
+                            <Form.Label>Seu e-mail</Form.Label>
+                            <Form.Control type="text"
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              value={values.email}
+                              name="email"
+                              isInvalid={!!errors.email && touched.email}
+                            />
+                            <Form.Control.Feedback type="invalid">{touched.email && errors.email}</Form.Control.Feedback>
+                          </Form.Group>
+
+                          <Form.Group className="mb-4" controlId="formLoginPassword">
+                            <Form.Label>Senha</Form.Label>
+                            <Form.Control type="password"
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              value={values.password}
+                              name="password"
+                              isInvalid={!!errors.password && touched.password}
+                            />
+                            <Form.Control.Feedback type="invalid">{touched.password && errors.password}</Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+
+                      <Row className="justify-content-end">
+                        {
+                          messageShow ? <Col sm={12}><AlertMessage status={typeMessage} message={textMessage} /></Col> :
+                            <Col style={{ flexGrow: 0 }}>
+                              <Button variant="success" type="submit">Entrar</Button>
+                            </Col>
+
+                        }
+                      </Row>
+
+                      <Row className="mt-4">
+                        <Col>
+                          <Link href="/login/reset">
+                            <a title="Recuperar a sua senha." data-title="Recuperar a sua senha.">
+                              <Row>
+                                <Col sm={1}>
+                                  <FaKey size={14} /> <span>Esqueci a minha senha</span>
+                                </Col>
+                              </Row>
+                            </a>
+                          </Link>
+                        </Col>
+                      </Row>
+                    </Form>
+                  )}
+                </Formik>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
       </Container>
-    </>
+    </div>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { token } = context.req.cookies;
+
+  if (token) {
+    try {
+      const res = await api.get('/users/authenticated',
+        {
+          validateStatus: function (status) {
+            return status < 500; // Resolve only if the status code is less than 500.
+          },
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (res.status === 202) { // Alread authenticated!
+        return {
+          redirect: {
+            destination: '/dashboard',
+            permanent: false,
+          },
+        }
+      }
+    }
+    catch { }
+  }
+
+  return {
+    props: {},
+  }
 }

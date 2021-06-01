@@ -1,7 +1,9 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Accordion, Card, Dropdown, Row, Col } from 'react-bootstrap';
 import {
+    FaColumns,
     FaUserTie,
     FaFileAlt,
     FaList,
@@ -20,14 +22,46 @@ import {
 } from 'react-icons/fa';
 
 import { SideBarContext } from '../../context/SideBarContext';
+import { AuthContext } from '../../context/authContext';
 import styles from './styles.module.css';
 
 const Sidebar: React.FC = () => {
+    const router = useRouter();
     const { itemSideBar, selectedMenu, handleItemSideBar } = useContext(SideBarContext);
+    const { signed } = useContext(AuthContext);
+
+    const [showPageHeader, setShowPageHeader] = useState(false);
+
+    const pathsNotShow = ['/'];
+
+    useEffect(() => {
+        let show = false;
+
+        if (signed && !pathsNotShow.find(item => { return item === router.route })) show = true;
+
+        setShowPageHeader(show);
+    }, [signed, router.route]);
+
+    function handleToDashboard() {
+        router.push('/dashboard');
+    }
 
     return (
-        <div className={styles.sideBarContainer}>
+        showPageHeader ? <div className={styles.sideBarContainer}>
             <Accordion activeKey={itemSideBar} className={styles.accordionContainer}>
+                <Card className={styles.menuCard}>
+                    <Accordion.Toggle
+                        as={Card.Header}
+                        className={styles.menuCardHeader}
+                        eventKey="dashboard"
+                        onClick={handleToDashboard}
+                    >
+                        <div>
+                            <FaColumns /> <span>Painel</span>
+                        </div>
+                    </Accordion.Toggle>
+                </Card>
+
                 <Card className={styles.menuCard}>
                     <Accordion.Toggle
                         as={Card.Header}
@@ -463,7 +497,7 @@ const Sidebar: React.FC = () => {
                     </Accordion.Collapse>
                 </Card>
             </Accordion>
-        </div>
+        </div> : null
     )
 }
 
