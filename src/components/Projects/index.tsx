@@ -10,7 +10,11 @@ export interface Project {
     id: string;
     value: number;
     deal: number;
+    paid: boolean,
+    paid_date: string,
     contract: string;
+    analyst: string,
+    analyst_contact: string,
     notes: string;
     warnings: boolean;
     created_by: string;

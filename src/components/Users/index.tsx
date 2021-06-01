@@ -32,9 +32,8 @@ interface UserRole {
 }
 
 interface UsersProps {
-    type: User;
-    listTypes: User[];
-    handleListTypes(): Promise<void>;
+    user: User;
+    handleListUsers(): Promise<void>;
 }
 
 const validationSchema = Yup.object().shape({
@@ -42,7 +41,7 @@ const validationSchema = Yup.object().shape({
     order: Yup.number().required(),
 });
 
-const Users: React.FC<UsersProps> = ({ type, listTypes, handleListTypes }) => {
+const Users: React.FC<UsersProps> = ({ user, handleListUsers }) => {
     const [showModalEditType, setShowModalEditType] = useState(false);
 
     const handleCloseModalEditType = () => { setShowModalEditType(false); setIconDeleteConfirm(false); setIconDelete(true); }
@@ -66,26 +65,11 @@ const Users: React.FC<UsersProps> = ({ type, listTypes, handleListTypes }) => {
         setMessageShow(true);
 
         try {
-            await api.delete(`projects/types/${type.id}`);
-
-            const list = listTypes.filter(item => { return item.id !== type.id });
-
-            list.forEach(async (type, index) => {
-                try {
-                    await api.put(`projects/types/${type.id}`, {
-                        name: type.name,
-                        order: index
-                    });
-                }
-                catch (err) {
-                    console.log('error to save types order after deleting.');
-                    console.log(err)
-                }
-            });
+            await api.delete(`projects/types/${user.id}`);
 
             handleCloseModalEditType();
 
-            handleListTypes();
+            handleListUsers();
         }
         catch (err) {
             setIconDeleteConfirm(false);
@@ -97,7 +81,7 @@ const Users: React.FC<UsersProps> = ({ type, listTypes, handleListTypes }) => {
                 setMessageShow(false);
             }, 4000);
 
-            console.log("Error to delete type");
+            console.log("Error to delete user");
             console.log(err);
         }
     }
@@ -109,7 +93,7 @@ const Users: React.FC<UsersProps> = ({ type, listTypes, handleListTypes }) => {
                     <FaBars />
                 </Col>
 
-                <Col><span>{type.name}</span></Col>
+                <Col><span>{user.name}</span></Col>
 
                 <Col className="text-end">
                     <Button variant="outline-success" className="button-link" onClick={handleShowModalEditType}><FaPencilAlt /> Editar</Button>
@@ -123,8 +107,8 @@ const Users: React.FC<UsersProps> = ({ type, listTypes, handleListTypes }) => {
                 <Formik
                     initialValues={
                         {
-                            name: type.name,
-                            order: type.phone,
+                            name: user.name,
+                            order: user.phone,
                         }
                     }
                     onSubmit={async values => {
@@ -132,24 +116,22 @@ const Users: React.FC<UsersProps> = ({ type, listTypes, handleListTypes }) => {
                         setMessageShow(true);
 
                         try {
-                            if (listTypes) {
-                                await api.put(`projects/types/${type.id}`, {
-                                    name: values.name,
-                                    order: type.phone
-                                });
+                            await api.put(`projects/types/${user.id}`, {
+                                name: values.name,
+                                order: user.phone
+                            });
 
-                                await handleListTypes();
+                            await handleListUsers();
 
-                                setTypeMessage("success");
+                            setTypeMessage("success");
 
-                                setTimeout(() => {
-                                    setMessageShow(false);
-                                    handleCloseModalEditType();
-                                }, 2000);
-                            }
+                            setTimeout(() => {
+                                setMessageShow(false);
+                                handleCloseModalEditType();
+                            }, 2000);
                         }
                         catch (err) {
-                            console.log('error edit type.');
+                            console.log('error edit user.');
                             console.log(err);
 
                             setTypeMessage("error");

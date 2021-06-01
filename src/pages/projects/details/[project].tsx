@@ -84,7 +84,7 @@ export default function PropertyDetails() {
                             <Col sm={4}>
                                 <Row>
                                     <Col>
-                                        <span className="text-success">Tipo de projeto/processo</span>
+                                        <span className="text-success">Tipo de projeto</span>
                                     </Col>
                                 </Row>
 
@@ -125,6 +125,50 @@ export default function PropertyDetails() {
                         </Row>
 
                         <Row className="mb-3">
+                            <Col sm={3}>
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Banco</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{`${projectData.bank.institution.name} - ${projectData.bank.sector}`}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Analista no banco</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{projectData.analyst}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={5} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Contatos do analista</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{projectData.analyst_contact}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
                             <Col sm={4}>
                                 <Row>
                                     <Col>
@@ -143,21 +187,7 @@ export default function PropertyDetails() {
                                 </Row>
                             </Col>
 
-                            <Col sm={4} >
-                                <Row>
-                                    <Col>
-                                        <span className="text-success">Situação do projeto/processo</span>
-                                    </Col>
-                                </Row>
-
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-secondary">{projectData.status.name}</h6>
-                                    </Col>
-                                </Row>
-                            </Col>
-
-                            <Col sm={4} >
+                            <Col sm={3} >
                                 <Row>
                                     <Col>
                                         <span className="text-success">Acordo %</span>
@@ -170,10 +200,40 @@ export default function PropertyDetails() {
                                     </Col>
                                 </Row>
                             </Col>
+
+                            <Col sm={2} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Pago?</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{projectData.paid ? "Sim" : "Não"}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            {
+                                projectData.paid && <Col sm={3} >
+                                    <Row>
+                                        <Col>
+                                            <span className="text-success">Data do pagemento</span>
+                                        </Col>
+                                    </Row>
+
+                                    <Row>
+                                        <Col>
+                                            <h6 className="text-secondary">{projectData.paid_date}</h6>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                            }
                         </Row>
 
                         <Row className="mb-3">
-                            <Col sm={4}>
+                            <Col sm={2}>
                                 <Row>
                                     <Col>
                                         <span className="text-success">Contrato</span>
@@ -190,6 +250,20 @@ export default function PropertyDetails() {
                             <Col sm={4} >
                                 <Row>
                                     <Col>
+                                        <span className="text-success">Situação do projeto</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{projectData.status.name}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={3} >
+                                <Row>
+                                    <Col>
                                         <span className="text-success">Data de criação</span>
                                     </Col>
                                 </Row>
@@ -201,7 +275,7 @@ export default function PropertyDetails() {
                                 </Row>
                             </Col>
 
-                            <Col sm={4} >
+                            <Col sm={3} >
                                 <Row>
                                     <Col>
                                         <span className="text-success">Última atualização</span>
@@ -248,20 +322,12 @@ export default function PropertyDetails() {
                                     {
                                         projectData.events.length > 0 ? <Col>
                                             <Row className="mb-2" style={{ padding: '0 1rem' }}>
-                                                <Col sm={5}>
+                                                <Col sm={10}>
                                                     <h6>Descrição</h6>
                                                 </Col>
 
                                                 <Col className="text-center">
                                                     <h6>Data de registro</h6>
-                                                </Col>
-
-                                                <Col className="text-center">
-                                                    <h6>Conluído</h6>
-                                                </Col>
-
-                                                <Col className="text-center">
-                                                    <h6>Data de conclusão</h6>
                                                 </Col>
                                             </Row>
 

@@ -24,7 +24,11 @@ import { prettifyCurrency } from '../../../components/InputMask/masks';
 const validationSchema = Yup.object().shape({
     value: Yup.string().notRequired(),
     deal: Yup.string().notRequired(),
+    paid: Yup.boolean().notRequired(),
+    paid_date: Yup.string().notRequired().nullable(),
     contract: Yup.string().notRequired().nullable(),
+    analyst: Yup.string().notRequired().nullable(),
+    analyst_contact: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
     customer: Yup.string().required('Obrigatório!'),
@@ -37,8 +41,6 @@ const validationSchema = Yup.object().shape({
 
 const validationSchemaEvents = Yup.object().shape({
     description: Yup.string().required('Obrigatório!'),
-    done: Yup.boolean().required('Obrigatório!'),
-    finished_at: Yup.date().notRequired(),
     project: Yup.string().required('Obrigatório!'),
 });
 
@@ -154,7 +156,11 @@ export default function NewCustomer() {
                 initialValues={{
                     value: prettifyCurrency(String(projectData.value)),
                     deal: prettifyCurrency(String(projectData.deal)),
+                    paid: projectData.paid,
+                    paid_date: projectData.paid_date,
                     contract: projectData.contract,
+                    analyst: projectData.analyst,
+                    analyst_contact: projectData.analyst_contact,
                     notes: projectData.notes,
                     warnings: projectData.warnings,
                     customer: projectData.customer.id,
@@ -173,7 +179,11 @@ export default function NewCustomer() {
                         await api.put(`projects/${projectData.id}`, {
                             value: Number(values.value.replace(".", "").replace(",", ".")),
                             deal: Number(values.deal.replace(".", "").replace(",", ".")),
+                            paid: values.paid,
+                            paid_date: values.paid_date,
                             contract: values.contract,
+                            analyst: values.analyst,
+                            analyst_contact: values.analyst_contact,
                             notes: values.notes,
                             warnings: values.warnings,
                             customer: values.customer,
@@ -261,7 +271,7 @@ export default function NewCustomer() {
 
                         <Row className="mb-3">
                             <Form.Group as={Col} sm={6} controlId="formGridType">
-                                <Form.Label>Tipo de projeto/processo</Form.Label>
+                                <Form.Label>Tipo de projeto</Form.Label>
                                 <Form.Control
                                     as="select"
                                     onChange={handleChange}
@@ -328,7 +338,7 @@ export default function NewCustomer() {
                             </Form.Group>
 
                             <Form.Group as={Col} sm={6} controlId="formGridStatus">
-                                <Form.Label>Fase do projeto/processo</Form.Label>
+                                <Form.Label>Fase do projeto</Form.Label>
                                 <Form.Control
                                     as="select"
                                     onChange={handleChange}
@@ -349,6 +359,34 @@ export default function NewCustomer() {
                         </Row>
 
                         <Row className="mb-2">
+                            <Form.Group as={Col} sm={5} controlId="formGridContract">
+                                <Form.Label>Analista no banco</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    value={values.analyst}
+                                    name="analyst"
+                                    isInvalid={!!errors.analyst && touched.analyst}
+                                />
+                                <Form.Control.Feedback type="invalid">{touched.analyst && errors.analyst}</Form.Control.Feedback>
+                            </Form.Group>
+
+                            <Form.Group as={Col} sm={7} controlId="formGridContract">
+                                <Form.Label>Contatos do analista</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    value={values.analyst_contact}
+                                    name="analyst_contact"
+                                    isInvalid={!!errors.analyst_contact && touched.analyst_contact}
+                                />
+                                <Form.Control.Feedback type="invalid">{touched.analyst_contact && errors.analyst_contact}</Form.Control.Feedback>
+                            </Form.Group>
+                        </Row>
+
+                        <Row className="align-items-center mb-2">
                             <Form.Group as={Col} sm={3} controlId="formGridValue">
                                 <Form.Label>Valor</Form.Label>
                                 <InputGroup className="mb-2">
@@ -366,14 +404,14 @@ export default function NewCustomer() {
                                         value={values.value}
                                         name="value"
                                         isInvalid={!!errors.value && touched.value}
-                                        aria-label="Nome do cliente"
+                                        aria-label="Valor do projeto"
                                         aria-describedby="btnGroupValue"
                                     />
                                 </InputGroup>
                                 <Form.Control.Feedback type="invalid">{touched.value && errors.value}</Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group as={Col} sm={3} controlId="formGridDeal">
+                            <Form.Group as={Col} sm={2} controlId="formGridDeal">
                                 <Form.Label>Acordo</Form.Label>
                                 <InputGroup className="mb-2">
                                     <InputGroup.Prepend>
@@ -390,14 +428,38 @@ export default function NewCustomer() {
                                         value={values.deal}
                                         name="deal"
                                         isInvalid={!!errors.deal && touched.deal}
-                                        aria-label="Nome do cliente"
+                                        aria-label="Acordo"
                                         aria-describedby="btnGroupDeal"
                                     />
                                 </InputGroup>
                                 <Form.Control.Feedback type="invalid">{touched.deal && errors.deal}</Form.Control.Feedback>
                             </Form.Group>
 
-                            <Form.Group as={Col} sm={6} controlId="formGridContract">
+                            <Form.Group as={Col} sm={2} controlId="formGridPaid">
+                                <Form.Switch
+                                    id="warnings"
+                                    label="Pago?"
+                                    checked={values.paid}
+                                    onChange={() => { setFieldValue('paid', !values.paid) }}
+                                />
+                            </Form.Group>
+
+                            {
+                                values.paid && <Form.Group as={Col} sm={3} controlId="formGridPaidDate">
+                                    <Form.Label>Data do pagamento</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.paid_date}
+                                        name="paid_date"
+                                        isInvalid={!!errors.paid_date && touched.paid_date}
+                                    />
+                                    <Form.Control.Feedback type="invalid">{touched.paid_date && errors.paid_date}</Form.Control.Feedback>
+                                </Form.Group>
+                            }
+
+                            <Form.Group as={Col} sm={4} controlId="formGridContract">
                                 <Form.Label>Contrato</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -540,20 +602,12 @@ export default function NewCustomer() {
                             {
                                 projectData.events.length > 0 ? <Col>
                                     <Row className="mb-2" style={{ padding: '0 1rem' }}>
-                                        <Col sm={5}>
+                                        <Col sm={10}>
                                             <h6>Descrição</h6>
                                         </Col>
 
                                         <Col className="text-center">
                                             <h6>Data de registro</h6>
-                                        </Col>
-
-                                        <Col className="text-center">
-                                            <h6>Conluído</h6>
-                                        </Col>
-
-                                        <Col className="text-center">
-                                            <h6>Data de conclusão</h6>
                                         </Col>
                                     </Row>
 
@@ -593,8 +647,6 @@ export default function NewCustomer() {
                         initialValues={
                             {
                                 description: '',
-                                done: false,
-                                finished_at: new Date(),
                                 project: projectData.id,
                             }
                         }
@@ -605,8 +657,6 @@ export default function NewCustomer() {
                             try {
                                 await api.post('events/project', {
                                     description: values.description,
-                                    done: values.done,
-                                    finished_at: values.finished_at,
                                     project: values.project,
                                 });
 
@@ -632,7 +682,7 @@ export default function NewCustomer() {
                         }}
                         validationSchema={validationSchemaEvents}
                     >
-                        {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Body>
                                     <Form.Group controlId="eventFormGridDescription">
@@ -650,7 +700,7 @@ export default function NewCustomer() {
                                         <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
                                     </Form.Group>
 
-                                    <Button
+                                    {/* <Button
                                         variant={values.done ? 'success' : 'secondary'}
                                         onClick={() => {
                                             setFieldValue('done', !values.done);
@@ -661,7 +711,7 @@ export default function NewCustomer() {
                                             values.done ? <span><FaCheck /> concluído</span> :
                                                 <span><FaClock /> marcar como concluído</span>
                                         }
-                                    </Button>
+                                    </Button> */}
 
                                 </Modal.Body>
                                 <Modal.Footer>

@@ -36,8 +36,6 @@ const validationSchema = Yup.object().shape({
 
 const validationSchemaEvents = Yup.object().shape({
     description: Yup.string().required('Obrigatório!'),
-    done: Yup.boolean().required('Obrigatório!'),
-    finished_at: Yup.date().notRequired(),
     licensing: Yup.string().required('Obrigatório!'),
 });
 
@@ -501,20 +499,12 @@ export default function NewCustomer() {
                             {
                                 licensingData.events.length > 0 ? <Col>
                                     <Row className="mb-2" style={{ padding: '0 1rem' }}>
-                                        <Col sm={5}>
+                                        <Col sm={10}>
                                             <h6>Descrição</h6>
                                         </Col>
 
                                         <Col className="text-center">
                                             <h6>Data de registro</h6>
-                                        </Col>
-
-                                        <Col className="text-center">
-                                            <h6>Conluído</h6>
-                                        </Col>
-
-                                        <Col className="text-center">
-                                            <h6>Data de conclusão</h6>
                                         </Col>
                                     </Row>
 
@@ -554,8 +544,6 @@ export default function NewCustomer() {
                         initialValues={
                             {
                                 description: '',
-                                done: false,
-                                finished_at: new Date(),
                                 licensing: licensingData.id,
                             }
                         }
@@ -566,8 +554,6 @@ export default function NewCustomer() {
                             try {
                                 await api.post('events/licensing', {
                                     description: values.description,
-                                    done: values.done,
-                                    finished_at: values.finished_at,
                                     licensing: values.licensing,
                                 });
 
@@ -593,7 +579,7 @@ export default function NewCustomer() {
                         }}
                         validationSchema={validationSchemaEvents}
                     >
-                        {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Body>
                                     <Form.Group controlId="eventFormGridDescription">
@@ -610,19 +596,6 @@ export default function NewCustomer() {
                                         />
                                         <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
                                     </Form.Group>
-
-                                    <Button
-                                        variant={values.done ? 'success' : 'secondary'}
-                                        onClick={() => {
-                                            setFieldValue('done', !values.done);
-                                        }}
-                                        style={{ width: '100%' }}
-                                    >
-                                        {
-                                            values.done ? <span><FaCheck /> concluído</span> :
-                                                <span><FaClock /> marcar como concluído</span>
-                                        }
-                                    </Button>
 
                                 </Modal.Body>
                                 <Modal.Footer>

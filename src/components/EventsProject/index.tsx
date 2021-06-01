@@ -29,8 +29,6 @@ interface EventsProjectProps {
 
 const validationSchema = Yup.object().shape({
     description: Yup.string().required('Obrigatório!'),
-    done: Yup.boolean().required('Obrigatório!'),
-    finished_at: Yup.date().notRequired(),
 });
 
 const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, canEdit = true }) => {
@@ -90,30 +88,18 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
     return (
         <>
             <ListGroup.Item
-                variant={event.done ? 'success' : 'light'}
+                variant="light"
                 action={canEdit}
                 onClick={handleEdit}
             >
                 <Row className="align-items-center">
-                    <Col sm={5}>
+                    <Col sm={10}>
                         <span className="text-wrap">{event.description}</span>
                     </Col>
 
                     <Col className="text-center">
                         <span>
                             {format(new Date(event.created_at), 'dd/MM/yyyy')}
-                        </span>
-                    </Col>
-
-                    <Col className="text-center">
-                        <span>
-                            {event.done && <FaCheck />}
-                        </span>
-                    </Col>
-
-                    <Col className="text-center">
-                        <span>
-                            {event.done && format(new Date(event.finished_at), 'dd/MM/yyyy')}
                         </span>
                     </Col>
                 </Row>
@@ -127,8 +113,6 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                     initialValues={
                         {
                             description: event.description,
-                            done: event.done,
-                            finished_at: format(new Date(event.finished_at), 'yyyy-MM-dd'),
                         }
                     }
                     onSubmit={async values => {
@@ -138,8 +122,6 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                         try {
                             await api.put(`events/project/${event.id}`, {
                                 description: values.description,
-                                done: values.done,
-                                finished_at: values.finished_at,
                             });
 
                             await handleListEvents();
@@ -164,7 +146,7 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                     }}
                     validationSchema={validationSchema}
                 >
-                    {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                         <Form onSubmit={handleSubmit}>
                             <Modal.Body>
                                 <Form.Group controlId="eventFormGridDescription">
@@ -182,7 +164,7 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                                     <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
                                 </Form.Group>
 
-                                <Button
+                                {/* <Button
                                     variant={values.done ? 'success' : 'secondary'}
                                     type="button"
                                     onClick={() => {
@@ -195,7 +177,7 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                                         values.done ? <span><FaCheck /> concluído</span> :
                                             <span><FaClock /> marcar como concluído</span>
                                     }
-                                </Button>
+                                </Button> */}
 
                             </Modal.Body>
                             <Modal.Footer>

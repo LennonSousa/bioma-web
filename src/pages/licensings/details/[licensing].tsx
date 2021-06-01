@@ -261,20 +261,12 @@ export default function PropertyDetails() {
                                     {
                                         licensingData.events.length > 0 ? <Col>
                                             <Row className="mb-2" style={{ padding: '0 1rem' }}>
-                                                <Col sm={5}>
+                                                <Col sm={10}>
                                                     <h6>Descrição</h6>
                                                 </Col>
 
                                                 <Col className="text-center">
                                                     <h6>Data de registro</h6>
-                                                </Col>
-
-                                                <Col className="text-center">
-                                                    <h6>Conluído</h6>
-                                                </Col>
-
-                                                <Col className="text-center">
-                                                    <h6>Data de conclusão</h6>
                                                 </Col>
                                             </Row>
 

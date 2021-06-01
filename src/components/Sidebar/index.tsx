@@ -19,6 +19,7 @@ import {
     FaAward,
     FaBalanceScaleLeft,
     FaFileExcel,
+    FaUsers,
 } from 'react-icons/fa';
 
 import { SideBarContext } from '../../context/SideBarContext';
@@ -489,6 +490,58 @@ const Sidebar: React.FC = () => {
                                         </Col>
                                         <Col>
                                             <span>Instituições</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
+
+                <Card className={styles.menuCard}>
+                    <Accordion.Toggle
+                        as={Card.Header}
+                        className={styles.menuCardHeader}
+                        eventKey="users"
+                        onClick={() => handleItemSideBar('users')}
+                    >
+                        <div>
+                            <FaUsers /> <span>Usuários</span>
+                        </div>
+                    </Accordion.Toggle>
+                    <Accordion.Collapse eventKey="users">
+                        <Card.Body className={styles.menuCardBody}>
+                            <Link href="/users">
+                                <a title="Listar todos os usuários" data-title="Listar todos os usuários">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'users-index' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaList size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Lista</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
+                            <Link href="/users/new">
+                                <a title="Criar um novo usuário" data-title="Criar um novo usuário">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'users-new' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaPlus size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Novo</span>
                                         </Col>
                                     </Row>
                                 </a>
