@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { FaPlus } from 'react-icons/fa';
 
 import api from '../../../api/api';
+import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Customer } from '../../../components/Customers';
 import { DocsCustomer } from '../../../components/DocsCustomer';

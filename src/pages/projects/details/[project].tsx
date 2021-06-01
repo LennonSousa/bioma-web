@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
+import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Project } from '../../../components/Projects';
 import EventsProject from '../../../components/EventsProject';

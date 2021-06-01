@@ -6,6 +6,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import api from '../../../api/api';
+import { TokenVerify } from '../../../utils/tokenVerify';
 import { Institution } from '../../../components/Institutions';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { cellphone } from '../../../components/InputMask/masks';

@@ -24,8 +24,6 @@ const AuthProvider: React.FC = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     async function handleAuthenticated() {
-        console.log('AuthContext...');
-
         try {
             const storagedUser = Cookies.get('user');
             const storagedToken = Cookies.get('token');

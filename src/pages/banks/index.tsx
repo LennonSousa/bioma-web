@@ -6,6 +6,7 @@ import { Bank } from '../../components/Banks';
 import BankListItem from '../../components/BankListItem';
 
 import api from '../../api/api';
+import { TokenVerify } from '../../utils/tokenVerify';
 import { SideBarContext } from '../../context/SideBarContext';
 
 export default function Banks() {

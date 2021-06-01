@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import { format } from 'date-fns';
 
 import api from '../../../api/api';
+import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';

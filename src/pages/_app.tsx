@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import Head from 'next/head';
 import { NextSeo } from 'next-seo';
 
@@ -13,8 +12,6 @@ import '../styles/global.css';
 import styles from '../styles/app.module.css';
 
 function MyApp({ Component, pageProps }) {
-  useEffect(() => { console.log('App...'); }, []);
-
   return <>
     <NextSeo titleTemplate="Bioma | %s" defaultTitle="Plataforma de gerenciamento." />
 

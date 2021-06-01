@@ -18,33 +18,27 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function Login() {
-  const { signed, handleLogin } = useContext(AuthContext);
-
-  const [showModalResetPassword, setShowModalResetPassword] = useState(false);
-
-  const handleCloseModalResetPassword = () => setShowModalResetPassword(false);
-  const handleShowModalResetPassword = () => setShowModalResetPassword(true);
+  const { handleLogin } = useContext(AuthContext);
 
   const [messageShow, setMessageShow] = useState(false);
   const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
   const [textMessage, setTextMessage] = useState('entrando...');
 
-  const [sentEmail, setSentEmail] = useState(false);
-  const [messageReset, setMessageReset] = useState('');
-  const [isMessageResetSuccess, setIsMessageResetSuccess] = useState(false);
-  const [isWaitingReset, setIsWaitingReset] = useState(false);
-
   return (
     <div className={styles.pageContainer}>
       <Container>
         <Row className="justify-content-center align-items-center">
-          <Col sm={10} className={`${styles.formContainer} col-11`}>
+          <Col sm={12} className={`${styles.formContainer} col-11`}>
             <Row className="justify-content-center align-items-center">
-              <Col md={4} className="mt-1 mb-4">
-                <Image fluid src="/assets/images/logo-bioma.svg" alt="Bioma consultoria." />
+              <Col md={6} className="mt-1 mb-4">
+                <Row className="justify-content-center align-items-center">
+                  <Col sm={8}>
+                    <Image fluid src="/assets/images/logo-bioma.svg" alt="Bioma consultoria." />
+                  </Col>
+                </Row>
               </Col>
 
-              <Col md={6} className="mt-1 mb-1">
+              <Col md={4} className="mt-1 mb-1">
                 <Formik
                   initialValues={{
                     email: '',

@@ -3,12 +3,12 @@ import { GetServerSideProps } from 'next';
 import { Container, Row } from 'react-bootstrap';
 
 import api from '../../api/api';
+import { TokenVerify } from '../../utils/tokenVerify';
 import { SideBarContext } from '../../context/SideBarContext';
 import { AuthContext } from '../../context/authContext';
 import { Bank } from '../../components/Banks';
 import BankListItem from '../../components/BankListItem';
 import PageWaiting from '../../components/PageWaiting';
-import { TokenVerify } from '../../utils/tokenVerify';
 
 export default function Banks() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);

@@ -10,10 +10,11 @@ export function Header() {
 
     const [showPageHeader, setShowPageHeader] = useState(false);
 
-    const pathsNotShow = ['/'];
+    const pathsNotShow = ['/', '/404', '500'];
 
     useEffect(() => {
-        handleAuthenticated();
+        if (!pathsNotShow.find(item => { return item === router.route }))
+            handleAuthenticated();
     }, []);
 
     useEffect(() => {

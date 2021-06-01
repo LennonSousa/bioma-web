@@ -6,8 +6,8 @@ import { Customer } from '../../components/Customers';
 import CustomerItem from '../../components/CustomerListItem';
 
 import api from '../../api/api';
-import { SideBarContext } from '../../context/SideBarContext';
 import { TokenVerify } from '../../utils/tokenVerify';
+import { SideBarContext } from '../../context/SideBarContext';
 
 export default function Customers() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
