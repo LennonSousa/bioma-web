@@ -1,7 +1,7 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
+import { Badge, Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format, subDays } from 'date-fns';
@@ -11,6 +11,7 @@ import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Customer } from '../../../components/Customers';
+import Members from '../../../components/CustomerMembers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import CustomerAttachments from '../../../components/CustomerAttachments';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
@@ -130,6 +131,14 @@ export default function NewCustomer() {
         setCustomerData({ ...customerData, attachments: updatedCustomer.attachments });
     }
 
+    async function handleListMembers() {
+        const res = await api.get(`customers/${customer}`);
+
+        const updatedCustomer: Customer = res.data;
+
+        setCustomerData({ ...customerData, members: updatedCustomer.members });
+    }
+
     function handleImages(event: ChangeEvent<HTMLInputElement>) {
         if (event.target.files[0]) {
             const image = event.target.files[0];
@@ -244,6 +253,28 @@ export default function NewCustomer() {
                         <Row className="mb-3">
                             <Col>
                                 <PageBack href={`/customers/details/${customerData.id}`} subTitle="Voltar para detalhes do cliente" />
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Membros</h6>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    {
+                                        customerData.members.map(member => {
+                                            return <Members
+                                                key={member.id}
+                                                member={member}
+                                                canRemove={customerData.members.length > 1}
+                                                handleListMembers={handleListMembers}
+                                            />
+                                        })
+                                    }
+                                </Row>
                             </Col>
                         </Row>
 

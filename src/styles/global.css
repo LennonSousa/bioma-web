@@ -1,5 +1,5 @@
 :root {
-    --background: #f2f3f5;
+    --background: #fbfbfb;
     --background-dark: #dddddd;
     --white: #fff;
     --green: #069140;
@@ -13,7 +13,7 @@ body {
 }
 
 body, input, button, textarea {
-    font: Nunito, sans-serif;
+    font: Nunito, sans-serif !important;
 }
 
 
@@ -35,6 +35,14 @@ a:hover {
     box-shadow: 3px 3px 10px rgb(0 0 0 / 32%);
     margin-bottom: 2rem;
     padding: 1rem 1rem;
+}
+
+.member-item {
+    border-radius: 50rem!important;
+    font-size: .75em;
+    line-height: 1;
+    font-weight: 700;
+    padding: .35em .65em;
 }
 
 .custom-control-input:checked~.custom-control-label::before {

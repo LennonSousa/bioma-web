@@ -2,6 +2,7 @@ import { CustomerDocs } from '../CustomerDocs';
 import { Property } from '../Properties';
 import { Project } from '../Projects';
 import { CustomerAttachment } from '../CustomerAttachments';
+import { Member } from '../CustomerMembers';
 
 export interface Customer {
     id: string;
@@ -24,4 +25,5 @@ export interface Customer {
     properties: Property[];
     projects: Project[];
     attachments: CustomerAttachment[];
+    members: Member[];
 }
