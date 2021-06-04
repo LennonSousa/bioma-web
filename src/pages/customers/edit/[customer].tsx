@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { FaPlus } from 'react-icons/fa';
 
 import api from '../../../api/api';
@@ -43,7 +43,8 @@ const attachmentValidationSchema = Yup.object().shape({
     received_at: Yup.date().required('Obrigatório!'),
     expire: Yup.boolean().notRequired().nullable(),
     expire_at: Yup.date().required('Obrigatório!'),
-    renewal: Yup.string().notRequired().nullable(),
+    schedule: Yup.boolean().notRequired(),
+    schedule_at: Yup.number().required('Obrigatório!'),
     customer: Yup.string().required('Obrigatório!'),
 });
 
@@ -523,9 +524,9 @@ export default function NewCustomer() {
                                     <Col>
                                         <ListGroup>
                                             {
-                                                customerData.attachments.map((attachment, index) => {
+                                                customerData.attachments.map(attachment => {
                                                     return <CustomerAttachments
-                                                        key={index}
+                                                        key={attachment.id}
                                                         attachment={attachment}
                                                         handleListAttachments={handleListAttachments}
                                                     />
@@ -565,13 +566,16 @@ export default function NewCustomer() {
                             received_at: format(new Date(), 'yyyy-MM-dd'),
                             expire: false,
                             expire_at: format(new Date(), 'yyyy-MM-dd'),
-                            renewal: 0,
+                            schedule: false,
+                            schedule_at: 0,
                             customer: customerData.id,
                         }
                     }
                     onSubmit={async values => {
                         setTypeMessage("waiting");
                         setMessageShowNewAttachment(true);
+
+                        const scheduleAt = format(subDays(new Date(`${values.expire_at} 12:00:00`), values.schedule_at), 'yyyy-MM-dd');
 
                         try {
                             const data = new FormData();
@@ -580,13 +584,14 @@ export default function NewCustomer() {
 
                             data.append('file', fileToSave);
 
-                            data.append('received_at', values.received_at);
+                            data.append('received_at', `${values.received_at} 12:00:00`);
                             data.append('expire', String(values.expire));
-                            data.append('expire_at', values.expire_at);
-                            data.append('renewal', String(values.renewal));
+                            data.append('expire_at', `${values.expire_at} 12:00:00`);
+                            data.append('schedule', String(values.schedule));
+                            data.append('schedule_at', `${scheduleAt} 12:00:00`);
                             data.append('customer', values.customer);
 
-                            await api.post('customers/attachments', data);
+                            await api.post(`customers/${customerData.id}/attachments`, data);
 
                             await handleListAttachments();
 
@@ -687,33 +692,46 @@ export default function NewCustomer() {
                                 </Form.Group>
 
                                 {
-                                    values.expire && <Row className="mb-3">
-                                        <Form.Group as={Col} sm={6} controlId="formGridExpireAt">
-                                            <Form.Label>Data de expiração</Form.Label>
-                                            <Form.Control
-                                                type="date"
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                value={values.expire_at}
-                                                name="expire_at"
-                                                isInvalid={!!errors.expire_at && touched.expire_at}
+                                    values.expire && <>
+                                        <Row className="mb-3">
+                                            <Form.Group as={Col} sm={6} controlId="formGridExpireAt">
+                                                <Form.Label>Data de expiração</Form.Label>
+                                                <Form.Control
+                                                    type="date"
+                                                    onChange={handleChange}
+                                                    onBlur={handleBlur}
+                                                    value={values.expire_at}
+                                                    name="expire_at"
+                                                    isInvalid={!!errors.expire_at && touched.expire_at}
+                                                />
+                                                <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
+                                            </Form.Group>
+                                        </Row>
+                                        <Form.Group className="mb-3" controlId="formGridSchedule">
+                                            <Form.Switch
+                                                label="Notificar"
+                                                checked={values.schedule}
+                                                onChange={() => { setFieldValue('schedule', !values.schedule) }}
                                             />
-                                            <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
                                         </Form.Group>
 
-                                        <Form.Group as={Col} sm={6} controlId="formGridName">
-                                            <Form.Label>Dias para renovar</Form.Label>
-                                            <Form.Control
-                                                type="number"
-                                                onChange={handleChange}
-                                                onBlur={handleBlur}
-                                                value={Number(values.renewal)}
-                                                name="renewal"
-                                                isInvalid={!!errors.renewal && touched.renewal}
-                                            />
-                                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                        </Form.Group>
-                                    </Row>
+                                        {
+                                            values.schedule && <Row className="mb-3">
+                                                <Form.Group as={Col} sm={3} controlId="formGridScheduleAt">
+                                                    <Form.Label>Dias antes</Form.Label>
+                                                    <Form.Control
+                                                        type="number"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.schedule_at}
+                                                        name="schedule_at"
+                                                        isInvalid={!!errors.schedule_at && touched.schedule_at}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{touched.schedule_at && errors.schedule_at}</Form.Control.Feedback>
+                                                </Form.Group>
+                                            </Row>
+                                        }
+                                    </>
                                 }
                             </Modal.Body>
                             <Modal.Footer>
