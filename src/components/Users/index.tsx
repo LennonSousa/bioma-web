@@ -8,7 +8,7 @@ import api from '../../api/api';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 
 export interface User {
-    id: number,
+    id: string,
     name: string;
     phone: string;
     email: string;

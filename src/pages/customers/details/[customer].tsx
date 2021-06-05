@@ -19,6 +19,7 @@ import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Customer } from '../../../components/Customers';
+import Members from '../../../components/CustomerMembers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import PropertyListItem from '../../../components/PropertyListItem';
 import CustomerAttachments from '../../../components/CustomerAttachments';
@@ -78,6 +79,8 @@ export default function CustomerDetails() {
 
     async function handleListAttachments() { }
 
+    async function handleListMembers() { }
+
     return <Container className="content-page">
         {
             !customerData ? <h1>Aguarde...</h1> :
@@ -86,6 +89,28 @@ export default function CustomerDetails() {
                         <Row className="mb-3">
                             <Col>
                                 <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Membros</h6>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    {
+                                        customerData.members.map(member => {
+                                            return <Members
+                                                key={member.id}
+                                                member={member}
+                                                canRemove={false}
+                                                handleListMembers={handleListMembers}
+                                            />
+                                        })
+                                    }
+                                </Row>
                             </Col>
                         </Row>
 

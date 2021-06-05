@@ -52,14 +52,13 @@ const Members: React.FC<MemberProps> = ({ member, canRemove = true, handleListMe
     }
 
     return (
-        <div
-            style={{
-                position: 'relative',
-                paddingRight: '0px',
-                paddingLeft: '15px',
-            }}
-        >
-            <Button onClick={toggleShowUserDetails} className="member-item" variant="success">
+        <div className="member-container">
+            <Button
+                onClick={toggleShowUserDetails}
+                className="member-item"
+                variant="success"
+                title={member.user.name}
+            >
                 {member.user.name.split(' ', 1)[0]}
             </Button>
 
@@ -76,23 +75,26 @@ const Members: React.FC<MemberProps> = ({ member, canRemove = true, handleListMe
                 }}
             >
                 <Toast.Header>
-                    <FaUserTie />{' '}<strong className="me-auto">{member.user.name}</strong>
+                    <FaUserTie style={{ marginRight: '.5rem' }} /><strong className="me-auto">{member.user.name}</strong>
                 </Toast.Header>
-                <Toast.Body>
-                    {
-                        messageShow ? <AlertMessage status={typeMessage} /> :
-                            <Button
-                                variant="light"
-                                type="button"
-                                onClick={deleteMember}
-                                style={{ width: '100%' }}
-                                disabled={!canRemove}
-                            >
-                                Remover
-                            </Button>
-                    }
+                {
+                    canRemove && <Toast.Body>
+                        {
+                            messageShow ? <AlertMessage status={typeMessage} /> :
+                                <Button
+                                    variant="light"
+                                    type="button"
+                                    onClick={deleteMember}
+                                    style={{ width: '100%' }}
+                                    title="Remover este membro responsável para este cliente."
+                                >
+                                    Remover
+                                </Button>
+                        }
 
-                </Toast.Body>
+                    </Toast.Body>
+                }
+
             </Toast>
         </div>
     )

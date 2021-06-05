@@ -139,6 +139,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                             variant="outline-success"
                             className="button-link"
                             onClick={handleDownloadAttachment}
+                            title="Baixar o anexo."
                         >
                             {downloadingAttachment ? <Spinner animation="border" variant="success" size="sm" /> : <FaCloudDownloadAlt />}
                         </Button>
@@ -150,6 +151,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                                 variant="outline-success"
                                 className="button-link"
                                 onClick={handleShowModalEditDoc}
+                                title="Editar o anexo."
                             >
                                 <FaPencilAlt /> Editar
                             </Button>
@@ -233,6 +235,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                                             variant="outline-success"
                                             className="button-link"
                                             onClick={handleDownloadAttachment}
+                                            title="Baixar o anexo."
                                         >
                                             <FaCloudDownloadAlt />
                                         </Button>
