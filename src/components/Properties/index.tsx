@@ -1,5 +1,7 @@
 import { Customer } from '../Customers';
 import { PropertyDocs } from '../PropertyDocs';
+import { PropertyAttachment } from '../PropertyAttachments';
+import { Member } from '../PropertyMembers';
 
 export interface Property {
     id: string;
@@ -15,4 +17,6 @@ export interface Property {
     created_at: Date;
     customer: Customer;
     docs: PropertyDocs[];
+    attachments: PropertyAttachment[];
+    members: Member[];
 }

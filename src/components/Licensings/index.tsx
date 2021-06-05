@@ -5,6 +5,8 @@ import { LicensingAuthorization } from '../LicensingAuthorizations';
 import { LicensingAgency } from '../LicensingAgencies';
 import { LicensingStatus } from '../LicensingStatus';
 import { EventLicensing } from '../EventsLicensing';
+import { LicensingAttachment } from '../LicensingAttachments';
+import { Member } from '../LicensingMembers';
 
 export interface Licensing {
     id: string;
@@ -24,4 +26,6 @@ export interface Licensing {
     agency: LicensingAgency;
     status: LicensingStatus;
     events: EventLicensing[];
+    attachments: LicensingAttachment[];
+    members: Member[];
 }

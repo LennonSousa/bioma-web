@@ -5,6 +5,8 @@ import { ProjectLine } from '../ProjectLines';
 import { ProjectStatus } from '../ProjectStatus';
 import { ProjectType } from '../ProjectTypes';
 import { EventProject } from '../EventsProject';
+import { ProjectAttachment } from '../ProjectAttachments';
+import { Member } from '../ProjectMembers';
 
 export interface Project {
     id: string;
@@ -28,4 +30,6 @@ export interface Project {
     status: ProjectStatus;
     line: ProjectLine;
     events: EventProject[];
+    attachments: ProjectAttachment[];
+    members: Member[];
 }

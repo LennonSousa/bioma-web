@@ -2,17 +2,16 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
+import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
-    FaLongArrowAltLeft,
     FaFileAlt,
     FaIdCard,
     FaExclamationCircle,
     FaCheck,
     FaPencilAlt,
     FaPlus,
-    FaRegFile
+    FaRegFile,
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
@@ -77,6 +76,10 @@ export default function CustomerDetails() {
         }
     }, [customer]);
 
+    function handleRoute(route: string) {
+        router.push(route);
+    }
+
     async function handleListAttachments() { }
 
     async function handleListMembers() { }
@@ -117,14 +120,32 @@ export default function CustomerDetails() {
                         <Row className="mb-3">
                             <Col sm={6}>
                                 <Row className="align-items-center">
-                                    <Col>
+                                    <Col className="col-row">
                                         <h3 className="form-control-plaintext text-success">{customerData.name}</h3>
                                     </Col>
+                                    <Col className="col-row">
+                                        <ButtonGroup size="sm" className="col-12">
+                                            {/* <Button
+                                                title="Editar cliente."
+                                                variant="success">
+                                                <FaPencilAlt /><FaUserTie />
+                                            </Button>
 
-                                    <Col>
-                                        <Link href={`/customers/edit/${customerData.id}`}>
-                                            <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
-                                        </Link>
+                                            <Button
+                                                variant="success"
+                                                title="Criar um novo projeto para este cliente."
+                                            >
+                                                <FaPlus /><FaFileAlt />
+                                            </Button> */}
+
+                                            <Button
+                                                title="Editar cliente."
+                                                variant="success"
+                                                onClick={() => handleRoute(`/customers/edit/${customerData.id}`)}
+                                            >
+                                                <FaPencilAlt />
+                                            </Button>
+                                        </ButtonGroup>
                                     </Col>
                                 </Row>
                             </Col>

@@ -8,11 +8,11 @@ import br from 'date-fns/locale/pt-BR';
 import FileSaver from 'file-saver';
 
 import api from '../../api/api';
-import { Customer } from '../Customers';
-import { LogCustomerAttachment } from '../LogsCustomerAttachment';
+import { Property } from '../Properties';
+import { LogPropertyAttachment } from '../LogsPropertyAttachment';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 
-export interface CustomerAttachment {
+export interface PropertyAttachment {
     id: string;
     name: string;
     path: string;
@@ -21,12 +21,12 @@ export interface CustomerAttachment {
     expire_at: Date;
     schedule: boolean;
     schedule_at: Date;
-    customer: Customer;
-    logs: LogCustomerAttachment[];
+    property: Property;
+    logs: LogPropertyAttachment[];
 }
 
-interface CustomerAttachmentsProps {
-    attachment: CustomerAttachment;
+interface PropertyAttachmentsProps {
+    attachment: PropertyAttachment;
     canEdit?: boolean;
     handleListAttachments(): Promise<void>;
 }
@@ -40,7 +40,7 @@ const validationSchema = Yup.object().shape({
     schedule_at: Yup.number().required('Obrigatório!'),
 });
 
-const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, canEdit = true, handleListAttachments }) => {
+const PropertyAttachments: React.FC<PropertyAttachmentsProps> = ({ attachment, canEdit = true, handleListAttachments }) => {
     const [showModalEditDoc, setShowModalEditDoc] = useState(false);
 
     const handleCloseModalEditDoc = () => { setShowModalEditDoc(false); setIconDeleteConfirm(false); setIconDelete(true); }
@@ -68,11 +68,11 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
         setDownloadingAttachment(true);
 
         try {
-            const res = await api.get(`customers/attachments/${attachment.id}`,
+            const res = await api.get(`properties/attachments/${attachment.id}`,
                 { responseType: "blob" }
             );
 
-            const fileName = `${attachment.customer.name.replace('.', '')} - ${attachment.name.replace('.', '')}`;
+            const fileName = `${attachment.property.id.replace('.', '')} - ${attachment.name.replace('.', '')}`;
 
             FileSaver.saveAs(res.data, fileName);
         }
@@ -96,7 +96,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
         setMessageShow(true);
 
         try {
-            await api.delete(`customers/attachments/${attachment.id}`);
+            await api.delete(`properties/attachments/${attachment.id}`);
 
             handleCloseModalEditDoc();
 
@@ -181,7 +181,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                         const scheduleAt = format(subDays(new Date(`${values.expire_at} 12:00:00`), values.schedule_at), 'yyyy-MM-dd');
 
                         try {
-                            await api.put(`customers/attachments/${attachment.id}`, {
+                            await api.put(`properties/attachments/${attachment.id}`, {
                                 name: values.name,
                                 received_at: `${values.received_at} 12:00:00`,
                                 expire: values.expire,
@@ -379,4 +379,4 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
     )
 }
 
-export default CustomerAttachments;
+export default PropertyAttachments;

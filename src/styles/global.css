@@ -51,6 +51,10 @@ a:hover {
     padding: .35em .65em;
 }
 
+.col-row{
+    flex-grow: 0;
+}
+
 .custom-control-input:checked~.custom-control-label::before {
     border-color: var(--green) !important;
     background-color: var(--green) !important;
