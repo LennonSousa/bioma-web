@@ -178,7 +178,7 @@ export default function NewCustomer() {
                             setTimeout(() => {
                                 setMessageShow(false);
                                 handleCloseModalNewDoc();
-                            }, 1500);
+                            }, 1000);
                         }
                     }
                     catch (err) {

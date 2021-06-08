@@ -1,25 +1,27 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { Col, Container, ListGroup, Row } from 'react-bootstrap';
+import { Button, ButtonGroup, Col, Container, ListGroup, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
+    FaFileAlt,
+    FaIdCard,
     FaHistory,
-    FaMapSigns,
     FaPencilAlt,
-    FaPlusSquare,
+    FaPlus,
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
+import Members from '../../../components/LicensingMembers';
 import { Licensing } from '../../../components/Licensings';
 import EventsLicensing from '../../../components/EventsLicensing';
+import LicensingAttachments from '../../../components/LicensingAttachments';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
-export default function PropertyDetails() {
+export default function LicensingDetails() {
     const router = useRouter();
     const { licensing } = router.query;
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
@@ -39,7 +41,9 @@ export default function PropertyDetails() {
         }
     }, [licensing]);
 
-    async function handleListEvents() { }
+    function handleRoute(route: string) {
+        router.push(route);
+    }
 
     return <Container className="content-page">
         {
@@ -53,27 +57,59 @@ export default function PropertyDetails() {
                         </Row>
 
                         <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Membros</h6>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    {
+                                        licensingData.members.map(member => {
+                                            return <Members
+                                                key={member.id}
+                                                member={member}
+                                                canRemove={false}
+                                            />
+                                        })
+                                    }
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
                             <Col sm={6}>
                                 <Row className="align-items-center">
-                                    <Col>
+                                    <Col className="col-row">
                                         <h3 className="form-control-plaintext text-success">{licensingData.customer.name}</h3>
                                     </Col>
 
-                                    <Col>
-                                        <Link href={`/licensings/edit/${licensingData.id}`}>
-                                            <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
-                                        </Link>
-                                    </Col>
-
-                                    <Col>
-                                        <Link href={`/licensing/new?customer=${licensingData.customer.id}`}>
-                                            <a
-                                                title="Criar um novo licenciamento para este cliente"
-                                                data-title="Criar um novo licenciamento para este cliente"
+                                    <Col className="col-row">
+                                        <ButtonGroup size="sm" className="col-12">
+                                            <Button
+                                                title="Editar cliente."
+                                                variant="success"
+                                                onClick={() => handleRoute(`/custimers/edit/${licensingData.customer.id}`)}
                                             >
-                                                <FaPlusSquare /><FaMapSigns />
-                                            </a>
-                                        </Link>
+                                                <FaPencilAlt /><FaIdCard />
+                                            </Button>
+
+                                            <Button
+                                                variant="success"
+                                                title="Criar um novo licenciamento para este cliente."
+                                                onClick={() => handleRoute(`/licensings/new?customer=${licensingData.customer.id}`)}
+                                            >
+                                                <FaPlus /><FaFileAlt />
+                                            </Button>
+
+                                            <Button
+                                                title="Editar licensiamento."
+                                                variant="success"
+                                                onClick={() => handleRoute(`/licensings/edit/${licensingData.id}`)}
+                                            >
+                                                <FaPencilAlt />
+                                            </Button>
+                                        </ButtonGroup>
                                     </Col>
                                 </Row>
                             </Col>
@@ -131,7 +167,7 @@ export default function PropertyDetails() {
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{licensingData.expire ? licensingData.expire : ''}</h6>
+                                        <h6 className="text-secondary">{licensingData.expire ? format(new Date(licensingData.expire), 'dd/MM/yyyy') : ''}</h6>
                                     </Col>
                                 </Row>
                             </Col>
@@ -148,7 +184,7 @@ export default function PropertyDetails() {
                                 <Row>
                                     <Col>
                                         <h6 className="text-secondary">
-                                            {licensingData.renovation ? licensingData.renovation : ''}
+                                            {licensingData.renovation ? format(new Date(licensingData.renovation), 'dd/MM/yyyy') : ''}
                                         </h6>
                                     </Col>
                                 </Row>
@@ -163,7 +199,7 @@ export default function PropertyDetails() {
 
                                 <Row>
                                     <Col>
-                                        <h6 className="text-secondary">{licensingData.deadline ? licensingData.deadline : ''}</h6>
+                                        <h6 className="text-secondary">{licensingData.deadline ? format(new Date(licensingData.deadline), 'dd/MM/yyyy') : ''}</h6>
                                     </Col>
                                 </Row>
                             </Col>
@@ -217,6 +253,8 @@ export default function PropertyDetails() {
                             </Col>
                         </Row>
 
+                        <Col className="border-top mt-3 mb-3"></Col>
+
                         <Row className="mb-3">
                             <Col sm={4} >
                                 <Row>
@@ -235,6 +273,22 @@ export default function PropertyDetails() {
                             <Col sm={4} >
                                 <Row>
                                     <Col>
+                                        <span className="text-success">Usuário</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{licensingData.created_by}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
                                         <span className="text-success">Última atualização</span>
                                     </Col>
                                 </Row>
@@ -245,9 +299,21 @@ export default function PropertyDetails() {
                                     </Col>
                                 </Row>
                             </Col>
-                        </Row>
 
-                        <Col className="border-top mt-3 mb-3"></Col>
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Usuário</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{licensingData.updated_by}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
 
                         <Row className="mb-3">
                             <Col>
@@ -278,7 +344,6 @@ export default function PropertyDetails() {
                                                                 return <EventsLicensing
                                                                     key={index}
                                                                     event={event}
-                                                                    handleListEvents={handleListEvents}
                                                                     canEdit={false}
                                                                 />
                                                             })
@@ -296,6 +361,40 @@ export default function PropertyDetails() {
                                     }
                                 </Row>
                             </Col>
+                        </Row>
+
+                        <Row>
+                            <Col>
+                                <h6 className="text-success">Anexos <FaFileAlt /></h6>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            {
+                                licensingData.attachments.length > 0 ? <Col>
+                                    <Row>
+                                        <Col>
+                                            <ListGroup>
+                                                {
+                                                    licensingData.attachments.map((attachment, index) => {
+                                                        return <LicensingAttachments
+                                                            key={index}
+                                                            attachment={attachment}
+                                                            canEdit={false}
+                                                        />
+                                                    })
+                                                }
+                                            </ListGroup>
+                                        </Col>
+                                    </Row>
+                                </Col> :
+                                    <Col>
+                                        <AlertMessage
+                                            status="warning"
+                                            message="Nenhum anexo enviado para esse licenciamento."
+                                        />
+                                    </Col>
+                            }
                         </Row>
                     </Col>
                 </Row>

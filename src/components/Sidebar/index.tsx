@@ -241,6 +241,24 @@ const Sidebar: React.FC = () => {
                                 </a>
                             </Link>
 
+                            <Link href="/docs/project">
+                                <a title="Listar os documentos para projetos" data-title="Listar os documentos para projetos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'projects-docs' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaIdCard size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Documentos</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
                             <Dropdown.Divider />
 
                             <Link href="/projects/types">

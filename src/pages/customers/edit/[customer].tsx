@@ -346,7 +346,7 @@ export default function NewCustomer() {
 
                             setTimeout(() => {
                                 router.push(`/customers/details/${customerData.id}`)
-                            }, 2000);
+                            }, 1000);
                         }
                         catch {
                             setTypeMessage("error");
@@ -675,206 +675,204 @@ export default function NewCustomer() {
                     )}
                 </Formik>
 
-                {
-                    customerData && <Modal show={showModalNewAttachment} onHide={handleCloseModalNewAttachment}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Criar um anexo</Modal.Title>
-                        </Modal.Header>
-                        <Formik
-                            initialValues={
-                                {
-                                    name: '',
-                                    path: '',
-                                    size: 0,
-                                    received_at: format(new Date(), 'yyyy-MM-dd'),
-                                    expire: false,
-                                    expire_at: format(new Date(), 'yyyy-MM-dd'),
-                                    schedule: false,
-                                    schedule_at: 0,
-                                    customer: customerData.id,
-                                }
+                <Modal show={showModalNewAttachment} onHide={handleCloseModalNewAttachment}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Criar um anexo</Modal.Title>
+                    </Modal.Header>
+                    <Formik
+                        initialValues={
+                            {
+                                name: '',
+                                path: '',
+                                size: 0,
+                                received_at: format(new Date(), 'yyyy-MM-dd'),
+                                expire: false,
+                                expire_at: format(new Date(), 'yyyy-MM-dd'),
+                                schedule: false,
+                                schedule_at: 0,
+                                customer: customerData.id,
                             }
-                            onSubmit={async values => {
-                                setTypeMessage("waiting");
-                                setMessageShowNewAttachment(true);
+                        }
+                        onSubmit={async values => {
+                            setTypeMessage("waiting");
+                            setMessageShowNewAttachment(true);
 
-                                const scheduleAt = format(subDays(new Date(`${values.expire_at} 12:00:00`), values.schedule_at), 'yyyy-MM-dd');
+                            const scheduleAt = format(subDays(new Date(`${values.expire_at} 12:00:00`), values.schedule_at), 'yyyy-MM-dd');
 
-                                try {
-                                    const data = new FormData();
+                            try {
+                                const data = new FormData();
 
-                                    data.append('name', values.name);
+                                data.append('name', values.name);
 
-                                    data.append('file', fileToSave);
+                                data.append('file', fileToSave);
 
-                                    data.append('received_at', `${values.received_at} 12:00:00`);
-                                    data.append('expire', String(values.expire));
-                                    data.append('expire_at', `${values.expire_at} 12:00:00`);
-                                    data.append('schedule', String(values.schedule));
-                                    data.append('schedule_at', `${scheduleAt} 12:00:00`);
-                                    data.append('customer', values.customer);
+                                data.append('received_at', `${values.received_at} 12:00:00`);
+                                data.append('expire', String(values.expire));
+                                data.append('expire_at', `${values.expire_at} 12:00:00`);
+                                data.append('schedule', String(values.schedule));
+                                data.append('schedule_at', `${scheduleAt} 12:00:00`);
+                                data.append('customer', values.customer);
 
-                                    await api.post(`customers/${customerData.id}/attachments`, data);
+                                await api.post(`customers/${customerData.id}/attachments`, data);
 
-                                    await handleListAttachments();
+                                await handleListAttachments();
 
-                                    setTypeMessage("success");
+                                setTypeMessage("success");
 
-                                    setTimeout(() => {
-                                        setMessageShowNewAttachment(false);
-                                        handleCloseModalNewAttachment();
-                                    }, 1000);
-                                }
-                                catch (err) {
-                                    console.log('error create attachment.');
-                                    console.log(err);
+                                setTimeout(() => {
+                                    setMessageShowNewAttachment(false);
+                                    handleCloseModalNewAttachment();
+                                }, 1000);
+                            }
+                            catch (err) {
+                                console.log('error create attachment.');
+                                console.log(err);
 
-                                    setTypeMessage("error");
+                                setTypeMessage("error");
 
-                                    setTimeout(() => {
-                                        setMessageShowNewAttachment(false);
-                                    }, 4000);
-                                }
-                            }}
-                            validationSchema={attachmentValidationSchema}
-                        >
-                            {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
-                                <Form onSubmit={handleSubmit}>
-                                    <Modal.Body>
-                                        <Form.Group controlId="attachmentFormGridName">
-                                            <Form.Label>Nome do documento</Form.Label>
-                                            <Form.Control type="text"
-                                                placeholder="Nome"
+                                setTimeout(() => {
+                                    setMessageShowNewAttachment(false);
+                                }, 4000);
+                            }
+                        }}
+                        validationSchema={attachmentValidationSchema}
+                    >
+                        {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                            <Form onSubmit={handleSubmit}>
+                                <Modal.Body>
+                                    <Form.Group controlId="attachmentFormGridName">
+                                        <Form.Label>Nome do documento</Form.Label>
+                                        <Form.Control type="text"
+                                            placeholder="Nome"
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            value={values.name}
+                                            name="name"
+                                            isInvalid={!!errors.name && touched.name}
+                                        />
+                                        <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                        <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
+                                    </Form.Group>
+
+                                    <Row className="mb-3">
+                                        <Col sm={4}>
+                                            <label
+                                                title="Procurar um arquivo para anexar."
+                                                htmlFor="fileAttachement"
+                                                className={styles.productImageButton}
+                                            >
+                                                <Row>
+                                                    <Col>
+                                                        <FaPlus />
+                                                    </Col>
+                                                </Row>
+
+                                                <Row>
+                                                    <Col>Anexo</Col>
+                                                </Row>
+                                                <input
+                                                    type="file" accept=".jpg, .jpeg, .png, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .psd"
+                                                    onChange={(e) => {
+                                                        handleImages(e);
+                                                        if (e.target.files[0]) {
+                                                            setFieldValue('path', e.target.files[0].name);
+                                                            setFieldValue('size', e.target.files[0].size);
+                                                        }
+                                                    }}
+                                                    id="fileAttachement"
+                                                />
+                                            </label>
+                                        </Col>
+
+                                        <Col>
+                                            <label>{filePreview}</label>
+                                        </Col>
+
+                                        <Col className="col-12">
+                                            <label className="invalid-feedback" style={{ display: 'block' }}>{errors.path}</label>
+                                            <label className="invalid-feedback" style={{ display: 'block' }}>{errors.size}</label>
+                                        </Col>
+                                    </Row>
+
+                                    <Form.Group as={Row} controlId="formGridReceivedAt">
+                                        <Form.Label column sm={7}>Data do recebimento</Form.Label>
+                                        <Col sm={5}>
+                                            <Form.Control
+                                                type="date"
                                                 onChange={handleChange}
                                                 onBlur={handleBlur}
-                                                value={values.name}
-                                                name="name"
-                                                isInvalid={!!errors.name && touched.name}
+                                                value={values.received_at}
+                                                name="received_at"
+                                                isInvalid={!!errors.received_at && touched.received_at}
                                             />
-                                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                            <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
-                                        </Form.Group>
+                                            <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
+                                        </Col>
+                                    </Form.Group>
 
-                                        <Row className="mb-3">
-                                            <Col sm={4}>
-                                                <label
-                                                    title="Procurar um arquivo para anexar."
-                                                    htmlFor="fileAttachement"
-                                                    className={styles.productImageButton}
-                                                >
-                                                    <Row>
-                                                        <Col>
-                                                            <FaPlus />
-                                                        </Col>
-                                                    </Row>
+                                    <Form.Group className="mb-3" controlId="formGridExpire">
+                                        <Form.Switch
+                                            label="Expira?"
+                                            checked={values.expire}
+                                            onChange={() => { setFieldValue('expire', !values.expire) }}
+                                        />
+                                    </Form.Group>
 
-                                                    <Row>
-                                                        <Col>Anexo</Col>
-                                                    </Row>
-                                                    <input
-                                                        type="file" accept=".jpg, .jpeg, .png, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .psd"
-                                                        onChange={(e) => {
-                                                            handleImages(e);
-                                                            if (e.target.files[0]) {
-                                                                setFieldValue('path', e.target.files[0].name);
-                                                                setFieldValue('size', e.target.files[0].size);
-                                                            }
-                                                        }}
-                                                        id="fileAttachement"
+                                    {
+                                        values.expire && <>
+                                            <Row className="mb-3">
+                                                <Form.Group as={Col} sm={6} controlId="formGridExpireAt">
+                                                    <Form.Label>Data de expiração</Form.Label>
+                                                    <Form.Control
+                                                        type="date"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.expire_at}
+                                                        name="expire_at"
+                                                        isInvalid={!!errors.expire_at && touched.expire_at}
                                                     />
-                                                </label>
-                                            </Col>
-
-                                            <Col>
-                                                <label>{filePreview}</label>
-                                            </Col>
-
-                                            <Col className="col-12">
-                                                <label className="invalid-feedback" style={{ display: 'block' }}>{errors.path}</label>
-                                                <label className="invalid-feedback" style={{ display: 'block' }}>{errors.size}</label>
-                                            </Col>
-                                        </Row>
-
-                                        <Form.Group as={Row} controlId="formGridReceivedAt">
-                                            <Form.Label column sm={7}>Data do recebimento</Form.Label>
-                                            <Col sm={5}>
-                                                <Form.Control
-                                                    type="date"
-                                                    onChange={handleChange}
-                                                    onBlur={handleBlur}
-                                                    value={values.received_at}
-                                                    name="received_at"
-                                                    isInvalid={!!errors.received_at && touched.received_at}
+                                                    <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
+                                                </Form.Group>
+                                            </Row>
+                                            <Form.Group className="mb-3" controlId="formGridSchedule">
+                                                <Form.Switch
+                                                    label="Notificar"
+                                                    checked={values.schedule}
+                                                    onChange={() => { setFieldValue('schedule', !values.schedule) }}
                                                 />
-                                                <Form.Control.Feedback type="invalid">{touched.received_at && errors.received_at}</Form.Control.Feedback>
-                                            </Col>
-                                        </Form.Group>
+                                            </Form.Group>
 
-                                        <Form.Group className="mb-3" controlId="formGridExpire">
-                                            <Form.Switch
-                                                label="Expira?"
-                                                checked={values.expire}
-                                                onChange={() => { setFieldValue('expire', !values.expire) }}
-                                            />
-                                        </Form.Group>
-
-                                        {
-                                            values.expire && <>
-                                                <Row className="mb-3">
-                                                    <Form.Group as={Col} sm={6} controlId="formGridExpireAt">
-                                                        <Form.Label>Data de expiração</Form.Label>
+                                            {
+                                                values.schedule && <Row className="mb-3">
+                                                    <Form.Group as={Col} sm={3} controlId="formGridScheduleAt">
+                                                        <Form.Label>Dias antes</Form.Label>
                                                         <Form.Control
-                                                            type="date"
+                                                            type="number"
                                                             onChange={handleChange}
                                                             onBlur={handleBlur}
-                                                            value={values.expire_at}
-                                                            name="expire_at"
-                                                            isInvalid={!!errors.expire_at && touched.expire_at}
+                                                            value={values.schedule_at}
+                                                            name="schedule_at"
+                                                            isInvalid={!!errors.schedule_at && touched.schedule_at}
                                                         />
-                                                        <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
+                                                        <Form.Control.Feedback type="invalid">{touched.schedule_at && errors.schedule_at}</Form.Control.Feedback>
                                                     </Form.Group>
                                                 </Row>
-                                                <Form.Group className="mb-3" controlId="formGridSchedule">
-                                                    <Form.Switch
-                                                        label="Notificar"
-                                                        checked={values.schedule}
-                                                        onChange={() => { setFieldValue('schedule', !values.schedule) }}
-                                                    />
-                                                </Form.Group>
-
-                                                {
-                                                    values.schedule && <Row className="mb-3">
-                                                        <Form.Group as={Col} sm={3} controlId="formGridScheduleAt">
-                                                            <Form.Label>Dias antes</Form.Label>
-                                                            <Form.Control
-                                                                type="number"
-                                                                onChange={handleChange}
-                                                                onBlur={handleBlur}
-                                                                value={values.schedule_at}
-                                                                name="schedule_at"
-                                                                isInvalid={!!errors.schedule_at && touched.schedule_at}
-                                                            />
-                                                            <Form.Control.Feedback type="invalid">{touched.schedule_at && errors.schedule_at}</Form.Control.Feedback>
-                                                        </Form.Group>
-                                                    </Row>
-                                                }
+                                            }
+                                        </>
+                                    }
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    {
+                                        messageShowNewAttachment ? <AlertMessage status={typeMessage} /> :
+                                            <>
+                                                <Button variant="secondary" onClick={handleCloseModalNewAttachment}>Cancelar</Button>
+                                                <Button variant="success" type="submit">Salvar</Button>
                                             </>
-                                        }
-                                    </Modal.Body>
-                                    <Modal.Footer>
-                                        {
-                                            messageShowNewAttachment ? <AlertMessage status={typeMessage} /> :
-                                                <>
-                                                    <Button variant="secondary" onClick={handleCloseModalNewAttachment}>Cancelar</Button>
-                                                    <Button variant="success" type="submit">Salvar</Button>
-                                                </>
-                                        }
-                                    </Modal.Footer>
-                                </Form>
-                            )}
-                        </Formik>
-                    </Modal>
-                }
+                                    }
+                                </Modal.Footer>
+                            </Form>
+                        )}
+                    </Formik>
+                </Modal>
             </>
         }
     </Container>

@@ -23,7 +23,7 @@ export interface EventProject {
 
 interface EventsProjectProps {
     event: EventProject;
-    handleListEvents(): Promise<void>;
+    handleListEvents?: () => Promise<void>;
     canEdit?: boolean;
 }
 

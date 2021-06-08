@@ -7,16 +7,16 @@ import * as Yup from 'yup';
 import api from '../../api/api';
 import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
 
-export interface DocsCustomer {
+export interface DocsProject {
     id: string;
     name: string;
     active: boolean;
     order: number;
 }
 
-interface DocsCustomerProps {
-    doc: DocsCustomer;
-    listDocs: DocsCustomer[];
+interface DocsProjectProps {
+    doc: DocsProject;
+    listDocs: DocsProject[];
     handleListDocs(): Promise<void>;
 }
 
@@ -26,7 +26,7 @@ const validationSchema = Yup.object().shape({
     order: Yup.number().required(),
 });
 
-const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDocs }) => {
+const DocsProject: React.FC<DocsProjectProps> = ({ doc, listDocs, handleListDocs }) => {
     const [showModalEditDoc, setShowModalEditDoc] = useState(false);
 
     const handleCloseModalEditDoc = () => { setShowModalEditDoc(false); setIconDeleteConfirm(false); setIconDelete(true); }
@@ -44,7 +44,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
         setCategoryPausing(true);
 
         try {
-            await api.put(`docs/customer/${doc.id}`, {
+            await api.put(`docs/project/${doc.id}`, {
                 name: doc.name,
                 active: !doc.active,
                 order: doc.order,
@@ -53,7 +53,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
             await handleListDocs();
         }
         catch (err) {
-            console.log("Error to pause category");
+            console.log("Error to pause doc");
             console.log(err);
         }
 
@@ -72,13 +72,13 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
         setMessageShow(true);
 
         try {
-            await api.delete(`docs/customer/${doc.id}`);
+            await api.delete(`docs/project/${doc.id}`);
 
             const list = listDocs.filter(item => { return item.id !== doc.id });
 
             list.forEach(async (doc, index) => {
                 try {
-                    await api.put(`docs/customer/${doc.id}`, {
+                    await api.put(`docs/project/${doc.id}`, {
                         name: doc.name,
                         active: doc.active,
                         order: index
@@ -104,7 +104,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
                 setMessageShow(false);
             }, 1000);
 
-            console.log("Error to delete product");
+            console.log("Error to delete doc");
             console.log(err);
         }
     }
@@ -158,7 +158,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
 
                         try {
                             if (listDocs) {
-                                await api.put(`docs/customer/${doc.id}`, {
+                                await api.put(`docs/project/${doc.id}`, {
                                     name: values.name,
                                     active: doc.active,
                                     order: doc.order
@@ -175,7 +175,7 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
                             }
                         }
                         catch (err) {
-                            console.log('error create category.');
+                            console.log('error create doc.');
                             console.log(err);
 
                             setTypeMessage("error");
@@ -236,4 +236,4 @@ const DocsCustomer: React.FC<DocsCustomerProps> = ({ doc, listDocs, handleListDo
     )
 }
 
-export default DocsCustomer;
+export default DocsProject;

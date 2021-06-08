@@ -1,22 +1,27 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { Col, Container, ListGroup, Row } from 'react-bootstrap';
+import { Col, Container, Button, ButtonGroup, ListGroup, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
+    FaCheck,
     FaExclamationCircle,
+    FaFileAlt,
     FaHistory,
-    FaMapSigns,
+    FaIdCard,
     FaPencilAlt,
-    FaPlusSquare,
+    FaPlus,
+    FaRegFile,
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Project } from '../../../components/Projects';
+import Members from '../../../components/ProjectMembers';
+import { DocsProject } from '../../../components/DocsProject';
 import EventsProject from '../../../components/EventsProject';
+import ProjectAttachments from '../../../components/ProjectAttachments';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
@@ -33,14 +38,42 @@ export default function PropertyDetails() {
 
         if (project) {
             api.get(`projects/${project}`).then(res => {
-                setProjectData(res.data);
+                let projecRes: Project = res.data;
+
+                api.get('docs/project').then(res => {
+                    const documentsRes: DocsProject[] = res.data;
+
+                    projecRes = {
+                        ...projecRes, docs: documentsRes.map(doc => {
+                            const projectDoc = projecRes.docs.find(item => { return item.doc.id === doc.id });
+
+                            if (projectDoc)
+                                return { ...projectDoc, project: projecRes };
+
+                            return {
+                                id: '0',
+                                path: '',
+                                received_at: new Date(),
+                                checked: false,
+                                project: projecRes,
+                                doc: doc,
+                            };
+                        })
+                    }
+
+                    setProjectData(projecRes);
+                }).catch(err => {
+                    console.log('Error to get docs project to edit, ', err);
+                });
             }).catch(err => {
                 console.log('Error to get project: ', err);
             });
         }
     }, [project]);
 
-    async function handleListEvents() { }
+    function handleRoute(route: string) {
+        router.push(route);
+    }
 
     return <Container className="content-page">
         {
@@ -54,27 +87,51 @@ export default function PropertyDetails() {
                         </Row>
 
                         <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Membros</h6>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    {
+                                        projectData.members.map(member => {
+                                            return <Members
+                                                key={member.id}
+                                                member={member}
+                                                canRemove={false}
+                                            />
+                                        })
+                                    }
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
                             <Col sm={6}>
                                 <Row className="align-items-center">
-                                    <Col>
+                                    <Col className="col-row">
                                         <h3 className="form-control-plaintext text-success">{projectData.customer.name}</h3>
                                     </Col>
 
-                                    <Col>
-                                        <Link href={`/projects/edit/${projectData.id}`}>
-                                            <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
-                                        </Link>
-                                    </Col>
-
-                                    <Col>
-                                        <Link href={`/projects/new?customer=${projectData.customer.id}`}>
-                                            <a
-                                                title="Criar um novo imóvel para este cliente"
-                                                data-title="Criar um novo imóvel para este cliente"
+                                    <Col className="col-row">
+                                        <ButtonGroup size="sm" className="col-12">
+                                            <Button
+                                                title="Editar projeto."
+                                                variant="success"
+                                                onClick={() => handleRoute(`/projects/edit/${projectData.id}`)}
                                             >
-                                                <FaPlusSquare /><FaMapSigns />
-                                            </a>
-                                        </Link>
+                                                <FaPencilAlt />
+                                            </Button>
+
+                                            <Button
+                                                variant="success"
+                                                title="Criar um novo projeto para este cliente."
+                                                onClick={() => handleRoute(`/projects/new?customer=${projectData.customer.id}`)}
+                                            >
+                                                <FaPlus /><FaFileAlt />
+                                            </Button>
+                                        </ButtonGroup>
                                     </Col>
                                 </Row>
                             </Col>
@@ -225,7 +282,7 @@ export default function PropertyDetails() {
 
                                     <Row>
                                         <Col>
-                                            <h6 className="text-secondary">{projectData.paid_date}</h6>
+                                            <h6 className="text-secondary">{format(new Date(projectData.paid_date), 'dd/MM/yyyy')}</h6>
                                         </Col>
                                     </Row>
                                 </Col>
@@ -260,34 +317,6 @@ export default function PropertyDetails() {
                                     </Col>
                                 </Row>
                             </Col>
-
-                            <Col sm={3} >
-                                <Row>
-                                    <Col>
-                                        <span className="text-success">Data de criação</span>
-                                    </Col>
-                                </Row>
-
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-secondary">{format(new Date(projectData.created_at), 'dd/MM/yyyy')}</h6>
-                                    </Col>
-                                </Row>
-                            </Col>
-
-                            <Col sm={3} >
-                                <Row>
-                                    <Col>
-                                        <span className="text-success">Última atualização</span>
-                                    </Col>
-                                </Row>
-
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-secondary">{format(new Date(projectData.updated_at), 'dd/MM/yyyy')}</h6>
-                                    </Col>
-                                </Row>
-                            </Col>
                         </Row>
 
                         {
@@ -309,6 +338,132 @@ export default function PropertyDetails() {
                         }
 
                         <Col className="border-top mt-3 mb-3"></Col>
+
+                        <Row className="mb-3">
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Criado em</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{format(new Date(projectData.created_at), 'dd/MM/yyyy')}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Usuário</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{projectData.created_by}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Última atualização</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{format(new Date(projectData.updated_at), 'dd/MM/yyyy')}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Usuário</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{projectData.updated_by}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Documentação <FaIdCard /></h6>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <ListGroup className="mb-3">
+                                            {
+                                                projectData.docs.map((doc, index) => {
+                                                    return <ListGroup.Item key={index} action as="div" variant="light">
+                                                        <Row>
+                                                            <Col sm={8}>
+                                                                {
+                                                                    doc.checked ? <FaCheck /> :
+                                                                        <FaRegFile />} <label>{doc.doc.name} </label>
+                                                            </Col>
+
+                                                            {
+                                                                doc.checked && <>
+                                                                    <Col sm={2}>Data do recebimento</Col>
+
+                                                                    <Col sm={2}>
+                                                                        {format(new Date(doc.received_at), 'dd/MM/yyyy')}
+                                                                    </Col>
+                                                                </>
+                                                            }
+                                                        </Row>
+                                                    </ListGroup.Item>
+                                                })
+                                            }
+                                        </ListGroup>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Anexos <FaFileAlt /></h6>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <ListGroup>
+                                            {
+                                                projectData.attachments.map((attachment, index) => {
+                                                    return <ProjectAttachments
+                                                        key={index}
+                                                        attachment={attachment}
+                                                        canEdit={false}
+                                                    />
+                                                })
+                                            }
+                                        </ListGroup>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
 
                         <Row className="mb-3">
                             <Col>
@@ -339,7 +494,6 @@ export default function PropertyDetails() {
                                                                 return <EventsProject
                                                                     key={index}
                                                                     event={event}
-                                                                    handleListEvents={handleListEvents}
                                                                     canEdit={false}
                                                                 />
                                                             })

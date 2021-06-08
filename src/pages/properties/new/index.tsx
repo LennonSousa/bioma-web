@@ -1,15 +1,17 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
+import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row, Toast } from 'react-bootstrap';
 import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
-import { FaLongArrowAltLeft, FaSearchPlus } from 'react-icons/fa';
+import { FaSearchPlus, FaPlus, FaUserTie } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
+import { AuthContext } from '../../../context/authContext';
 import { SideBarContext } from '../../../context/SideBarContext';
+import Members, { Member } from '../../../components/PropertyMembers';
+import { User } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
 import { DocsProperty } from '../../../components/DocsProperty';
 import { statesCities } from '../../../components/StatesCities';
@@ -23,22 +25,32 @@ const validationSchema = Yup.object().shape({
     city: Yup.string().required('Obrigatório!'),
     state: Yup.string().required('Obrigatório!'),
     area: Yup.string().required('Obrigatório!'),
+    coordinates: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
     customer: Yup.string().required('Obrigatório!'),
     customerName: Yup.string().required('Obrigatório!'),
 });
 
-export default function NewCustomer() {
+export default function NewProperty() {
     const router = useRouter();
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { user } = useContext(AuthContext);
 
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
+    const [membersAdded, setMembersAdded] = useState<Member[]>([]);
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
     const [docsProperty, setDocsProperty] = useState<DocsProperty[]>([]);
+
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
     const [cities, setCities] = useState<string[]>([]);
+
+    const [showUsers, setShowUsers] = useState(false);
+
+    const toggleShowUsers = () => setShowUsers(!showUsers);
 
     const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
 
@@ -49,18 +61,37 @@ export default function NewCustomer() {
         handleItemSideBar('customers');
         handleSelectedMenu('properties-new');
 
+        api.get('users').then(res => {
+            setUsers(res.data);
+            const usersRes: User[] = res.data;
+
+            if (user) {
+                const newMembersAddedList = [{
+                    id: '',
+                    property: undefined,
+                    user,
+                }];
+
+                handleUsersToAdd(usersRes, newMembersAddedList);
+
+                setMembersAdded(newMembersAddedList);
+            }
+        }).catch(err => {
+            console.log('Error to get users on new property, ', err);
+        });
+
         api.get('customers').then(res => {
             setCustomers(res.data);
-
-            api.get('docs/property').then(res => {
-                setDocsProperty(res.data);
-            }).catch(err => {
-                console.log('Error to get docs property, ', err);
-            });
         }).catch(err => {
             console.log('Error to get customers, ', err);
         });
-    }, []);
+
+        api.get('docs/property').then(res => {
+            setDocsProperty(res.data);
+        }).catch(err => {
+            console.log('Error to get docs property, ', err);
+        });
+    }, [user]);
 
     function handleSearch(event: ChangeEvent<HTMLInputElement>) {
         if (customers) {
@@ -83,7 +114,111 @@ export default function NewCustomer() {
         }
     }
 
+    function createMember(userId: string) {
+        const userFound = usersToAdd.find(user => { return user.id === userId });
+
+        if (!userFound) return;
+
+        let newMembersAddedList = membersAdded;
+
+        newMembersAddedList.push({
+            id: '',
+            property: undefined,
+            user: userFound,
+        });
+
+        handleUsersToAdd(users, newMembersAddedList);
+
+        setMembersAdded(newMembersAddedList);
+
+        toggleShowUsers();
+    }
+
+    function handleDeleteMember(userId: string) {
+        const newMembersAddedList = membersAdded.filter(member => { return member.user.id !== userId });
+
+        handleUsersToAdd(users, newMembersAddedList);
+
+        setMembersAdded(newMembersAddedList);
+    }
+
+    function handleUsersToAdd(usersList: User[], addedList: Member[]) {
+        setUsersToAdd(
+            usersList.filter(user => {
+                return !addedList.find(member => {
+                    return member.user.id === user.id
+                })
+            })
+        );
+    }
+
     return <Container className="content-page">
+        <Row className="mb-3">
+            <Col>
+                <PageBack href="/properties" subTitle="Voltar para a lista de imóveis" />
+            </Col>
+        </Row>
+
+        <Row className="mb-3">
+            <Col>
+                <Row>
+                    <Col>
+                        <h6 className="text-success">Membros</h6>
+                    </Col>
+                </Row>
+                <Row>
+                    {
+                        membersAdded.map(member => {
+                            return <Members
+                                key={member.id}
+                                member={member}
+                                canRemove={membersAdded.length > 1}
+                                isNewItem={true}
+                                handleDeleteMember={handleDeleteMember}
+                            />
+                        })
+                    }
+                    <div className="member-container">
+                        <Button
+                            onClick={toggleShowUsers}
+                            className="member-item"
+                            variant="secondary"
+                            disabled={usersToAdd.length < 1}
+                            title="Adicionar um membro responsável para este imóvel."
+                        >
+                            <FaPlus />
+                        </Button>
+
+                        <Toast
+                            show={showUsers}
+                            onClose={toggleShowUsers}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                zIndex: 999,
+                            }}
+                        >
+                            <Toast.Header>
+                                <FaUserTie />{' '}<strong className="me-auto">Adicionar um membro</strong>
+                            </Toast.Header>
+                            <Toast.Body>
+                                <ListGroup>
+                                    {
+                                        usersToAdd.map(user => {
+                                            return <ListGroup.Item key={user.id} action onClick={() => createMember(user.id)}>
+                                                {user.name}
+                                            </ListGroup.Item>
+                                        })
+                                    }
+                                </ListGroup>
+                            </Toast.Body>
+                        </Toast>
+                    </div>
+                </Row>
+            </Col>
+        </Row>
+
         <Formik
             initialValues={{
                 name: '',
@@ -92,22 +227,22 @@ export default function NewCustomer() {
                 city: '',
                 state: '',
                 area: '',
+                coordinates: '',
                 notes: '',
                 warnings: false,
                 customer: '',
                 customerName: '',
-                docs: [],
             }}
             onSubmit={async values => {
                 setTypeMessage("waiting");
                 setMessageShow(true);
 
                 const docs = docsProperty.map(doc => {
-                    let checked = false;
+                    return { doc: doc.id }
+                });
 
-                    values.docs.forEach(item => { if (item === doc.id) checked = true });
-
-                    return { checked, doc: doc.id }
+                const members = membersAdded.map(member => {
+                    return { user: member.user.id }
                 });
 
                 try {
@@ -118,10 +253,12 @@ export default function NewCustomer() {
                         city: values.city,
                         state: values.state,
                         area: values.area,
+                        coordinates: values.coordinates,
                         notes: values.notes,
                         warnings: values.warnings,
                         customer: values.customer,
                         docs,
+                        members,
                     });
 
                     setTypeMessage("success");
@@ -142,12 +279,6 @@ export default function NewCustomer() {
         >
             {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                 <Form onSubmit={handleSubmit}>
-                    <Row className="mb-3">
-                        <Col>
-                            <PageBack href="/properties" subTitle="Voltar para a lista de imóveis" />
-                        </Col>
-                    </Row>
-
                     <Row className="mb-3">
                         <Form.Group as={Col} sm={6} controlId="formGridName">
                             <Form.Label>Nome do imóvel/fazenda*</Form.Label>
@@ -205,7 +336,7 @@ export default function NewCustomer() {
                             <Form.Control.Feedback type="invalid">{touched.registration && errors.registration}</Form.Control.Feedback>
                         </Form.Group>
 
-                        <Form.Group as={Col} sm={3} controlId="formGridArea">
+                        <Form.Group as={Col} sm={4} controlId="formGridArea">
                             <Form.Label>Área do imóvel</Form.Label>
                             <Form.Control
                                 type="text"
@@ -216,6 +347,19 @@ export default function NewCustomer() {
                                 isInvalid={!!errors.area && touched.area}
                             />
                             <Form.Control.Feedback type="invalid">{touched.area && errors.area}</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group as={Col} sm={4} controlId="formGridArea">
+                            <Form.Label>Coordenadas</Form.Label>
+                            <Form.Control
+                                type="text"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.coordinates}
+                                name="coordinates"
+                                isInvalid={!!errors.coordinates && touched.coordinates}
+                            />
+                            <Form.Control.Feedback type="invalid">{touched.coordinates && errors.coordinates}</Form.Control.Feedback>
                         </Form.Group>
                     </Row>
 
@@ -306,32 +450,6 @@ export default function NewCustomer() {
                     </Form.Row>
 
                     <Col className="border-top mb-3"></Col>
-
-                    <Form.Row>
-                        <Form.Group as={Col} sm={5} controlId="formGridDocs">
-                            <Form.Label>Documentação</Form.Label>
-                            <ListGroup className="mb-3">
-                                {
-                                    docsProperty.map((doc, index) => {
-                                        return <ListGroup.Item key={index} action as="div" variant="light">
-                                            <Row className="align-items-center">
-                                                <Col>
-                                                    <label>
-                                                        <Field
-                                                            type="checkbox"
-                                                            name="docs"
-                                                            value={doc.id}
-                                                        />
-                                                        {` ${doc.name}`}
-                                                    </label>
-                                                </Col>
-                                            </Row>
-                                        </ListGroup.Item>
-                                    })
-                                }
-                            </ListGroup>
-                        </Form.Group>
-                    </Form.Row>
 
                     <Row className="justify-content-end">
                         {

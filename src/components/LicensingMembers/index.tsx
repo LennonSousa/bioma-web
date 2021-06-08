@@ -16,10 +16,12 @@ export interface Member {
 interface MemberProps {
     member: Member;
     canRemove?: boolean;
-    handleListMembers(): Promise<void>;
+    isNewItem?: boolean;
+    handleListMembers?: () => Promise<void>;
+    handleDeleteMember?: (userId: string) => void;
 }
 
-const Members: React.FC<MemberProps> = ({ member, canRemove = true, handleListMembers }) => {
+const Members: React.FC<MemberProps> = ({ member, canRemove = true, isNewItem = false, handleListMembers, handleDeleteMember }) => {
     const [showUserDetails, setShowUserDetails] = useState(false);
 
     const toggleShowUserDetails = () => setShowUserDetails(!showUserDetails);
@@ -28,6 +30,13 @@ const Members: React.FC<MemberProps> = ({ member, canRemove = true, handleListMe
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
     async function deleteMember() {
+        if (isNewItem) {
+            handleDeleteMember(member.user.id);
+            toggleShowUserDetails();
+
+            return;
+        }
+
         setTypeMessage("waiting");
         setMessageShow(true);
 

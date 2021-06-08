@@ -1,22 +1,23 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row } from 'react-bootstrap';
+import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row, Toast } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { FaSearchPlus } from 'react-icons/fa';
+import { FaSearchPlus, FaPlus, FaUserTie } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { Licensing } from '../../../components/Licensings';
+import { SideBarContext } from '../../../context/SideBarContext';
+import { AuthContext } from '../../../context/authContext';
+import Members, { Member } from '../../../components/LicensingMembers';
+import { User } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
 import { LicensingAgency } from '../../../components/LicensingAgencies';
 import { LicensingAuthorization } from '../../../components/LicensingAuthorizations';
 import { LicensingInfringement } from '../../../components/LicensingInfringements';
 import { LicensingStatus } from '../../../components/LicensingStatus';
 import { Property } from '../../../components/Properties';
-import EventsLicensing from '../../../components/EventsLicensing';
-import { SideBarContext } from '../../../context/SideBarContext';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
@@ -34,10 +35,14 @@ const validationSchema = Yup.object().shape({
     status: Yup.string().required('Obrigatório!'),
 });
 
-export default function NewCustomer() {
+export default function NewLicensing() {
     const router = useRouter();
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { user } = useContext(AuthContext);
 
+    const [users, setUsers] = useState<User[]>([]);
+    const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
+    const [membersAdded, setMembersAdded] = useState<Member[]>([]);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
     const [licensingAgencies, setLicensingAgencies] = useState<LicensingAgency[]>([]);
@@ -49,6 +54,10 @@ export default function NewCustomer() {
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
+    const [showUsers, setShowUsers] = useState(false);
+
+    const toggleShowUsers = () => setShowUsers(!showUsers);
+
     const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
 
     const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
@@ -57,6 +66,25 @@ export default function NewCustomer() {
     useEffect(() => {
         handleItemSideBar('licensings');
         handleSelectedMenu('licensings-new');
+
+        api.get('users').then(res => {
+            setUsers(res.data);
+            const usersRes: User[] = res.data;
+
+            if (user) {
+                const newMembersAddedList = [{
+                    id: '',
+                    licensing: undefined,
+                    user,
+                }];
+
+                handleUsersToAdd(usersRes, newMembersAddedList);
+
+                setMembersAdded(newMembersAddedList);
+            }
+        }).catch(err => {
+            console.log('Error to get users on new customer, ', err);
+        });
 
         api.get('customers').then(res => {
             setCustomers(res.data);
@@ -110,7 +138,111 @@ export default function NewCustomer() {
         }
     }
 
+    function createMember(userId: string) {
+        const userFound = usersToAdd.find(user => { return user.id === userId });
+
+        if (!userFound) return;
+
+        let newMembersAddedList = membersAdded;
+
+        newMembersAddedList.push({
+            id: '',
+            licensing: undefined,
+            user: userFound,
+        });
+
+        handleUsersToAdd(users, newMembersAddedList);
+
+        setMembersAdded(newMembersAddedList);
+
+        toggleShowUsers();
+    }
+
+    function handleDeleteMember(userId: string) {
+        const newMembersAddedList = membersAdded.filter(member => { return member.user.id !== userId });
+
+        handleUsersToAdd(users, newMembersAddedList);
+
+        setMembersAdded(newMembersAddedList);
+    }
+
+    function handleUsersToAdd(usersList: User[], addedList: Member[]) {
+        setUsersToAdd(
+            usersList.filter(user => {
+                return !addedList.find(member => {
+                    return member.user.id === user.id
+                })
+            })
+        );
+    }
+
     return <Container className="content-page">
+        <Row className="mb-3">
+            <Col>
+                <PageBack href="/licensings" subTitle="Voltar para a lista de projetos" />
+            </Col>
+        </Row>
+
+        <Row className="mb-3">
+            <Col>
+                <Row>
+                    <Col>
+                        <h6 className="text-success">Membros</h6>
+                    </Col>
+                </Row>
+                <Row>
+                    {
+                        membersAdded.map(member => {
+                            return <Members
+                                key={member.id}
+                                member={member}
+                                canRemove={membersAdded.length > 1}
+                                isNewItem={true}
+                                handleDeleteMember={handleDeleteMember}
+                            />
+                        })
+                    }
+                    <div className="member-container">
+                        <Button
+                            onClick={toggleShowUsers}
+                            className="member-item"
+                            variant="secondary"
+                            disabled={usersToAdd.length < 1}
+                            title="Adicionar um membro responsável para este licensiamento."
+                        >
+                            <FaPlus />
+                        </Button>
+
+                        <Toast
+                            show={showUsers}
+                            onClose={toggleShowUsers}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                zIndex: 999,
+                            }}
+                        >
+                            <Toast.Header>
+                                <FaUserTie />{' '}<strong className="me-auto">Adicionar um membro</strong>
+                            </Toast.Header>
+                            <Toast.Body>
+                                <ListGroup>
+                                    {
+                                        usersToAdd.map(user => {
+                                            return <ListGroup.Item key={user.id} action onClick={() => createMember(user.id)}>
+                                                {user.name}
+                                            </ListGroup.Item>
+                                        })
+                                    }
+                                </ListGroup>
+                            </Toast.Body>
+                        </Toast>
+                    </div>
+                </Row>
+            </Col>
+        </Row>
+
         <Formik
             initialValues={{
                 licensing_number: '',
@@ -130,6 +262,10 @@ export default function NewCustomer() {
                 setTypeMessage("waiting");
                 setMessageShow(true);
 
+                const members = membersAdded.map(member => {
+                    return { user: member.user.id }
+                });
+
                 try {
                     const res = await api.post('licensings', {
                         licensing_number: values.licensing_number,
@@ -143,6 +279,7 @@ export default function NewCustomer() {
                         authorization: values.authorization,
                         agency: values.agency,
                         status: values.status,
+                        members,
                     });
 
                     setTypeMessage("success");
@@ -163,12 +300,6 @@ export default function NewCustomer() {
         >
             {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                 <Form onSubmit={handleSubmit}>
-                    <Row className="mb-3">
-                        <Col>
-                            <PageBack href="/licensings" subTitle="Voltar para a lista de projetos" />
-                        </Col>
-                    </Row>
-
                     <Row className="mb-3">
                         <Col sm={6}>
                             <Form.Label>Cliente</Form.Label>
@@ -261,7 +392,7 @@ export default function NewCustomer() {
                         </Form.Group>
 
                         <Form.Group as={Col} sm={2} controlId="formGridExpire">
-                            <Form.Label>Renovação</Form.Label>
+                            <Form.Label>Validade</Form.Label>
                             <Form.Control
                                 type="date"
                                 onChange={handleChange}

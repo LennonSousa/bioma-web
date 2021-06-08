@@ -80,10 +80,6 @@ export default function CustomerDetails() {
         router.push(route);
     }
 
-    async function handleListAttachments() { }
-
-    async function handleListMembers() { }
-
     return <Container className="content-page">
         {
             !customerData ? <h1>Aguarde...</h1> :
@@ -109,7 +105,6 @@ export default function CustomerDetails() {
                                                 key={member.id}
                                                 member={member}
                                                 canRemove={false}
-                                                handleListMembers={handleListMembers}
                                             />
                                         })
                                     }
@@ -318,6 +313,36 @@ export default function CustomerDetails() {
                         <Col className="border-top mb-3"></Col>
 
                         <Row className="mb-3">
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Criado em</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{format(new Date(customerData.created_at), 'dd/MM/yyyy')}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Usuário</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{customerData.created_by}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
                             <Col>
                                 <Row>
                                     <Col>
@@ -374,7 +399,6 @@ export default function CustomerDetails() {
                                                         key={index}
                                                         attachment={attachment}
                                                         canEdit={false}
-                                                        handleListAttachments={handleListAttachments}
                                                     />
                                                 })
                                             }

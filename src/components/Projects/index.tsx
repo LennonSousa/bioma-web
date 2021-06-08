@@ -4,6 +4,7 @@ import { Property } from '../Properties';
 import { ProjectLine } from '../ProjectLines';
 import { ProjectStatus } from '../ProjectStatus';
 import { ProjectType } from '../ProjectTypes';
+import { ProjectDocs } from '../ProjectDocs';
 import { EventProject } from '../EventsProject';
 import { ProjectAttachment } from '../ProjectAttachments';
 import { Member } from '../ProjectMembers';
@@ -29,6 +30,7 @@ export interface Project {
     type: ProjectType;
     status: ProjectStatus;
     line: ProjectLine;
+    docs: ProjectDocs[];
     events: EventProject[];
     attachments: ProjectAttachment[];
     members: Member[];

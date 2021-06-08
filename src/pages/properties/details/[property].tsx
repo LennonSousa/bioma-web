@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
-    FaLongArrowAltLeft,
     FaIdCard,
     FaExclamationCircle,
     FaCheck,
@@ -216,6 +215,36 @@ export default function PropertyDetails() {
                         }
 
                         <Col className="border-top mb-3"></Col>
+
+                        <Row className="mb-3">
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Criado em</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{format(new Date(propertyData.created_at), 'dd/MM/yyyy')}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Usuário</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{propertyData.created_by}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
 
                         <Row className="mb-3">
                             <Col>

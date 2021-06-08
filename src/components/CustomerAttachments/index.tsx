@@ -28,7 +28,7 @@ export interface CustomerAttachment {
 interface CustomerAttachmentsProps {
     attachment: CustomerAttachment;
     canEdit?: boolean;
-    handleListAttachments(): Promise<void>;
+    handleListAttachments?: () => Promise<void>;
 }
 
 const validationSchema = Yup.object().shape({

@@ -11,6 +11,7 @@ export interface Property {
     city: string;
     state: string;
     area: string;
+    coordinates: string;
     notes: string;
     warnings: boolean;
     created_by: string;

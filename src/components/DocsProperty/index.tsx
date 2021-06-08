@@ -102,7 +102,7 @@ const DocsProperty: React.FC<DocsPropertyProps> = ({ doc, listDocs, handleListDo
 
             setTimeout(() => {
                 setMessageShow(false);
-            }, 4000);
+            }, 1000);
 
             console.log("Error to delete doc property");
             console.log(err);

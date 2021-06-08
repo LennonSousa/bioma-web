@@ -23,7 +23,7 @@ export interface EventLicensing {
 
 interface EventsLicensingProps {
     event: EventLicensing;
-    handleListEvents(): Promise<void>;
+    handleListEvents?: () => Promise<void>;
     canEdit?: boolean;
 }
 

@@ -1,14 +1,18 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { Button, Col, Container, Form, Row } from 'react-bootstrap';
+import { Button, Col, Container, Form, ListGroup, Row, Toast } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format } from 'date-fns';
+import { FaPlus, FaUserTie } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
+import { AuthContext } from '../../../context/authContext';
+import Members, { Member } from '../../../components/CustomerMembers';
+import { User } from '../../../components/Users';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
@@ -32,28 +36,158 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function NewCustomer() {
+    const router = useRouter();
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { user } = useContext(AuthContext);
 
+    const [users, setUsers] = useState<User[]>([]);
+    const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
+    const [membersAdded, setMembersAdded] = useState<Member[]>([]);
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
     const [documentType, setDocumentType] = useState("CPF");
     const [cities, setCities] = useState<string[]>([]);
 
-    const router = useRouter();
+    const [showUsers, setShowUsers] = useState(false);
+
+    const toggleShowUsers = () => setShowUsers(!showUsers);
 
     useEffect(() => {
         handleItemSideBar('customers');
         handleSelectedMenu('customers-new');
+
+        api.get('users').then(res => {
+            setUsers(res.data);
+            const usersRes: User[] = res.data;
+
+            if (user) {
+                const newMembersAddedList = [{
+                    id: '',
+                    customer: undefined,
+                    user,
+                }];
+
+                handleUsersToAdd(usersRes, newMembersAddedList);
+
+                setMembersAdded(newMembersAddedList);
+            }
+        }).catch(err => {
+            console.log('Error to get users on new customer, ', err);
+        });
 
         api.get('docs/customer').then(res => {
             setDocsCustomer(res.data);
         }).catch(err => {
             console.log('Error to get docs customer, ', err);
         });
-    }, []);
+    }, [user]);
+
+    function createMember(userId: string) {
+        const userFound = usersToAdd.find(user => { return user.id === userId });
+
+        if (!userFound) return;
+
+        let newMembersAddedList = membersAdded;
+
+        newMembersAddedList.push({
+            id: '',
+            customer: undefined,
+            user: userFound,
+        });
+
+        handleUsersToAdd(users, newMembersAddedList);
+
+        setMembersAdded(newMembersAddedList);
+
+        toggleShowUsers();
+    }
+
+    function handleDeleteMember(userId: string) {
+        const newMembersAddedList = membersAdded.filter(member => { return member.user.id !== userId });
+
+        handleUsersToAdd(users, newMembersAddedList);
+
+        setMembersAdded(newMembersAddedList);
+    }
+
+    function handleUsersToAdd(usersList: User[], addedList: Member[]) {
+        setUsersToAdd(
+            usersList.filter(user => {
+                return !addedList.find(member => {
+                    return member.user.id === user.id
+                })
+            })
+        );
+    }
 
     return <Container className="content-page">
+        <Row className="mb-3">
+            <Col>
+                <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
+            </Col>
+        </Row>
+
+        <Row className="mb-3">
+            <Col>
+                <Row>
+                    <Col>
+                        <h6 className="text-success">Membros</h6>
+                    </Col>
+                </Row>
+                <Row>
+                    {
+                        membersAdded.map(member => {
+                            return <Members
+                                key={member.id}
+                                member={member}
+                                canRemove={membersAdded.length > 1}
+                                isNewItem={true}
+                                handleDeleteMember={handleDeleteMember}
+                            />
+                        })
+                    }
+                    <div className="member-container">
+                        <Button
+                            onClick={toggleShowUsers}
+                            className="member-item"
+                            variant="secondary"
+                            disabled={usersToAdd.length < 1}
+                            title="Adicionar um membro responsável para este cliente."
+                        >
+                            <FaPlus />
+                        </Button>
+
+                        <Toast
+                            show={showUsers}
+                            onClose={toggleShowUsers}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                zIndex: 999,
+                            }}
+                        >
+                            <Toast.Header>
+                                <FaUserTie />{' '}<strong className="me-auto">Adicionar um membro</strong>
+                            </Toast.Header>
+                            <Toast.Body>
+                                <ListGroup>
+                                    {
+                                        usersToAdd.map(user => {
+                                            return <ListGroup.Item key={user.id} action onClick={() => createMember(user.id)}>
+                                                {user.name}
+                                            </ListGroup.Item>
+                                        })
+                                    }
+                                </ListGroup>
+                            </Toast.Body>
+                        </Toast>
+                    </div>
+                </Row>
+            </Col>
+        </Row>
+
         <Formik
             initialValues={{
                 name: '',
@@ -78,6 +212,10 @@ export default function NewCustomer() {
                     return { checked: false, doc: doc.id }
                 });
 
+                const members = membersAdded.map(member => {
+                    return { user: member.user.id }
+                });
+
                 try {
                     const res = await api.post('customers', {
                         name: values.name,
@@ -94,6 +232,7 @@ export default function NewCustomer() {
                         warnings: values.warnings,
                         birth: new Date(`${values.birth} 12:00:00`),
                         docs,
+                        members,
                     });
 
                     setTypeMessage("success");
@@ -114,11 +253,7 @@ export default function NewCustomer() {
         >
             {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
                 <Form onSubmit={handleSubmit}>
-                    <Row className="mb-3">
-                        <Col>
-                            <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
-                        </Col>
-                    </Row>
+
 
                     <Row className="mb-3">
                         <Form.Group as={Col} sm={6} controlId="formGridName">

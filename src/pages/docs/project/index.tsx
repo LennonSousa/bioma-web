@@ -10,7 +10,7 @@ import produce from 'immer';
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
-import DocProperty, { DocsProperty } from '../../../components/DocsProperty';
+import DocProject, { DocsProject } from '../../../components/DocsProject';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -19,10 +19,10 @@ const validationSchema = Yup.object().shape({
     order: Yup.number().required(),
 });
 
-export default function NewCustomer() {
+export default function NewProject() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
-    const [docsProperty, setDocsProperty] = useState<DocsProperty[]>([]);
+    const [docsProject, setDocsProject] = useState<DocsProject[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
@@ -32,20 +32,20 @@ export default function NewCustomer() {
     const handleShowModalNewDoc = () => setShowModalNewDoc(true);
 
     useEffect(() => {
-        handleItemSideBar('customers');
-        handleSelectedMenu('properties-docs');
+        handleItemSideBar('projects');
+        handleSelectedMenu('projects-docs');
 
-        api.get('docs/property').then(res => {
-            setDocsProperty(res.data);
+        api.get('docs/project').then(res => {
+            setDocsProject(res.data);
         }).catch(err => {
-            console.log('Error to get docs property, ', err);
+            console.log('Error to get docs project, ', err);
         })
     }, []);
 
     async function handleListDocs() {
-        const res = await api.get('docs/property');
+        const res = await api.get('docs/project');
 
-        setDocsProperty(res.data);
+        setDocsProject(res.data);
     }
 
     function handleOnDragEnd(result: DropResult) {
@@ -53,7 +53,7 @@ export default function NewCustomer() {
             const from = result.source.index;
             const to = result.destination.index;
 
-            const updatedListDocs = produce(docsProperty, draft => {
+            const updatedListDocs = produce(docsProject, draft => {
                 if (draft) {
                     const dragged = draft[from];
 
@@ -63,16 +63,16 @@ export default function NewCustomer() {
             });
 
             if (updatedListDocs) {
-                setDocsProperty(updatedListDocs);
+                setDocsProject(updatedListDocs);
                 saveOrder(updatedListDocs);
             }
         }
     }
 
-    async function saveOrder(list: DocsProperty[]) {
+    async function saveOrder(list: DocsProject[]) {
         list.forEach(async (doc, index) => {
             try {
-                await api.put(`docs/property/${doc.id}`, {
+                await api.put(`docs/project/${doc.id}`, {
                     name: doc.name,
                     active: doc.active,
                     order: index
@@ -81,7 +81,7 @@ export default function NewCustomer() {
                 handleListDocs();
             }
             catch (err) {
-                console.log('error to save docs property order');
+                console.log('error to save docs project order');
                 console.log(err)
             }
         });
@@ -98,7 +98,7 @@ export default function NewCustomer() {
 
         <article className="mt-3">
             <Row>
-                {docsProperty.length > 0 ? <Col>
+                {docsProject.length > 0 ? <Col>
                     <DragDropContext onDragEnd={handleOnDragEnd}>
                         <Droppable droppableId="docs">
                             {provided => (
@@ -108,7 +108,7 @@ export default function NewCustomer() {
                                 >
                                     <ListGroup>
                                         {
-                                            docsProperty && docsProperty.map((doc, index) => {
+                                            docsProject && docsProject.map((doc, index) => {
                                                 return <Draggable key={doc.id} draggableId={doc.id} index={index}>
                                                     {(provided) => (
                                                         <div
@@ -116,7 +116,7 @@ export default function NewCustomer() {
                                                             {...provided.dragHandleProps}
                                                             ref={provided.innerRef}
                                                         >
-                                                            <DocProperty doc={doc} listDocs={docsProperty} handleListDocs={handleListDocs} />
+                                                            <DocProject doc={doc} listDocs={docsProject} handleListDocs={handleListDocs} />
                                                         </div>
                                                     )}
 
@@ -164,11 +164,11 @@ export default function NewCustomer() {
                     setMessageShow(true);
 
                     try {
-                        if (docsProperty) {
-                            await api.post('docs/property', {
+                        if (docsProject) {
+                            await api.post('docs/project', {
                                 name: values.name,
                                 active: values.active,
-                                order: docsProperty.length,
+                                order: docsProject.length,
                             });
 
                             await handleListDocs();
@@ -178,7 +178,7 @@ export default function NewCustomer() {
                             setTimeout(() => {
                                 setMessageShow(false);
                                 handleCloseModalNewDoc();
-                            }, 1000);
+                            }, 1500);
                         }
                     }
                     catch (err) {
@@ -186,9 +186,9 @@ export default function NewCustomer() {
 
                         setTimeout(() => {
                             setMessageShow(false);
-                        }, 4000);
+                        }, 1000);
 
-                        console.log('error create doc property.');
+                        console.log('error create doc project.');
                         console.log(err);
                     }
 
