@@ -238,7 +238,7 @@ export default function NewProject() {
                             }}
                         >
                             <Toast.Header>
-                                <FaUserTie />{' '}<strong className="me-auto">Adicionar um membro</strong>
+                                <FaUserTie style={{ marginRight: '.5rem' }} /><strong className="me-auto">Adicionar um membro</strong>
                             </Toast.Header>
                             <Toast.Body>
                                 <ListGroup>

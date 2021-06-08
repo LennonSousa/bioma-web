@@ -178,7 +178,7 @@ export default function NewProperty() {
 
     async function createMember(userId: string) {
         try {
-            await api.post('members/properties', {
+            await api.post('members/property', {
                 property: propertyData.id,
                 user: userId,
             });
@@ -294,7 +294,7 @@ export default function NewProperty() {
                                     }}
                                 >
                                     <Toast.Header>
-                                        <FaUserTie />{' '}<strong className="me-auto">Adicionar um membro</strong>
+                                        <FaUserTie style={{ marginRight: '.5rem' }} /><strong className="me-auto">Adicionar um membro</strong>
                                     </Toast.Header>
                                     <Toast.Body>
                                         <ListGroup>

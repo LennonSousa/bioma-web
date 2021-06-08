@@ -120,16 +120,16 @@ export default function PropertyDetails() {
                                         <ButtonGroup size="sm" className="col-12">
 
                                             <Button
-                                                title="Editar cliente."
+                                                title="Editar imóvel."
                                                 variant="success"
-                                                onClick={() => handleRoute(`/properties/edit/${propertyData.customer.id}`)}
+                                                onClick={() => handleRoute(`/properties/edit/${propertyData.id}`)}
                                             >
                                                 <FaPencilAlt />
                                             </Button>
 
                                             <Button
                                                 variant="success"
-                                                title="Criar um novo projeto para este cliente."
+                                                title="Criar um novo imóvel para este cliente."
                                                 onClick={() => handleRoute(`/properties/new?customer=${propertyData.customer.id}`)}
                                             >
                                                 <FaPlus /><FaMapSigns />
