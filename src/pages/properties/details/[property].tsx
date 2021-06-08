@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
+import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
     FaIdCard,
@@ -11,7 +11,7 @@ import {
     FaMapSigns,
     FaPencilAlt,
     FaPlus,
-    FaPlusSquare,
+    FaFileAlt,
     FaRegFile
 } from 'react-icons/fa';
 
@@ -19,8 +19,10 @@ import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../context/SideBarContext';
 import { Property } from '../../../components/Properties';
+import Members from '../../../components/PropertyMembers';
 import PropertyListItem from '../../../components/PropertyListItem';
 import { DocsProperty } from '../../../components/DocsProperty';
+import PropertyAttachments from '../../../components/PropertyAttachments';
 import PageBack from '../../../components/PageBack';
 
 import styles from './styles.module.css';
@@ -71,6 +73,10 @@ export default function PropertyDetails() {
         }
     }, [property]);
 
+    function handleRoute(route: string) {
+        router.push(route);
+    }
+
     return <Container className="content-page">
         {
             !propertyData ? <h1>Aguarde...</h1> :
@@ -83,16 +89,52 @@ export default function PropertyDetails() {
                         </Row>
 
                         <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Membros</h6>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    {
+                                        propertyData.members.map(member => {
+                                            return <Members
+                                                key={member.id}
+                                                member={member}
+                                                canRemove={false}
+                                            />
+                                        })
+                                    }
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
                             <Col sm={6}>
                                 <Row className="align-items-center">
-                                    <Col>
+                                    <Col className="col-row">
                                         <h3 className="form-control-plaintext text-success">{propertyData.name}</h3>
                                     </Col>
 
-                                    <Col>
-                                        <Link href={`/properties/edit/${propertyData.id}`}>
-                                            <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
-                                        </Link>
+                                    <Col className="col-row">
+                                        <ButtonGroup size="sm" className="col-12">
+
+                                            <Button
+                                                title="Editar cliente."
+                                                variant="success"
+                                                onClick={() => handleRoute(`/properties/edit/${propertyData.customer.id}`)}
+                                            >
+                                                <FaPencilAlt />
+                                            </Button>
+
+                                            <Button
+                                                variant="success"
+                                                title="Criar um novo projeto para este cliente."
+                                                onClick={() => handleRoute(`/properties/new?customer=${propertyData.customer.id}`)}
+                                            >
+                                                <FaPlus /><FaMapSigns />
+                                            </Button>
+                                        </ButtonGroup>
                                     </Col>
                                 </Row>
                             </Col>
@@ -107,16 +149,6 @@ export default function PropertyDetails() {
                                 <Row>
                                     <Col>
                                         <h6 className="text-secondary">{propertyData.customer.name}</h6>
-                                    </Col>
-                                    <Col>
-                                        <Link href={`/properties/new?customer=${propertyData.customer.id}`}>
-                                            <a
-                                                title="Criar um novo imóvel para este cliente"
-                                                data-title="Criar um novo imóvel para este cliente"
-                                            >
-                                                <FaPlusSquare /><FaMapSigns />
-                                            </a>
-                                        </Link>
                                     </Col>
                                 </Row>
                             </Col>
@@ -278,6 +310,32 @@ export default function PropertyDetails() {
                                                             }
                                                         </Row>
                                                     </ListGroup.Item>
+                                                })
+                                            }
+                                        </ListGroup>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Anexos <FaFileAlt /></h6>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <ListGroup>
+                                            {
+                                                propertyData.attachments.map((attachment, index) => {
+                                                    return <PropertyAttachments
+                                                        key={index}
+                                                        attachment={attachment}
+                                                        canEdit={false}
+                                                    />
                                                 })
                                             }
                                         </ListGroup>
