@@ -1,6 +1,6 @@
 {
   "name": "web-next",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,6 +11,7 @@
     "accesscontrol": "^2.2.1",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
+    "chart.js": "^3.3.2",
     "date-fns": "^2.21.3",
     "file-saver": "^2.0.5",
     "formik": "^2.2.6",
@@ -21,6 +22,7 @@
     "react": "17.0.2",
     "react-beautiful-dnd": "^13.1.0",
     "react-bootstrap": "^1.5.2",
+    "react-chartjs-2": "^3.0.3",
     "react-dom": "17.0.2",
     "react-icons": "^4.2.0",
     "yup": "^0.32.9"

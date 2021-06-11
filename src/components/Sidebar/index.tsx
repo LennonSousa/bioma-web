@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Accordion, Card, Dropdown, Row, Col } from 'react-bootstrap';
 import {
+    FaChartPie,
     FaColumns,
     FaUserTie,
     FaFileAlt,
@@ -19,6 +20,7 @@ import {
     FaAward,
     FaBalanceScaleLeft,
     FaFileExcel,
+    FaSortAlphaDown,
     FaUsers,
 } from 'react-icons/fa';
 
@@ -508,6 +510,112 @@ const Sidebar: React.FC = () => {
                                         </Col>
                                         <Col>
                                             <span>Instituições</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
+
+                <Card className={styles.menuCard}>
+                    <Accordion.Toggle
+                        as={Card.Header}
+                        className={styles.menuCardHeader}
+                        eventKey="reports"
+                        onClick={() => handleItemSideBar('reports')}
+                    >
+                        <div>
+                            <FaSortAlphaDown /> <span>Relatórios</span>
+                        </div>
+                    </Accordion.Toggle>
+                    <Accordion.Collapse eventKey="reports">
+                        <Card.Body className={styles.menuCardBody}>
+                            <Link href="/reports/banks">
+                                <a title="Relatórios de bancos" data-title="Relatórios de bancos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'reports-banks' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaUniversity size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Bancos</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
+                            <Link href="/reports/customers">
+                                <a title="Relatórios de clientes" data-title="Relatórios de clientes">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'reports-customers' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaUserTie size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Clientes</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
+                            <Link href="/reports/licensings">
+                                <a title="Relatórios de licenciamentos" data-title="Relatórios de licenciamentos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'reports-licensings' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaFileAlt size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Licenças</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
+                            <Link href="/reports/projects">
+                                <a title="Relatórios de projetos" data-title="Relatórios de projetos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'reports-projects' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaFileAlt size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Projetos</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
+                            <Link href="/reports/properties">
+                                <a title="Relatórios de imóveis" data-title="Relatórios de imóveis">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'reports-properties' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaMapSigns size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Imóveis</span>
                                         </Col>
                                     </Row>
                                 </a>
