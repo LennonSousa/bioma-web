@@ -26,7 +26,7 @@ const validationSchema = Yup.object().shape({
     institution: Yup.string().required('Obrigatório!'),
 });
 
-export default function NewCustomer() {
+export default function NewBank() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [institutions, setInstitutions] = useState<Institution[]>([]);

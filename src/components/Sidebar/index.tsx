@@ -35,7 +35,7 @@ const Sidebar: React.FC = () => {
 
     const [showPageHeader, setShowPageHeader] = useState(false);
 
-    const pathsNotShow = ['/'];
+    const pathsNotShow = ['/', '/users/new/auth', '/404', '500'];
 
     useEffect(() => {
         let show = false;
@@ -128,6 +128,26 @@ const Sidebar: React.FC = () => {
                                         </Col>
                                         <Col>
                                             <span>Documentos</span>
+                                        </Col>
+                                    </Row>
+                                </a>
+                            </Link>
+
+                            <Dropdown.Divider />
+
+                            <Link href="/customers/types">
+                                <a title="Listar os tipos" data-title="Listar os tipos">
+                                    <Row
+                                        className={
+                                            selectedMenu === 'customers-types' ? styles.selectedMenuCardBodyItem :
+                                                styles.menuCardBodyItem
+                                        }
+                                    >
+                                        <Col sm={1}>
+                                            <FaProjectDiagram size={14} />
+                                        </Col>
+                                        <Col>
+                                            <span>Tipos</span>
                                         </Col>
                                     </Row>
                                 </a>

@@ -13,6 +13,7 @@ import { SideBarContext } from '../../../context/SideBarContext';
 import { Customer } from '../../../components/Customers';
 import Members from '../../../components/CustomerMembers';
 import { User } from '../../../components/Users';
+import { CustomerType } from '../../../components/CustomerTypes';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import CustomerAttachments from '../../../components/CustomerAttachments';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
@@ -58,6 +59,7 @@ export default function NewCustomer() {
     const [customerData, setCustomerData] = useState<Customer>();
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
+    const [customerTypes, setCustomerTypes] = useState<CustomerType[]>([]);
 
     const [messageShow, setMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
@@ -107,6 +109,12 @@ export default function NewCustomer() {
                     handleUsersToAdd(usersRes, customerRes);
                 }).catch(err => {
                     console.log('Error to get users on customer edit, ', err);
+                });
+
+                api.get('customers/types').then(res => {
+                    setCustomerTypes(res.data);
+                }).catch(err => {
+                    console.log('Error to get customer types, ', err);
                 });
 
                 api.get('docs/customer').then(res => {
@@ -301,6 +309,7 @@ export default function NewCustomer() {
                         notes: customerData.notes,
                         warnings: customerData.warnings,
                         birth: format(new Date(customerData.birth), 'yyyy-MM-dd'),
+                        type: customerData.type.id,
                     }}
                     onSubmit={async values => {
                         setTypeMessage("waiting");
@@ -321,6 +330,7 @@ export default function NewCustomer() {
                                 notes: values.notes,
                                 warnings: values.warnings,
                                 birth: new Date(`${values.birth} 12:00:00`),
+                                type: values.type,
                             });
 
                             customerData.docs.forEach(async doc => {
@@ -552,6 +562,28 @@ export default function NewCustomer() {
                                         }
                                     </Form.Control>
                                     <Form.Control.Feedback type="invalid">{touched.city && errors.city}</Form.Control.Feedback>
+                                </Form.Group>
+                            </Row>
+
+                            <Row className="mb-3">
+                                <Form.Group as={Col} sm={6} controlId="formGridType">
+                                    <Form.Label>Tipo</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.type}
+                                        name="type"
+                                        isInvalid={!!errors.type && touched.type}
+                                    >
+                                        <option hidden>...</option>
+                                        {
+                                            customerTypes.map((type, index) => {
+                                                return <option key={index} value={type.id}>{type.name}</option>
+                                            })
+                                        }
+                                    </Form.Control>
+                                    <Form.Control.Feedback type="invalid">{touched.type && errors.type}</Form.Control.Feedback>
                                 </Form.Group>
                             </Row>
 

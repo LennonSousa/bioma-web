@@ -44,7 +44,7 @@ export default function Dashboard() {
                         const projectsFound = projects.filter(project => { return status.id === project.status.id });
 
                         if (projectsFound.length > 0) {
-                            tempStatusList.push(projectsFound[0].status.name);
+                            tempStatusList.push(`${projectsFound[0].status.name} (${projectsFound.length})`);
                             tempAmountStatusList.push(projectsFound.length);
                         }
                     });

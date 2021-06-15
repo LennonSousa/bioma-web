@@ -13,6 +13,7 @@ import { SideBarContext } from '../../../context/SideBarContext';
 import { AuthContext } from '../../../context/authContext';
 import Members, { Member } from '../../../components/CustomerMembers';
 import { User } from '../../../components/Users';
+import { CustomerType } from '../../../components/CustomerTypes';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import { cpf, cnpj, cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
@@ -33,6 +34,7 @@ const validationSchema = Yup.object().shape({
     notes: Yup.string().notRequired().nullable(),
     warnings: Yup.boolean().notRequired().nullable(),
     birth: Yup.date().required('Obrigatório!'),
+    type: Yup.string().required('Obrigatório!'),
 });
 
 export default function NewCustomer() {
@@ -43,6 +45,7 @@ export default function NewCustomer() {
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
     const [membersAdded, setMembersAdded] = useState<Member[]>([]);
+    const [customerTypes, setCustomerTypes] = useState<CustomerType[]>([]);
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -74,6 +77,12 @@ export default function NewCustomer() {
             }
         }).catch(err => {
             console.log('Error to get users on new customer, ', err);
+        });
+
+        api.get('customers/types').then(res => {
+            setCustomerTypes(res.data);
+        }).catch(err => {
+            console.log('Error to get customer types, ', err);
         });
 
         api.get('docs/customer').then(res => {
@@ -203,6 +212,7 @@ export default function NewCustomer() {
                 notes: '',
                 warnings: false,
                 birth: format(new Date(), 'yyyy-MM-dd'),
+                type: '',
             }}
             onSubmit={async values => {
                 setTypeMessage("waiting");
@@ -231,6 +241,7 @@ export default function NewCustomer() {
                         notes: values.notes,
                         warnings: values.warnings,
                         birth: new Date(`${values.birth} 12:00:00`),
+                        type: values.type,
                         docs,
                         members,
                     });
@@ -447,6 +458,28 @@ export default function NewCustomer() {
                                 }
                             </Form.Control>
                             <Form.Control.Feedback type="invalid">{touched.city && errors.city}</Form.Control.Feedback>
+                        </Form.Group>
+                    </Row>
+
+                    <Row className="mb-3">
+                        <Form.Group as={Col} sm={6} controlId="formGridType">
+                            <Form.Label>Tipo</Form.Label>
+                            <Form.Control
+                                as="select"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.type}
+                                name="type"
+                                isInvalid={!!errors.type && touched.type}
+                            >
+                                <option hidden>...</option>
+                                {
+                                    customerTypes.map((type, index) => {
+                                        return <option key={index} value={type.id}>{type.name}</option>
+                                    })
+                                }
+                            </Form.Control>
+                            <Form.Control.Feedback type="invalid">{touched.type && errors.type}</Form.Control.Feedback>
                         </Form.Group>
                     </Row>
 

@@ -14,7 +14,7 @@ import PageBack from '../../../components/PageBack';
 
 import styles from './styles.module.css';
 
-export default function CustomerDetails() {
+export default function BankDetails() {
     const router = useRouter();
     const { bank } = router.query;
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);

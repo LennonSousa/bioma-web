@@ -310,6 +310,22 @@ export default function CustomerDetails() {
                             </Row>
                         }
 
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Tipo</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{customerData.type.name}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
                         <Col className="border-top mb-3"></Col>
 
                         <Row className="mb-3">
