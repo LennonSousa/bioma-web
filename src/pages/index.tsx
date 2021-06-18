@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 import { FaKey } from 'react-icons/fa';
 
 import api from '../api/api';
-import { AuthContext } from '../context/authContext';
+import { AuthContext } from '../contexts/AuthContext';
 import { AlertMessage, statusModal } from '../components/interfaces/AlertMessage';
 
 import styles from '../styles/index.module.css';

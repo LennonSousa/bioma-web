@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { Container, Row } from 'react-bootstrap';
 
-import { SideBarContext } from '../../context/SideBarContext';
+import { SideBarContext } from '../../contexts/SideBarContext';
 import { Project } from '../../components/Projects';
 import ProjectListItem from '../../components/ProjectListItem';
 

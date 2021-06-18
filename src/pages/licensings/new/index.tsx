@@ -8,8 +8,8 @@ import { FaSearchPlus, FaPlus, FaUserTie } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
-import { AuthContext } from '../../../context/authContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
+import { AuthContext } from '../../../contexts/AuthContext';
 import Members, { Member } from '../../../components/LicensingMembers';
 import { User } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';

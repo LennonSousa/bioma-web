@@ -1,0 +1,8 @@
+.buttonNotificationsContainer {
+    justify-content: center;
+    display: inline-flex;
+}
+
+.buttonNotificationsContainerBadge {
+    margin-left: .5rem;
+}

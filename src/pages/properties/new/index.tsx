@@ -8,8 +8,8 @@ import { FaSearchPlus, FaPlus, FaUserTie } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { AuthContext } from '../../../context/authContext';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import Members, { Member } from '../../../components/PropertyMembers';
 import { User } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
@@ -349,7 +349,7 @@ export default function NewProperty() {
                             <Form.Control.Feedback type="invalid">{touched.area && errors.area}</Form.Control.Feedback>
                         </Form.Group>
 
-                        <Form.Group as={Col} sm={4} controlId="formGridArea">
+                        <Form.Group as={Col} sm={4} controlId="formGridCoordinates">
                             <Form.Label>Coordenadas</Form.Label>
                             <Form.Control
                                 type="text"

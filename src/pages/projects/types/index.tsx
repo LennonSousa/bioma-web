@@ -9,7 +9,7 @@ import produce from 'immer';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import ProjectTypes, { ProjectType } from '../../../components/ProjectTypes';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 

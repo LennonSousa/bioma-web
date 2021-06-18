@@ -19,7 +19,7 @@ import { LicensingInfringement } from '../../../components/LicensingInfringement
 import { LicensingStatus } from '../../../components/LicensingStatus';
 import { Property } from '../../../components/Properties';
 import EventsLicensing from '../../../components/EventsLicensing';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import LicensingAttachments from '../../../components/LicensingAttachments';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';

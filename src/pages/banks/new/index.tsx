@@ -8,7 +8,7 @@ import * as Yup from 'yup';
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { Institution } from '../../../components/Institutions';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
 import PageBack from '../../../components/PageBack';

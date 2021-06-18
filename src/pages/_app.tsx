@@ -1,8 +1,9 @@
 import Head from 'next/head';
 import { NextSeo } from 'next-seo';
 
-import { SideBarProvider } from '../context/SideBarContext';
-import { AuthProvider } from '../context/authContext';
+import { SideBarProvider } from '../contexts/SideBarContext';
+import { AuthProvider } from '../contexts/AuthContext';
+import { NotificationsProvider } from '../contexts/NotificationsContext';
 import { Header } from '../components/Header';
 import Sidebar from '../components/Sidebar';
 
@@ -20,20 +21,22 @@ function MyApp({ Component, pageProps }) {
       <meta name="viewport" content="width=device-width, initial-scale=1" />
     </Head>
 
-    <AuthProvider>
-      <SideBarProvider>
-        <div className={styles.wrapper}>
-          <Header />
-          <div className={styles.main}>
-            <Sidebar />
+    <NotificationsProvider>
+      <AuthProvider>
+        <SideBarProvider>
+          <div className={styles.wrapper}>
+            <Header />
+            <div className={styles.main}>
+              <Sidebar />
 
-            <section className={styles.content}>
-              <Component {...pageProps} />
-            </section>
+              <section className={styles.content}>
+                <Component {...pageProps} />
+              </section>
+            </div>
           </div>
-        </div>
-      </SideBarProvider>
-    </AuthProvider>
+        </SideBarProvider>
+      </AuthProvider>
+    </NotificationsProvider>
   </>
 }
 

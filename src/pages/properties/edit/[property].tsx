@@ -9,7 +9,7 @@ import { FaSearchPlus, FaPlus, FaUserTie } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Property } from '../../../components/Properties';
 import Members from '../../../components/PropertyMembers';
 import { User } from '../../../components/Users';
@@ -29,6 +29,7 @@ const validationSchema = Yup.object().shape({
     city: Yup.string().required('Obrigatório!'),
     state: Yup.string().required('Obrigatório!'),
     area: Yup.string().required('Obrigatório!'),
+    coordinates: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired().nullable(),
     warnings: Yup.boolean().notRequired(),
     customer: Yup.string().required('Obrigatório!'),
@@ -321,6 +322,7 @@ export default function NewProperty() {
                         city: propertyData.city,
                         state: propertyData.state,
                         area: propertyData.area,
+                        coordinates: propertyData.coordinates,
                         notes: propertyData.notes,
                         warnings: propertyData.warnings,
                         customer: propertyData.customer.id,
@@ -338,6 +340,7 @@ export default function NewProperty() {
                                 city: values.city,
                                 state: values.state,
                                 area: values.area,
+                                coordinates: values.coordinates,
                                 notes: values.notes,
                                 warnings: values.warnings,
                                 customer: values.customer,
@@ -437,7 +440,7 @@ export default function NewProperty() {
                                     <Form.Control.Feedback type="invalid">{touched.registration && errors.registration}</Form.Control.Feedback>
                                 </Form.Group>
 
-                                <Form.Group as={Col} sm={3} controlId="formGridArea">
+                                <Form.Group as={Col} sm={4} controlId="formGridArea">
                                     <Form.Label>Área do imóvel</Form.Label>
                                     <Form.Control
                                         type="text"
@@ -448,6 +451,19 @@ export default function NewProperty() {
                                         isInvalid={!!errors.area && touched.area}
                                     />
                                     <Form.Control.Feedback type="invalid">{touched.area && errors.area}</Form.Control.Feedback>
+                                </Form.Group>
+
+                                <Form.Group as={Col} sm={4} controlId="formGridCoordinates">
+                                    <Form.Label>Coordenadas</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.coordinates}
+                                        name="coordinates"
+                                        isInvalid={!!errors.coordinates && touched.coordinates}
+                                    />
+                                    <Form.Control.Feedback type="invalid">{touched.coordinates && errors.coordinates}</Form.Control.Feedback>
                                 </Form.Group>
                             </Row>
 

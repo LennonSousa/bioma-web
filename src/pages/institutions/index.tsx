@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
-import { SideBarContext } from '../../context/SideBarContext';
+import { SideBarContext } from '../../contexts/SideBarContext';
 import InstitutionItem, { Institution } from '../../components/Institutions';
 import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';
 
@@ -32,8 +32,6 @@ export default function Institutions() {
     const handleShowModalNewInstitution = () => setShowModalNewInstitution(true);
 
     useEffect(() => {
-        console.log('Institutions');
-
         handleItemSideBar('banks');
         handleSelectedMenu('institutions-index');
 

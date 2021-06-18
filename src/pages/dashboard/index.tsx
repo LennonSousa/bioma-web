@@ -5,8 +5,8 @@ import { addDays, startOfToday, endOfToday } from 'date-fns';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
-import { SideBarContext } from '../../context/SideBarContext';
-import { AuthContext } from '../../context/authContext';
+import { SideBarContext } from '../../contexts/SideBarContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import { Project } from '../../components/Projects';
 import { ProjectStatus } from '../../components/ProjectStatus';
 import PieChart from '../../components/Graphs/PieChart';

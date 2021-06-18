@@ -16,7 +16,7 @@ import {
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Project } from '../../../components/Projects';
 import Members from '../../../components/ProjectMembers';
 import { DocsProject } from '../../../components/DocsProject';

@@ -6,7 +6,7 @@ import { FaPlus } from 'react-icons/fa';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
-import { SideBarContext } from '../../context/SideBarContext';
+import { SideBarContext } from '../../contexts/SideBarContext';
 import Users, { User } from '../../components/Users';
 import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';
 

@@ -1,8 +1,10 @@
+import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { createContext, useState } from 'react';
 import Cookies from 'js-cookie';
 
 import api from '../api/api';
+import { NotificationsContext } from './NotificationsContext';
 import { User } from '../components/Users';
 
 interface AuthContextData {
@@ -18,6 +20,8 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 const AuthProvider: React.FC = ({ children }) => {
     const router = useRouter();
+
+    const { handleNotifications } = useContext(NotificationsContext);
 
     const [user, setUser] = useState<User | null>(null);
     const [signed, setSigned] = useState(false);
@@ -35,7 +39,13 @@ const AuthProvider: React.FC = ({ children }) => {
 
             api.defaults.headers['Authorization'] = `Bearer ${storagedToken}`;
 
-            setUser(JSON.parse(storagedUser));
+            const res = await api.get(`users/${storagedUser}`);
+
+            const userRes: User = res.data;
+
+            handleNotifications(userRes.notifications);
+
+            setUser(userRes);
             setSigned(true);
 
             setLoading(false);
@@ -65,7 +75,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
                 api.defaults.headers['Authorization'] = `Bearer ${token}`;
 
-                Cookies.set('user', JSON.stringify(user), { expires: 1 });
+                Cookies.set('user', user.id, { expires: 1 });
                 Cookies.set('token', token, { expires: 1 });
 
                 setSigned(true);

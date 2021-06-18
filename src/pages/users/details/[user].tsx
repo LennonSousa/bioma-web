@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import api from '../../../api/api';
 import { cellphone } from '../../../components/InputMask/masks';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { User, UserRole } from '../../../components/Users';
 import PropertyListItem from '../../../components/PropertyListItem';
 import PageBack from '../../../components/PageBack';

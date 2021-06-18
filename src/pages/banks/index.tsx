@@ -7,7 +7,7 @@ import BankListItem from '../../components/BankListItem';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
-import { SideBarContext } from '../../context/SideBarContext';
+import { SideBarContext } from '../../contexts/SideBarContext';
 
 export default function Banks() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);

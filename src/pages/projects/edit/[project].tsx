@@ -20,7 +20,7 @@ import { format, subDays } from 'date-fns';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Project } from '../../../components/Projects';
 import { Customer } from '../../../components/Customers';
 import Members from '../../../components/ProjectMembers';

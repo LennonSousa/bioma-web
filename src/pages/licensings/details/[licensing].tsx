@@ -13,7 +13,7 @@ import {
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import Members from '../../../components/LicensingMembers';
 import { Licensing } from '../../../components/Licensings';
 import EventsLicensing from '../../../components/EventsLicensing';

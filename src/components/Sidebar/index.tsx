@@ -22,10 +22,11 @@ import {
     FaFileExcel,
     FaSortAlphaDown,
     FaUsers,
+    FaUsersCog
 } from 'react-icons/fa';
 
-import { SideBarContext } from '../../context/SideBarContext';
-import { AuthContext } from '../../context/authContext';
+import { SideBarContext } from '../../contexts/SideBarContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import styles from './styles.module.css';
 
 const Sidebar: React.FC = () => {
@@ -144,7 +145,7 @@ const Sidebar: React.FC = () => {
                                         }
                                     >
                                         <Col sm={1}>
-                                            <FaProjectDiagram size={14} />
+                                            <FaUsersCog size={14} />
                                         </Col>
                                         <Col>
                                             <span>Tipos</span>

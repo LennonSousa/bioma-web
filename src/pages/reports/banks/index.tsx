@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Project } from '../../../components/Projects';
 import { Bank } from '../../../components/Banks';
 import ReportsItem from '../../../components/Reports';

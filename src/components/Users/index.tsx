@@ -8,6 +8,7 @@ import { Member as CustomerMember } from '../../components/CustomerMembers';
 import { Member as LicensingMember } from '../../components/LicensingMembers';
 import { Member as ProjectMember } from '../../components/ProjectMembers';
 import { Member as PropertyMember } from '../../components/PropertyMembers';
+import { Notification } from '../../components/Notifications';
 
 export interface User {
     id: string,
@@ -24,6 +25,7 @@ export interface User {
     licensingMembers: LicensingMember[];
     projectMembers: ProjectMember[];
     propertyMembers: PropertyMember[];
+    notifications: Notification[];
 }
 
 export interface UserRole {

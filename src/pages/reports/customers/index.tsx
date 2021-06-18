@@ -6,8 +6,9 @@ import * as Yup from 'yup';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Customer } from '../../../components/Customers';
+import { CustomerType } from '../../../components/CustomerTypes'
 import ReportsItem from '../../../components/Reports';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
@@ -18,6 +19,8 @@ const validationSchema = Yup.object().shape({
 
 export default function Reports() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+
+    const [customerTypes, setCustomerTypes] = useState<CustomerType[]>([]);
 
     const [isFirstView, setIsFirstView] = useState(true);
     const [showResultMessage, setShowResultMessage] = useState(false);
@@ -37,6 +40,12 @@ export default function Reports() {
     useEffect(() => {
         handleItemSideBar('reports');
         handleSelectedMenu('reports-customers');
+
+        api.get('customers/types').then(res => {
+            setCustomerTypes(res.data);
+        }).catch(err => {
+            console.log('Error to get customers types on reports, ', err);
+        });
     }, []);
 
     return <Container className="content-page">
@@ -66,7 +75,9 @@ export default function Reports() {
                         setMessageShow(true);
 
                         try {
-                            const res = await api.get(`reports/customers?warnings=${values.sub_item}`);
+                            const res = await api.get(
+                                `reports/customers?${values.item === "warnings" ? 'warnings' : 'type'}=${values.sub_item}`
+                            );
 
                             const customers: Customer[] = res.data;
 
@@ -102,14 +113,17 @@ export default function Reports() {
                     }}
                     validationSchema={validationSchema}
                 >
-                    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                    {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
                         <Form onSubmit={handleSubmit}>
                             <Row className="mb-3 align-items-end">
                                 <Form.Group as={Col} sm={4} controlId="formGridType">
                                     <Form.Label>Filtro</Form.Label>
                                     <Form.Control
                                         as="select"
-                                        onChange={handleChange}
+                                        onChange={e => {
+                                            setFieldValue('item', e.target.value);
+                                            setFieldValue('sub_item', '');
+                                        }}
                                         onBlur={handleBlur}
                                         value={values.item}
                                         name="item"
@@ -117,6 +131,7 @@ export default function Reports() {
                                     >
                                         <option hidden>...</option>
                                         <option value='warnings'>Pendências</option>
+                                        <option value='type'>Tipo</option>
                                     </Form.Control>
                                     <Form.Control.Feedback type="invalid">{touched.item && errors.item}</Form.Control.Feedback>
                                 </Form.Group>
@@ -124,7 +139,7 @@ export default function Reports() {
                                 <Form.Group as={Col} sm={6} controlId="formGridLine">
                                     {
                                         !!values.item && <>
-                                            <Form.Label>Clientes por pendência</Form.Label>
+                                            <Form.Label>{`${values.item === "warnings" ? 'Clientes por pendência' : 'Tipo de cliente'}`}</Form.Label>
                                             <Form.Control
                                                 as="select"
                                                 onChange={handleChange}
@@ -134,8 +149,19 @@ export default function Reports() {
                                                 isInvalid={!!errors.sub_item && touched.sub_item}
                                             >
                                                 <option hidden>...</option>
-                                                <option value='true'>Com pendência</option>
-                                                <option value='false'>Sem pendência</option>
+                                                {
+                                                    values.item === "warnings" && <>
+                                                        <option value='true'>Com pendência</option>
+                                                        <option value='false'>Sem pendência</option>
+                                                    </>
+                                                }
+
+                                                {
+                                                    values.item === "type" && customerTypes.map((type, index) => {
+                                                        return <option key={index} value={type.id}>{type.name}</option>
+                                                    })
+                                                }
+
                                             </Form.Control>
                                             <Form.Control.Feedback type="invalid">{touched.sub_item && errors.sub_item}</Form.Control.Feedback>
                                         </>

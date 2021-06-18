@@ -17,7 +17,7 @@ import {
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
-import { SideBarContext } from '../../../context/SideBarContext';
+import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Property } from '../../../components/Properties';
 import Members from '../../../components/PropertyMembers';
 import PropertyListItem from '../../../components/PropertyListItem';
@@ -155,7 +155,7 @@ export default function PropertyDetails() {
                         </Row>
 
                         <Row className="mb-3">
-                            <Col sm={3}>
+                            <Col sm={4}>
                                 <Row>
                                     <Col>
                                         <span className="text-success">Matrícula</span>
@@ -169,7 +169,7 @@ export default function PropertyDetails() {
                                 </Row>
                             </Col>
 
-                            <Col sm={3} >
+                            <Col sm={4} >
                                 <Row>
                                     <Col>
                                         <span className="text-success">Área</span>
@@ -179,6 +179,20 @@ export default function PropertyDetails() {
                                 <Row>
                                     <Col>
                                         <h6 className="text-secondary">{propertyData.area}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+
+                            <Col sm={4} >
+                                <Row>
+                                    <Col>
+                                        <span className="text-success">Coordenadas</span>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-secondary">{propertyData.coordinates}</h6>
                                     </Col>
                                 </Row>
                             </Col>
