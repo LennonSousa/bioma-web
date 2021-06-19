@@ -1,21 +1,17 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { Button, ButtonGroup, Col, Container, Tab, Tabs, ListGroup, Row } from 'react-bootstrap';
-import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FaKey, FaUserEdit } from 'react-icons/fa';
 import { format } from 'date-fns';
 
 import api from '../../../api/api';
-import { cellphone } from '../../../components/InputMask/masks';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { User, UserRole } from '../../../components/Users';
 import PropertyListItem from '../../../components/PropertyListItem';
 import PageBack from '../../../components/PageBack';
-import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 
@@ -55,11 +51,6 @@ const translatedRoles: TranslateRoles[] = [
     },
 ];
 
-const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Obrigatório!'),
-    phone: Yup.string().required('Obrigatório!'),
-});
-
 export default function UserDetails() {
     const router = useRouter();
     const { user } = router.query;
@@ -71,7 +62,7 @@ export default function UserDetails() {
 
     useEffect(() => {
         handleItemSideBar('users');
-        handleSelectedMenu('users-new');
+        handleSelectedMenu('users-index');
 
         api.get(`users/${user}`).then(res => {
             let userRes: User = res.data;

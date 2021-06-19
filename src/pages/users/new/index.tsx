@@ -82,7 +82,7 @@ export default function NewUser() {
 
     useEffect(() => {
         handleItemSideBar('users');
-        handleSelectedMenu('users-index');
+        handleSelectedMenu('users-new');
 
         api.get('user/roles').then(res => {
             const roles: userRoles[] = res.data;
