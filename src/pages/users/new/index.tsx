@@ -13,11 +13,6 @@ import { UserRole } from '../../../components/Users';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
-interface userRoles {
-    role: string,
-    grants: string[],
-};
-
 interface TranslateRoles {
     role: string,
     translated: string;
@@ -85,23 +80,7 @@ export default function NewUser() {
         handleSelectedMenu('users-new');
 
         api.get('user/roles').then(res => {
-            const roles: userRoles[] = res.data;
-
-            setUsersRoles(roles.map(role => {
-                const translatedRole = translatedRoles.find(item => { return item.role === role.role });
-
-                return {
-                    id: role.role,
-                    role: translatedRole ? translatedRole.translated : role.role,
-                    view: false,
-                    view_self: false,
-                    create: false,
-                    update: false,
-                    update_self: false,
-                    remove: false,
-                }
-            }));
-
+            setUsersRoles(res.data);
         }).catch(err => {
             console.log('Error get users roles, ', err);
         });
@@ -264,10 +243,12 @@ export default function NewUser() {
                             <ListGroup className="mb-3">
                                 {
                                     usersRoles.map((role, index) => {
+                                        const translatedRole = translatedRoles.find(item => { return item.role === role.role });
+
                                         return <ListGroup.Item key={index} as="div" variant="light">
                                             <Row>
                                                 <Col>
-                                                    <h6 className="text-success">{role.role} </h6>
+                                                    <h6 className="text-success">{translatedRole ? translatedRole.translated : role.role} </h6>
                                                 </Col>
 
                                                 <Col>

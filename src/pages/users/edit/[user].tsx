@@ -72,13 +72,9 @@ export default function UserEdit() {
         handleSelectedMenu('users-new');
 
         api.get(`users/${user}`).then(res => {
-            let userRes: User = res.data;
+            const userRes: User = res.data;
 
-            setUsersRoles(userRes.roles.map(role => {
-                const translatedRole = translatedRoles.find(item => { return item.role === role.role });
-
-                return { ...role, role: translatedRole ? translatedRole.translated : role.role };
-            }));
+            setUsersRoles(userRes.roles);
 
             setUserData(userRes);
         }).catch(err => {
@@ -248,10 +244,12 @@ export default function UserEdit() {
                                 <ListGroup className="mb-3">
                                     {
                                         usersRoles.map((role, index) => {
+                                            const translatedRole = translatedRoles.find(item => { return item.role === role.role });
+
                                             return <ListGroup.Item key={index} as="div" variant="light">
                                                 <Row>
                                                     <Col>
-                                                        <h6 className="text-success">{role.role} </h6>
+                                                        <h6 className="text-success">{translatedRole ? translatedRole.translated : role.role} </h6>
                                                     </Col>
 
                                                     <Col>
