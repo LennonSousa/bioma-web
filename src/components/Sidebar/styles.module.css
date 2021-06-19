@@ -63,7 +63,7 @@
 }
 
 .menuCardBodyItem:hover {
-    background-color: var(--green) !important;
+    background-color: var(--green-dark) !important;
 }
 
 .selectedMenuCardBodyItem {
