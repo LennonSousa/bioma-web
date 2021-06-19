@@ -69,7 +69,7 @@ export default function UserEdit() {
 
     useEffect(() => {
         handleItemSideBar('users');
-        handleSelectedMenu('users-new');
+        handleSelectedMenu('users-index');
 
         api.get(`users/${user}`).then(res => {
             const userRes: User = res.data;

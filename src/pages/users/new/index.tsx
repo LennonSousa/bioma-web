@@ -13,6 +13,11 @@ import { UserRole } from '../../../components/Users';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
+interface userRoles {
+    role: string,
+    grants: string[],
+};
+
 interface TranslateRoles {
     role: string,
     translated: string;
@@ -77,10 +82,24 @@ export default function NewUser() {
 
     useEffect(() => {
         handleItemSideBar('users');
-        handleSelectedMenu('users-new');
+        handleSelectedMenu('users-index');
 
         api.get('user/roles').then(res => {
-            setUsersRoles(res.data);
+            const roles: userRoles[] = res.data;
+
+            setUsersRoles(roles.map(role => {
+                return {
+                    id: role.role,
+                    role: role.role,
+                    view: false,
+                    view_self: false,
+                    create: false,
+                    update: false,
+                    update_self: false,
+                    remove: false,
+                }
+            }));
+
         }).catch(err => {
             console.log('Error get users roles, ', err);
         });
