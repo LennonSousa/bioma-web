@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { Button, ButtonGroup, Col, Container, Tab, Tabs, ListGroup, Row } from 'react-bootstrap';
-import * as Yup from 'yup';
 import { FaKey, FaUserEdit } from 'react-icons/fa';
 import { format } from 'date-fns';
 
