@@ -446,7 +446,7 @@ export default function CustomerDetails() {
 
                                         <Row className={styles.relationsContent}>
                                             {
-                                                customerData.properties.length > 0 ? customerData.properties.map((property, index) => {
+                                                !!customerData.properties.length ? customerData.properties.map((property, index) => {
                                                     return <PropertyListItem
                                                         key={index}
                                                         property={property}

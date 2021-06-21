@@ -108,7 +108,7 @@ export default function NewProperty() {
                 return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
             });
 
-            if (customersFound.length > 0) resultsUpdated = customersFound;
+            if (!!customersFound.length) resultsUpdated = customersFound;
 
             setCustomerResults(resultsUpdated);
         }
@@ -364,19 +364,6 @@ export default function NewProperty() {
                     </Row>
 
                     <Row className="mb-2">
-                        <Form.Group as={Col} sm={6} controlId="formGridAddress">
-                            <Form.Label>Roteiro</Form.Label>
-                            <Form.Control
-                                type="address"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.route}
-                                name="route"
-                                isInvalid={!!errors.route && touched.route}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.route && errors.route}</Form.Control.Feedback>
-                        </Form.Group>
-
                         <Form.Group as={Col} sm={2} controlId="formGridState">
                             <Form.Label>Estado</Form.Label>
                             <Form.Control
@@ -424,6 +411,22 @@ export default function NewProperty() {
                             <Form.Control.Feedback type="invalid">{touched.city && errors.city}</Form.Control.Feedback>
                         </Form.Group>
                     </Row>
+
+                    <Form.Row className="mb-3">
+                        <Form.Group as={Col} controlId="formGridRoute">
+                            <Form.Label>Roteiro</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={4}
+                                style={{ resize: 'none' }}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.route}
+                                name="route"
+                            />
+                            <Form.Control.Feedback type="invalid">{touched.route && errors.route}</Form.Control.Feedback>
+                        </Form.Group>
+                    </Form.Row>
 
                     <Form.Row className="mb-2">
                         <Form.Switch

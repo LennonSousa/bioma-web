@@ -325,7 +325,7 @@ export default function LicensingDetails() {
 
                                 <Row className="mt-2">
                                     {
-                                        licensingData.events.length > 0 ? <Col>
+                                        !!licensingData.events.length ? <Col>
                                             <Row className="mb-2" style={{ padding: '0 1rem' }}>
                                                 <Col sm={10}>
                                                     <h6>Descrição</h6>
@@ -371,7 +371,7 @@ export default function LicensingDetails() {
 
                         <Row className="mb-3">
                             {
-                                licensingData.attachments.length > 0 ? <Col>
+                                !!licensingData.attachments.length ? <Col>
                                     <Row>
                                         <Col>
                                             <ListGroup>

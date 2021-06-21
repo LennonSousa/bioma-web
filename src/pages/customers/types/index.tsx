@@ -122,7 +122,7 @@ export default function Types() {
                 </Col> :
                     <Row>
                         {
-                            customerTypes.length > 0 ? <Col>
+                            !!customerTypes.length ? <Col>
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="lines">
                                         {provided => (

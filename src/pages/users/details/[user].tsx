@@ -230,7 +230,7 @@ export default function UserDetails() {
                                 <Col>
                                     <Row className={styles.relationsContent}>
                                         {
-                                            userData.propertyMembers.length > 0 ? userData.propertyMembers.map((propertyMember, index) => {
+                                            !!userData.propertyMembers.length ? userData.propertyMembers.map((propertyMember, index) => {
                                                 return <PropertyListItem
                                                     key={index}
                                                     property={propertyMember.property}

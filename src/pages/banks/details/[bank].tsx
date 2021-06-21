@@ -187,7 +187,7 @@ export default function BankDetails() {
                                     <Col>
                                         <Row className={styles.relationsContent}>
                                             {
-                                                bankData.projects.length > 0 ? bankData.projects.map((project, index) => {
+                                                !!bankData.projects.length ? bankData.projects.map((project, index) => {
                                                     return <ProjectListItem
                                                         key={index}
                                                         project={project}

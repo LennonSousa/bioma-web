@@ -98,7 +98,7 @@ export default function NewCustomer() {
 
         <article className="mt-3">
             <Row>
-                {docsProperty.length > 0 ? <Col>
+                {!!docsProperty.length ? <Col>
                     <DragDropContext onDragEnd={handleOnDragEnd}>
                         <Droppable droppableId="docs">
                             {provided => (

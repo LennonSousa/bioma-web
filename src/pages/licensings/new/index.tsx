@@ -132,7 +132,7 @@ export default function NewLicensing() {
                 return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
             });
 
-            if (customersFound.length > 0) resultsUpdated = customersFound;
+            if (!!customersFound.length) resultsUpdated = customersFound;
 
             setCustomerResults(resultsUpdated);
         }

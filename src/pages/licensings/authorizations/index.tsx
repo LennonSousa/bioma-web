@@ -124,7 +124,7 @@ export default function Lines() {
                 </Col> :
                     <Row>
                         {
-                            authorizations.length > 0 ? <Col>
+                            !!authorizations.length ? <Col>
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="lines">
                                         {provided => (

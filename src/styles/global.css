@@ -55,6 +55,11 @@ a:hover {
     flex-grow: 0;
 }
 
+.text-cut{
+    overflow: hidden;
+    white-space: nowrap !important;
+}
+
 .custom-control-input:checked~.custom-control-label::before {
     border-color: var(--green) !important;
     background-color: var(--green) !important;

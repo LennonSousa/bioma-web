@@ -122,7 +122,7 @@ export default function Types() {
                 </Col> :
                     <Row>
                         {
-                            projectTypes.length > 0 ? <Col>
+                            !!projectTypes.length ? <Col>
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="lines">
                                         {provided => (

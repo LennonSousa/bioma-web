@@ -41,6 +41,7 @@ const AlertMessage: React.FC<WaitingModalProps> = ({ status, message = "" }) => 
         if (status === 'warning') {
             setVariantColor("warning");
             setCircleWaiting(false);
+            setErrorWaiting(false);
             setWarningWaiting(true);
             return;
         }
@@ -48,6 +49,7 @@ const AlertMessage: React.FC<WaitingModalProps> = ({ status, message = "" }) => 
         if (status === 'error') {
             setVariantColor("danger");
             setCircleWaiting(false);
+            setSuccessWaiting(false);
             setErrorWaiting(true);
             return;
         }

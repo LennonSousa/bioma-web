@@ -62,7 +62,7 @@ export default function Notifications() {
         <article className="mt-3">
             <Row>
                 {
-                    filteredNotifications.length > 0 ? <Col>
+                    !!filteredNotifications.length ? <Col>
                         <ListGroup>
                             {
                                 filteredNotifications && filteredNotifications.map(notification => {

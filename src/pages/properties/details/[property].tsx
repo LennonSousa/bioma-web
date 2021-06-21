@@ -199,20 +199,6 @@ export default function PropertyDetails() {
                         </Row>
 
                         <Row className="mb-3">
-                            <Col sm={6}>
-                                <Row>
-                                    <Col>
-                                        <span className="text-success">Roteiro</span>
-                                    </Col>
-                                </Row>
-
-                                <Row>
-                                    <Col>
-                                        <h6 className="text-secondary">{propertyData.route}</h6>
-                                    </Col>
-                                </Row>
-                            </Col>
-
                             <Col sm={4} >
                                 <Row>
                                     <Col>
@@ -237,6 +223,22 @@ export default function PropertyDetails() {
                                 <Row>
                                     <Col>
                                         <h6 className="text-secondary">{propertyData.state}</h6>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+
+                        <Row className="mb-3">
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h6 className="text-success">Roteiro</h6>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col>
+                                        <span className="text-secondary text-wrap">{propertyData.route}</span>
                                     </Col>
                                 </Row>
                             </Col>
@@ -406,7 +408,7 @@ export default function PropertyDetails() {
 
                                         <Row className={styles.relationsContent}>
                                             {
-                                                propertyData.customer.properties.length > 0 ? propertyData.customer.properties.map((property, index) => {
+                                                !!propertyData.customer.properties.length ? propertyData.customer.properties.map((property, index) => {
                                                     return <PropertyListItem
                                                         key={index}
                                                         property={property}

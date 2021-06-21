@@ -122,7 +122,7 @@ export default function Status() {
                 </Col> :
                     <Row>
                         {
-                            projectStatus.length > 0 ? <Col>
+                            !!projectStatus.length ? <Col>
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="status">
                                         {provided => (

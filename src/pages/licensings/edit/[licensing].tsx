@@ -1,11 +1,14 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { FaCheck, FaClock, FaFileAlt, FaIdCard, FaHistory, FaPlus, FaSearchPlus, FaUserTie } from 'react-icons/fa';
+import { FaFileAlt, FaHistory, FaPlus, FaSearchPlus, FaUserTie } from 'react-icons/fa';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row, Toast } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format, subDays } from 'date-fns';
+import filesize from "filesize";
+import { CircularProgressbar } from 'react-circular-progressbar';
+import "react-circular-progressbar/dist/styles.css";
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
@@ -48,7 +51,7 @@ const validationSchemaEvents = Yup.object().shape({
 const attachmentValidationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
     path: Yup.string().required('Obrigatório!'),
-    size: Yup.number().lessThan(5 * 1024 * 1024, 'O arquivo não pode ultrapassar 5MB.').notRequired().nullable(),
+    size: Yup.number().lessThan(200 * 1024 * 1024, 'O arquivo não pode ultrapassar 200MB.').notRequired().nullable(),
     received_at: Yup.date().required('Obrigatório!'),
     expire: Yup.boolean().notRequired().nullable(),
     expire_at: Yup.date().required('Obrigatório!'),
@@ -73,6 +76,8 @@ export default function NewCustomer() {
     const [licensingStatus, setLicensingStatus] = useState<LicensingStatus[]>([]);
     const [properties, setProperties] = useState<Property[]>([]);
 
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadingPercentage, setUploadingPercentage] = useState(0);
     const [messageShow, setMessageShow] = useState(false);
     const [eventMessageShow, setEventMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
@@ -185,7 +190,7 @@ export default function NewCustomer() {
                 return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
             });
 
-            if (customersFound.length > 0) resultsUpdated = customersFound;
+            if (!!customersFound.length) resultsUpdated = customersFound;
 
             setCustomerResults(resultsUpdated);
         }
@@ -663,7 +668,7 @@ export default function NewCustomer() {
 
                         <Row className="mt-2">
                             {
-                                licensingData.events.length > 0 ? <Col>
+                                !!licensingData.events.length ? <Col>
                                     <Row className="mb-2" style={{ padding: '0 1rem' }}>
                                         <Col sm={10}>
                                             <h6>Descrição</h6>
@@ -835,7 +840,9 @@ export default function NewCustomer() {
                             }
                         }
                         onSubmit={async values => {
-                            setTypeMessage("waiting");
+                            setUploadingPercentage(0);
+                            setTypeMessage("success");
+                            setIsUploading(true);
                             setMessageShowNewAttachment(true);
 
                             const scheduleAt = format(subDays(new Date(`${values.expire_at} 12:00:00`), values.schedule_at), 'yyyy-MM-dd');
@@ -854,21 +861,42 @@ export default function NewCustomer() {
                                 data.append('schedule_at', `${scheduleAt} 12:00:00`);
                                 data.append('licensing', values.customer);
 
-                                await api.post(`licensings/${licensingData.id}/attachments`, data);
+                                await api.post(`licensings/${licensingData.id}/attachments`, data, {
+                                    onUploadProgress: e => {
+                                        const progress = Math.round((e.loaded * 100) / e.total);
 
-                                await handleListAttachments();
+                                        setUploadingPercentage(progress);
+                                    },
+                                    timeout: 0,
+                                }).then(async () => {
+                                    await handleListAttachments();
 
-                                setTypeMessage("success");
+                                    setIsUploading(false);
+                                    setMessageShowNewAttachment(true);
 
-                                setTimeout(() => {
-                                    setMessageShowNewAttachment(false);
-                                    handleCloseModalNewAttachment();
-                                }, 1000);
+                                    setTimeout(() => {
+                                        setMessageShowNewAttachment(false);
+                                        handleCloseModalNewAttachment();
+                                    }, 1000);
+                                }).catch(err => {
+                                    console.log('error create attachment.');
+                                    console.log(err);
+
+                                    setIsUploading(false);
+                                    setMessageShowNewAttachment(true);
+                                    setTypeMessage("error");
+
+                                    setTimeout(() => {
+                                        setMessageShowNewAttachment(false);
+                                    }, 4000);
+                                });
                             }
                             catch (err) {
                                 console.log('error create attachment.');
                                 console.log(err);
 
+                                setIsUploading(false);
+                                setMessageShowNewAttachment(true);
                                 setTypeMessage("error");
 
                                 setTimeout(() => {
@@ -912,7 +940,7 @@ export default function NewCustomer() {
                                                     <Col>Anexo</Col>
                                                 </Row>
                                                 <input
-                                                    type="file" accept=".jpg, .jpeg, .png, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .psd"
+                                                    type="file"
                                                     onChange={(e) => {
                                                         handleImages(e);
                                                         if (e.target.files[0]) {
@@ -925,8 +953,18 @@ export default function NewCustomer() {
                                             </label>
                                         </Col>
 
-                                        <Col>
-                                            <label>{filePreview}</label>
+                                        <Col sm={8}>
+                                            <Row>
+                                                <Col>
+                                                    <h6 className="text-cut">{filePreview}</h6>
+                                                </Col>
+                                            </Row>
+
+                                            <Row>
+                                                <Col>
+                                                    <label className="text-wrap">{fileToSave ? filesize(fileToSave.size) : ''}</label>
+                                                </Col>
+                                            </Row>
                                         </Col>
 
                                         <Col className="col-12">
@@ -1003,7 +1041,22 @@ export default function NewCustomer() {
                                 </Modal.Body>
                                 <Modal.Footer>
                                     {
-                                        messageShowNewAttachment ? <AlertMessage status={typeMessage} /> :
+                                        messageShowNewAttachment ? (
+                                            isUploading ? <CircularProgressbar
+                                                styles={{
+                                                    root: { width: 50 },
+                                                    path: { stroke: "#069140" },
+                                                    text: {
+                                                        fontSize: "30px",
+                                                        fill: "#069140"
+                                                    },
+                                                }}
+                                                strokeWidth={12}
+                                                value={uploadingPercentage}
+                                                text={`${uploadingPercentage}%`}
+                                            /> :
+                                                <AlertMessage status={typeMessage} />
+                                        ) :
                                             <>
                                                 <Button variant="secondary" onClick={handleCloseModalNewAttachment}>Cancelar</Button>
                                                 <Button variant="success" type="submit">Salvar</Button>

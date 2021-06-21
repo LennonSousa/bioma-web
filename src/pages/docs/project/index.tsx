@@ -98,7 +98,7 @@ export default function NewProject() {
 
         <article className="mt-3">
             <Row>
-                {docsProject.length > 0 ? <Col>
+                {!!docsProject.length ? <Col>
                     <DragDropContext onDragEnd={handleOnDragEnd}>
                         <Droppable droppableId="docs">
                             {provided => (

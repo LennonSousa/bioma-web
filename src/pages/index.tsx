@@ -10,6 +10,8 @@ import api from '../api/api';
 import { AuthContext } from '../contexts/AuthContext';
 import { AlertMessage, statusModal } from '../components/interfaces/AlertMessage';
 
+import packageJson from '../../package.json';
+
 import styles from '../styles/index.module.css';
 
 const validationSchema = Yup.object().shape({
@@ -140,6 +142,12 @@ export default function Login() {
                               </Row>
                             </a>
                           </Link>
+                        </Col>
+                      </Row>
+
+                      <Row className={styles.version}>
+                        <Col>
+                          <small>{`v. ${packageJson.version}`}</small>
                         </Col>
                       </Row>
                     </Form>

@@ -122,7 +122,7 @@ export default function Types() {
                 </Col> :
                     <Row>
                         {
-                            infringements.length > 0 ? <Col>
+                            !!infringements.length ? <Col>
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="lines">
                                         {provided => (

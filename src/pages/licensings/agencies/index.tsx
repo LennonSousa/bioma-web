@@ -122,7 +122,7 @@ export default function Lines() {
                 </Col> :
                     <Row>
                         {
-                            licensingAgencies.length > 0 ? <Col>
+                            !!licensingAgencies.length ? <Col>
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="lines">
                                         {provided => (

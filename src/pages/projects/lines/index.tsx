@@ -122,7 +122,7 @@ export default function Lines() {
                 </Col> :
                     <Row>
                         {
-                            projectLines.length > 0 ? <Col>
+                            !!projectLines.length ? <Col>
                                 <DragDropContext onDragEnd={handleOnDragEnd}>
                                     <Droppable droppableId="lines">
                                         {provided => (

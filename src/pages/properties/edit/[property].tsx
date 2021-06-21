@@ -19,6 +19,9 @@ import PropertyAttachments from '../../../components/PropertyAttachments';
 import { statesCities } from '../../../components/StatesCities';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
+import filesize from "filesize";
+import { CircularProgressbar } from 'react-circular-progressbar';
+import "react-circular-progressbar/dist/styles.css";
 
 import styles from './styles.module.css';
 
@@ -39,7 +42,7 @@ const validationSchema = Yup.object().shape({
 const attachmentValidationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
     path: Yup.string().required('Obrigatório!'),
-    size: Yup.number().lessThan(5 * 1024 * 1024, 'O arquivo não pode ultrapassar 5MB.').notRequired().nullable(),
+    size: Yup.number().lessThan(200 * 1024 * 1024, 'O arquivo não pode ultrapassar 200MB.').notRequired().nullable(),
     received_at: Yup.date().required('Obrigatório!'),
     expire: Yup.boolean().notRequired().nullable(),
     expire_at: Yup.date().required('Obrigatório!'),
@@ -59,6 +62,8 @@ export default function NewProperty() {
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
 
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadingPercentage, setUploadingPercentage] = useState(0);
     const [messageShow, setMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -162,7 +167,7 @@ export default function NewProperty() {
                 return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
             });
 
-            if (customersFound.length > 0) resultsUpdated = customersFound;
+            if (!!customersFound.length) resultsUpdated = customersFound;
 
             setCustomerResults(resultsUpdated);
         }
@@ -468,19 +473,6 @@ export default function NewProperty() {
                             </Row>
 
                             <Row className="mb-2">
-                                <Form.Group as={Col} sm={6} controlId="formGridAddress">
-                                    <Form.Label>Roteiro</Form.Label>
-                                    <Form.Control
-                                        type="address"
-                                        onChange={handleChange}
-                                        onBlur={handleBlur}
-                                        value={values.route}
-                                        name="route"
-                                        isInvalid={!!errors.route && touched.route}
-                                    />
-                                    <Form.Control.Feedback type="invalid">{touched.route && errors.route}</Form.Control.Feedback>
-                                </Form.Group>
-
                                 <Form.Group as={Col} sm={2} controlId="formGridState">
                                     <Form.Label>Estado</Form.Label>
                                     <Form.Control
@@ -528,6 +520,22 @@ export default function NewProperty() {
                                     <Form.Control.Feedback type="invalid">{touched.city && errors.city}</Form.Control.Feedback>
                                 </Form.Group>
                             </Row>
+
+                            <Form.Row className="mb-3">
+                                <Form.Group as={Col} controlId="formGridRoute">
+                                    <Form.Label>Roteiro</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={4}
+                                        style={{ resize: 'none' }}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.route}
+                                        name="route"
+                                    />
+                                    <Form.Control.Feedback type="invalid">{touched.route && errors.route}</Form.Control.Feedback>
+                                </Form.Group>
+                            </Form.Row>
 
                             <Form.Row className="mb-2">
                                 <Form.Switch
@@ -718,7 +726,9 @@ export default function NewProperty() {
                             }
                         }
                         onSubmit={async values => {
-                            setTypeMessage("waiting");
+                            setUploadingPercentage(0);
+                            setTypeMessage("success");
+                            setIsUploading(true);
                             setMessageShowNewAttachment(true);
 
                             const scheduleAt = format(subDays(new Date(`${values.expire_at} 12:00:00`), values.schedule_at), 'yyyy-MM-dd');
@@ -737,21 +747,42 @@ export default function NewProperty() {
                                 data.append('schedule_at', `${scheduleAt} 12:00:00`);
                                 data.append('property', values.property);
 
-                                await api.post(`properties/${propertyData.id}/attachments`, data);
+                                await api.post(`properties/${propertyData.id}/attachments`, data, {
+                                    onUploadProgress: e => {
+                                        const progress = Math.round((e.loaded * 100) / e.total);
 
-                                await handleListAttachments();
+                                        setUploadingPercentage(progress);
+                                    },
+                                    timeout: 0,
+                                }).then(async () => {
+                                    await handleListAttachments();
 
-                                setTypeMessage("success");
+                                    setIsUploading(false);
+                                    setMessageShowNewAttachment(true);
 
-                                setTimeout(() => {
-                                    setMessageShowNewAttachment(false);
-                                    handleCloseModalNewAttachment();
-                                }, 1000);
+                                    setTimeout(() => {
+                                        setMessageShowNewAttachment(false);
+                                        handleCloseModalNewAttachment();
+                                    }, 1000);
+                                }).catch(err => {
+                                    console.log('error create attachment.');
+                                    console.log(err);
+
+                                    setIsUploading(false);
+                                    setMessageShowNewAttachment(true);
+                                    setTypeMessage("error");
+
+                                    setTimeout(() => {
+                                        setMessageShowNewAttachment(false);
+                                    }, 4000);
+                                });
                             }
                             catch (err) {
                                 console.log('error create attachment.');
                                 console.log(err);
 
+                                setIsUploading(false);
+                                setMessageShowNewAttachment(true);
                                 setTypeMessage("error");
 
                                 setTimeout(() => {
@@ -795,7 +826,7 @@ export default function NewProperty() {
                                                     <Col>Anexo</Col>
                                                 </Row>
                                                 <input
-                                                    type="file" accept=".jpg, .jpeg, .png, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .psd"
+                                                    type="file"
                                                     onChange={(e) => {
                                                         handleImages(e);
                                                         if (e.target.files[0]) {
@@ -808,8 +839,18 @@ export default function NewProperty() {
                                             </label>
                                         </Col>
 
-                                        <Col>
-                                            <label>{filePreview}</label>
+                                        <Col sm={8}>
+                                            <Row>
+                                                <Col>
+                                                    <h6 className="text-cut">{filePreview}</h6>
+                                                </Col>
+                                            </Row>
+
+                                            <Row>
+                                                <Col>
+                                                    <label className="text-wrap">{fileToSave ? filesize(fileToSave.size) : ''}</label>
+                                                </Col>
+                                            </Row>
                                         </Col>
 
                                         <Col className="col-12">
@@ -886,7 +927,22 @@ export default function NewProperty() {
                                 </Modal.Body>
                                 <Modal.Footer>
                                     {
-                                        messageShowNewAttachment ? <AlertMessage status={typeMessage} /> :
+                                        messageShowNewAttachment ? (
+                                            isUploading ? <CircularProgressbar
+                                                styles={{
+                                                    root: { width: 50 },
+                                                    path: { stroke: "#069140" },
+                                                    text: {
+                                                        fontSize: "30px",
+                                                        fill: "#069140"
+                                                    },
+                                                }}
+                                                strokeWidth={12}
+                                                value={uploadingPercentage}
+                                                text={`${uploadingPercentage}%`}
+                                            /> :
+                                                <AlertMessage status={typeMessage} />
+                                        ) :
                                             <>
                                                 <Button variant="secondary" onClick={handleCloseModalNewAttachment}>Cancelar</Button>
                                                 <Button variant="success" type="submit">Salvar</Button>

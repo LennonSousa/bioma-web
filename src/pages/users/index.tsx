@@ -73,7 +73,7 @@ export default function Institutions() {
                 </Col> :
                     <Row>
                         {
-                            users.length > 0 ? <Col>
+                            !!users.length ? <Col>
                                 <ListGroup>
                                     {
                                         users && users.map((user, index) => {

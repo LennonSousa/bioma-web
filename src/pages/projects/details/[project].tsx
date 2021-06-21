@@ -475,7 +475,7 @@ export default function PropertyDetails() {
 
                                 <Row className="mt-2">
                                     {
-                                        projectData.events.length > 0 ? <Col>
+                                        !!projectData.events.length ? <Col>
                                             <Row className="mb-2" style={{ padding: '0 1rem' }}>
                                                 <Col sm={10}>
                                                     <h6>Descrição</h6>

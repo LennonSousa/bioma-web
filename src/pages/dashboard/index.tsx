@@ -43,7 +43,7 @@ export default function Dashboard() {
                     statusRes.forEach(status => {
                         const projectsFound = projects.filter(project => { return status.id === project.status.id });
 
-                        if (projectsFound.length > 0) {
+                        if (!!projectsFound.length) {
                             tempStatusList.push(`${projectsFound[0].status.name} (${projectsFound.length})`);
                             tempAmountStatusList.push(projectsFound.length);
                         }

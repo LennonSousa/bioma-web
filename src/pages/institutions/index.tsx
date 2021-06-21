@@ -81,7 +81,7 @@ export default function Institutions() {
                 </Col> :
                     <Row>
                         {
-                            institutions.length > 0 ? <Col>
+                            !!institutions.length ? <Col>
                                 <ListGroup>
                                     {
                                         institutions && institutions.map((institution, index) => {
