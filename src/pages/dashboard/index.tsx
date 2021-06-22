@@ -10,7 +10,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { Project } from '../../components/Projects';
 import { ProjectStatus } from '../../components/ProjectStatus';
 import PieChart from '../../components/Graphs/PieChart';
-import PageWaiting from '../../components/PageWaiting';
+import { PageWaiting } from '../../components/PageWaiting';
 
 const startOfDay = startOfToday();
 const endOfDay = endOfToday();
@@ -62,32 +62,47 @@ export default function Dashboard() {
     }, [signed]);
 
     return (
-        loading ? <PageWaiting /> :
-            <Container className="content-page">
-                <Row>
-                    <Col sm={6}>
-                        <Row className="mb-3">
-                            <Col>
-                                <h6 className="text-success text-center">Fases dos projetos nos últimos 30 dias</h6>
-                            </Col>
-                        </Row>
-                        <Row className="justify-content-center mb-3">
-                            <Col sm={8}>
-                                <PieChart
-                                    labels={statusList}
-                                    label='Projetos'
-                                    data={amountStatusProjects}
-                                />
-                            </Col>
-                        </Row>
-                    </Col>
+        loading ? <PageWaiting status="waiting" /> :
+            <section>
+                <Container className="content-page mb-4">
+                    <Row>
+                        <Col sm={6}>
+                            <Row className="mb-3">
+                                <Col>
+                                    <h6 className="text-success text-center">Fases dos projetos nos últimos 30 dias</h6>
+                                </Col>
+                            </Row>
+                            <Row className="justify-content-center align-items-center mb-3">
+                                {
+                                    !!amountStatusProjects.length ? <Col sm={8}>
+                                        <PieChart
+                                            labels={statusList}
+                                            label='Projetos'
+                                            data={amountStatusProjects}
+                                        />
+                                    </Col> : <Col className="text-center">
+                                        <span className="text-secondary">Nenhum projeto no período.</span>
+                                    </Col>
+                                }
+                            </Row>
+                        </Col>
 
-                    <Col sm={6}>
+                        <Col sm={6}>
 
-                    </Col>
-                </Row>
+                        </Col>
+                    </Row>
+                </Container>
 
-            </Container>
+                <Container>
+                    <Row>
+                        <Col className="content-page" sm={4}>
+                            <Row>
+
+                            </Row>
+                        </Col>
+                    </Row>
+                </Container>
+            </section>
     )
 }
 

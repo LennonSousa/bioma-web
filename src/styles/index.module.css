@@ -19,6 +19,6 @@
 }
 
 .version{
-    text-align: right;
+    text-align: left;
     color: var(--gray);
 }

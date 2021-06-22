@@ -47,7 +47,7 @@ export default function Login() {
                     password: '',
                   }}
                   onSubmit={async values => {
-                    setTextMessage('entrando...');
+                    setTextMessage('autenticando...');
                     setTypeMessage("waiting");
                     setMessageShow(true);
 

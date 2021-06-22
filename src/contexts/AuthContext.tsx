@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { createContext, useState } from 'react';
 import Cookies from 'js-cookie';
+import { AccessControl } from 'accesscontrol';
 
 import api from '../api/api';
 import { NotificationsContext } from './NotificationsContext';
@@ -45,6 +46,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
             handleNotifications(userRes.notifications);
 
+            setUserGrants(user);
             setUser(userRes);
             setSigned(true);
 
@@ -71,6 +73,8 @@ const AuthProvider: React.FC = ({ children }) => {
             if (res.status === 201) {
                 const { user, token } = res.data;
 
+                setUserGrants(user);
+
                 setUser(user);
 
                 api.defaults.headers['Authorization'] = `Bearer ${token}`;
@@ -93,7 +97,40 @@ const AuthProvider: React.FC = ({ children }) => {
         }
     }
 
+    function setUserGrants(user: User) {
+        const ac = new AccessControl();
+
+        user.roles.forEach(role => {
+            if (role.view) {
+                ac.grant(user.id).readAny(role.role);
+            }
+
+            if (role.view_self) {
+                ac.grant(user.id).readOwn(role.role);
+            }
+
+            if (role.create) {
+                ac.grant(user.id).create(role.role);
+            }
+
+            if (role.update) {
+                ac.grant(user.id).updateAny(role.role);
+            }
+
+            if (role.update_self) {
+                ac.grant(user.id).updateOwn(role.role);
+            }
+
+            if (role.remove) {
+                ac.grant(user.id).delete(role.role);
+            }
+        });
+
+        ac.lock();
+    }
+
     async function handleLogout() {
+        setLoading(true);
         setSigned(false);
         Cookies.remove('user');
         Cookies.remove('token');

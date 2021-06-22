@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { Container, Row } from 'react-bootstrap';
+import { AccessControl } from 'accesscontrol';
 
 import { Customer } from '../../components/Customers';
 import CustomerItem from '../../components/CustomerListItem';
@@ -12,6 +13,8 @@ import { SideBarContext } from '../../contexts/SideBarContext';
 export default function Customers() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const [customers, setCustomers] = useState<Customer[]>([]);
+
+    const ac = new AccessControl();
 
     useEffect(() => {
         handleItemSideBar('customers');
