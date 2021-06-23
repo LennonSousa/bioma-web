@@ -37,49 +37,54 @@ export default function PropertyDetails() {
     const { loading, user } = useContext(AuthContext);
 
     const [projectData, setProjectData] = useState<Project>();
+    const [accessVerified, setAccessVerified] = useState(false);
 
     useEffect(() => {
         if (user) {
             ac.setGrants(user.grants);
 
-            if (ac.can(user.id).readAny('projects').granted) {
-                handleItemSideBar('projects');
-                handleSelectedMenu('projects-index');
+            if (ac.hasRole(user.id)) {
+                if (ac.can(user.id).readAny('projects').granted) {
+                    handleItemSideBar('projects');
+                    handleSelectedMenu('projects-index');
 
-                if (project) {
-                    api.get(`projects/${project}`).then(res => {
-                        let projecRes: Project = res.data;
+                    if (project) {
+                        api.get(`projects/${project}`).then(res => {
+                            let projecRes: Project = res.data;
 
-                        api.get('docs/project').then(res => {
-                            const documentsRes: DocsProject[] = res.data;
+                            api.get('docs/project').then(res => {
+                                const documentsRes: DocsProject[] = res.data;
 
-                            projecRes = {
-                                ...projecRes, docs: documentsRes.map(doc => {
-                                    const projectDoc = projecRes.docs.find(item => { return item.doc.id === doc.id });
+                                projecRes = {
+                                    ...projecRes, docs: documentsRes.map(doc => {
+                                        const projectDoc = projecRes.docs.find(item => { return item.doc.id === doc.id });
 
-                                    if (projectDoc)
-                                        return { ...projectDoc, project: projecRes };
+                                        if (projectDoc)
+                                            return { ...projectDoc, project: projecRes };
 
-                                    return {
-                                        id: '0',
-                                        path: '',
-                                        received_at: new Date(),
-                                        checked: false,
-                                        project: projecRes,
-                                        doc: doc,
-                                    };
-                                })
-                            }
+                                        return {
+                                            id: '0',
+                                            path: '',
+                                            received_at: new Date(),
+                                            checked: false,
+                                            project: projecRes,
+                                            doc: doc,
+                                        };
+                                    })
+                                }
 
-                            setProjectData(projecRes);
+                                setProjectData(projecRes);
+                            }).catch(err => {
+                                console.log('Error to get docs project to edit, ', err);
+                            });
                         }).catch(err => {
-                            console.log('Error to get docs project to edit, ', err);
+                            console.log('Error to get project: ', err);
                         });
-                    }).catch(err => {
-                        console.log('Error to get project: ', err);
-                    });
+                    }
                 }
             }
+
+            setAccessVerified(true);
         }
     }, [user, project]);
 
@@ -87,10 +92,10 @@ export default function PropertyDetails() {
         router.push(route);
     }
 
-    return loading ? <PageWaiting status="waiting" /> :
+    return loading || !accessVerified ? <PageWaiting status="waiting" /> :
         <>
             {
-                user && ac.hasRole(user.id) && ac.can(user.id).readAny('projects').granted ? <Container className="content-page">
+                ac.hasRole(user.id) && ac.can(user.id).readAny('projects').granted ? <Container className="content-page">
                     {
                         !projectData ? <h1>Aguarde...</h1> :
                             <Row>
@@ -197,7 +202,7 @@ export default function PropertyDetails() {
                                     </Row>
 
                                     <Row className="mb-3">
-                                        <Col sm={3}>
+                                        <Col sm={4}>
                                             <Row>
                                                 <Col>
                                                     <span className="text-success">Banco</span>
@@ -225,7 +230,7 @@ export default function PropertyDetails() {
                                             </Row>
                                         </Col>
 
-                                        <Col sm={5} >
+                                        <Col sm={4} >
                                             <Row>
                                                 <Col>
                                                     <span className="text-success">Contatos do analista</span>
@@ -234,7 +239,7 @@ export default function PropertyDetails() {
 
                                             <Row>
                                                 <Col>
-                                                    <h6 className="text-secondary">{projectData.analyst_contact}</h6>
+                                                    <h6 className="text-secondary text-wrap">{projectData.analyst_contact}</h6>
                                                 </Col>
                                             </Row>
                                         </Col>

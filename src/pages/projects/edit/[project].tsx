@@ -99,6 +99,7 @@ export default function NewCustomer() {
     const [banks, setBanks] = useState<Bank[]>([]);
     const [properties, setProperties] = useState<Property[]>([]);
 
+    const [accessVerified, setAccessVerified] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadingPercentage, setUploadingPercentage] = useState(0);
     const [messageShow, setMessageShow] = useState(false);
@@ -136,91 +137,96 @@ export default function NewCustomer() {
         if (user) {
             ac.setGrants(user.grants);
 
-            if (ac.can(user.id).updateAny('projects').granted) {
-                handleItemSideBar('projects');
-                handleSelectedMenu('projects-index');
+            if (ac.hasRole(user.id)) {
+                if (ac.can(user.id).updateAny('projects').granted) {
 
-                if (project) {
-                    api.get(`projects/${project}`).then(res => {
-                        let projectRes: Project = res.data;
+                    handleItemSideBar('projects');
+                    handleSelectedMenu('projects-index');
 
-                        api.get('customers').then(res => {
-                            setCustomers(res.data);
+                    if (project) {
+                        api.get(`projects/${project}`).then(res => {
+                            let projectRes: Project = res.data;
+
+                            api.get('customers').then(res => {
+                                setCustomers(res.data);
+                            }).catch(err => {
+                                console.log('Error to get project status, ', err);
+                            });
+
+                            api.get('users').then(res => {
+                                setUsers(res.data);
+                                const usersRes: User[] = res.data;
+
+                                handleUsersToAdd(usersRes, projectRes);
+                            }).catch(err => {
+                                console.log('Error to get users on project edit, ', err);
+                            });
+
+                            api.get('projects/types').then(res => {
+                                setProjectTypes(res.data);
+                            }).catch(err => {
+                                console.log('Error to get project types, ', err);
+                            });
+
+                            api.get('projects/lines').then(res => {
+                                setProjectLines(res.data);
+                            }).catch(err => {
+                                console.log('Error to get project lines, ', err);
+                            });
+
+                            api.get('projects/status').then(res => {
+                                setProjectStatus(res.data);
+                            }).catch(err => {
+                                console.log('Error to get project status, ', err);
+                            });
+
+                            api.get('banks').then(res => {
+                                setBanks(res.data);
+                            }).catch(err => {
+                                console.log('Error to get banks, ', err);
+                            });
+
+                            api.get('docs/project').then(res => {
+                                const documentsRes: DocsProject[] = res.data;
+
+                                projectRes = {
+                                    ...projectRes, docs: documentsRes.map(doc => {
+                                        const projectDoc = projectRes.docs.find(item => { return item.doc.id === doc.id });
+
+                                        if (projectDoc)
+                                            return { ...projectDoc, project: projectRes };
+
+                                        return {
+                                            id: '0',
+                                            path: '',
+                                            received_at: new Date(),
+                                            checked: false,
+                                            project: projectRes,
+                                            doc: doc,
+                                        };
+                                    })
+                                }
+
+                                setProjectData(projectRes);
+                            }).catch(err => {
+                                console.log('Error to get docs project to edit, ', err);
+                            });
+
+                            api.get(`customers/${projectRes.customer.id}/properties`).then(res => {
+                                setProperties(res.data);
+
+                                setProjectData(projectRes);
+                            }).catch(err => {
+                                console.log('Error to get customer properties ', err);
+                            });
                         }).catch(err => {
-                            console.log('Error to get project status, ', err);
+                            console.log('Error to get project, ', err);
                         });
-
-                        api.get('users').then(res => {
-                            setUsers(res.data);
-                            const usersRes: User[] = res.data;
-
-                            handleUsersToAdd(usersRes, projectRes);
-                        }).catch(err => {
-                            console.log('Error to get users on project edit, ', err);
-                        });
-
-                        api.get('projects/types').then(res => {
-                            setProjectTypes(res.data);
-                        }).catch(err => {
-                            console.log('Error to get project types, ', err);
-                        });
-
-                        api.get('projects/lines').then(res => {
-                            setProjectLines(res.data);
-                        }).catch(err => {
-                            console.log('Error to get project lines, ', err);
-                        });
-
-                        api.get('projects/status').then(res => {
-                            setProjectStatus(res.data);
-                        }).catch(err => {
-                            console.log('Error to get project status, ', err);
-                        });
-
-                        api.get('banks').then(res => {
-                            setBanks(res.data);
-                        }).catch(err => {
-                            console.log('Error to get banks, ', err);
-                        });
-
-                        api.get('docs/project').then(res => {
-                            const documentsRes: DocsProject[] = res.data;
-
-                            projectRes = {
-                                ...projectRes, docs: documentsRes.map(doc => {
-                                    const projectDoc = projectRes.docs.find(item => { return item.doc.id === doc.id });
-
-                                    if (projectDoc)
-                                        return { ...projectDoc, project: projectRes };
-
-                                    return {
-                                        id: '0',
-                                        path: '',
-                                        received_at: new Date(),
-                                        checked: false,
-                                        project: projectRes,
-                                        doc: doc,
-                                    };
-                                })
-                            }
-
-                            setProjectData(projectRes);
-                        }).catch(err => {
-                            console.log('Error to get docs project to edit, ', err);
-                        });
-
-                        api.get(`customers/${projectRes.customer.id}/properties`).then(res => {
-                            setProperties(res.data);
-
-                            setProjectData(projectRes);
-                        }).catch(err => {
-                            console.log('Error to get customer properties ', err);
-                        });
-                    }).catch(err => {
-                        console.log('Error to get project, ', err);
-                    });
+                    }
                 }
             }
+
+            setAccessVerified(true);
         }
     }, [user, project]);
 
@@ -330,12 +336,12 @@ export default function NewCustomer() {
         setProjectData({ ...projectData, docs: updatedDocs });
     }
 
-    return loading ? <PageWaiting status="waiting" /> :
+    return loading || !accessVerified ? <PageWaiting status="waiting" /> :
         <>
             {
-                user && ac.hasRole(user.id) && ac.can(user.id).updateAny('projects').granted ? <Container className="content-page">
+                ac.can(user.id).updateAny('projects').granted ? <Container className="content-page">
                     {
-                        projectData ? <h1>Aguarde...</h1> :
+                        !projectData ? <h1>Aguarde...</h1> :
                             <>
                                 <Row className="mb-3">
                                     <Col>
@@ -622,7 +628,7 @@ export default function NewCustomer() {
                                             </Row>
 
                                             <Row className="mb-2">
-                                                <Form.Group as={Col} sm={5} controlId="formGridContract">
+                                                <Form.Group as={Col} sm={5} controlId="formGridAnalyst">
                                                     <Form.Label>Analista no banco</Form.Label>
                                                     <Form.Control
                                                         type="text"
@@ -635,7 +641,7 @@ export default function NewCustomer() {
                                                     <Form.Control.Feedback type="invalid">{touched.analyst && errors.analyst}</Form.Control.Feedback>
                                                 </Form.Group>
 
-                                                <Form.Group as={Col} sm={7} controlId="formGridContract">
+                                                <Form.Group as={Col} sm={7} controlId="formGridAnalystContact">
                                                     <Form.Label>Contatos do analista</Form.Label>
                                                     <Form.Control
                                                         type="text"

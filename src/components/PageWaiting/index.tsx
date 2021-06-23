@@ -3,7 +3,7 @@ import { Col, Container, Image, Row, Spinner } from 'react-bootstrap';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 interface PageWaitingProps {
-    status: 'waiting' | 'success' | 'warning' | 'error',
+    status: 'waiting' | 'success' | 'warning' | 'empty' | 'error',
     message?: string;
 }
 
@@ -11,13 +11,14 @@ const PageWaiting: React.FC<PageWaitingProps> = ({ status, message = "Aguarde, c
     const [circleWaiting, setCircleWaiting] = useState(true);
     const [successWaiting, setSuccessWaiting] = useState(false);
     const [warningWaiting, setWarningWaiting] = useState(false);
+    const [emptyWaiting, setEmptyWaiting] = useState(false);
     const [errorWaiting, setErrorWaiting] = useState(false);
 
     useEffect(() => {
         handleAlert(status);
     }, [status, message]);
 
-    function handleAlert(status: 'waiting' | 'success' | 'warning' | 'error') {
+    function handleAlert(status: 'waiting' | 'success' | 'warning' | 'empty' | 'error') {
         if (status === 'waiting') {
             setCircleWaiting(true);
             setSuccessWaiting(false);
@@ -38,6 +39,14 @@ const PageWaiting: React.FC<PageWaitingProps> = ({ status, message = "Aguarde, c
             return;
         }
 
+        if (status === 'empty') {
+            setCircleWaiting(false);
+            setErrorWaiting(false);
+            setEmptyWaiting(true);
+            setWarningWaiting(false);
+            return;
+        }
+
         if (status === 'error') {
             setCircleWaiting(false);
             setSuccessWaiting(false);
@@ -52,7 +61,7 @@ const PageWaiting: React.FC<PageWaitingProps> = ({ status, message = "Aguarde, c
                 <Row>
                     <Col>
                         {
-                            circleWaiting && <Spinner animation="border" variant="info" size="sm" />
+                            circleWaiting && <Spinner animation="border" variant="success" />
                         }
                         {
                             successWaiting && <FaCheckCircle />
@@ -64,14 +73,27 @@ const PageWaiting: React.FC<PageWaitingProps> = ({ status, message = "Aguarde, c
                                 </Col>
                             </Row>
                         }
+
                         {
-                            errorWaiting && <FaTimesCircle />
+                            emptyWaiting && <Row className="justify-content-center mt-3 mb-3">
+                                <Col sm={3}>
+                                    <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                </Col>
+                            </Row>
+                        }
+
+                        {
+                            errorWaiting && <Row className="justify-content-center mt-3 mb-3">
+                                <Col sm={3}>
+                                    <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
+                                </Col>
+                            </Row>
                         }
                     </Col>
                 </Row>
                 <Row>
                     <Col>
-                        <h1>{message}</h1>
+                        <h4 className="text-success">{message}</h4>
                     </Col>
                 </Row>
             </Col>

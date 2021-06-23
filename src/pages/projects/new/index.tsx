@@ -63,6 +63,7 @@ export default function NewProject() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [docsProject, setDocsProject] = useState<DocsProject[]>([]);
 
+    const [accessVerified, setAccessVerified] = useState(false);
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
@@ -79,65 +80,69 @@ export default function NewProject() {
         if (user) {
             ac.setGrants(user.grants);
 
-            if (ac.can(user.id).readAny('projects').granted) {
-                handleItemSideBar('projects');
-                handleSelectedMenu('projects-new');
+            if (ac.hasRole(user.id)) {
+                if (ac.can(user.id).readAny('projects').granted) {
+                    handleItemSideBar('projects');
+                    handleSelectedMenu('projects-new');
 
-                api.get('users').then(res => {
-                    setUsers(res.data);
-                    const usersRes: User[] = res.data;
+                    api.get('users').then(res => {
+                        setUsers(res.data);
+                        const usersRes: User[] = res.data;
 
-                    if (user) {
-                        const newMembersAddedList = [{
-                            id: '',
-                            project: undefined,
-                            user,
-                        }];
+                        if (user) {
+                            const newMembersAddedList = [{
+                                id: '',
+                                project: undefined,
+                                user,
+                            }];
 
-                        handleUsersToAdd(usersRes, newMembersAddedList);
+                            handleUsersToAdd(usersRes, newMembersAddedList);
 
-                        setMembersAdded(newMembersAddedList);
-                    }
-                }).catch(err => {
-                    console.log('Error to get users on new project, ', err);
-                });
+                            setMembersAdded(newMembersAddedList);
+                        }
+                    }).catch(err => {
+                        console.log('Error to get users on new project, ', err);
+                    });
 
-                api.get('customers').then(res => {
-                    setCustomers(res.data);
-                }).catch(err => {
-                    console.log('Error to get project status, ', err);
-                });
+                    api.get('customers').then(res => {
+                        setCustomers(res.data);
+                    }).catch(err => {
+                        console.log('Error to get project status, ', err);
+                    });
 
-                api.get('projects/types').then(res => {
-                    setProjectTypes(res.data);
-                }).catch(err => {
-                    console.log('Error to get project types, ', err);
-                });
+                    api.get('projects/types').then(res => {
+                        setProjectTypes(res.data);
+                    }).catch(err => {
+                        console.log('Error to get project types, ', err);
+                    });
 
-                api.get('projects/lines').then(res => {
-                    setProjectLines(res.data);
-                }).catch(err => {
-                    console.log('Error to get project lines, ', err);
-                });
+                    api.get('projects/lines').then(res => {
+                        setProjectLines(res.data);
+                    }).catch(err => {
+                        console.log('Error to get project lines, ', err);
+                    });
 
-                api.get('projects/status').then(res => {
-                    setProjectStatus(res.data);
-                }).catch(err => {
-                    console.log('Error to get project status, ', err);
-                });
+                    api.get('projects/status').then(res => {
+                        setProjectStatus(res.data);
+                    }).catch(err => {
+                        console.log('Error to get project status, ', err);
+                    });
 
-                api.get('banks').then(res => {
-                    setBanks(res.data);
-                }).catch(err => {
-                    console.log('Error to get banks, ', err);
-                });
+                    api.get('banks').then(res => {
+                        setBanks(res.data);
+                    }).catch(err => {
+                        console.log('Error to get banks, ', err);
+                    });
 
-                api.get('docs/project').then(res => {
-                    setDocsProject(res.data);
-                }).catch(err => {
-                    console.log('Error to get docs project, ', err);
-                });
+                    api.get('docs/project').then(res => {
+                        setDocsProject(res.data);
+                    }).catch(err => {
+                        console.log('Error to get docs project, ', err);
+                    });
+                }
             }
+
+            setAccessVerified(true);
         }
     }, [user]);
 
@@ -200,10 +205,10 @@ export default function NewProject() {
         )
     }
 
-    return loading ? <PageWaiting status="waiting" /> :
+    return loading || !accessVerified ? <PageWaiting status="waiting" /> :
         <>
             {
-                user && ac.hasRole(user.id) && ac.can(user.id).createAny('projects').granted ? <Container className="content-page">
+                ac.hasRole(user.id) && ac.can(user.id).createAny('projects').granted ? <Container className="content-page">
                     <Row className="mb-3">
                         <Col>
                             <PageBack href="/projects" subTitle="Voltar para a lista de projetos" />
@@ -481,7 +486,7 @@ export default function NewProject() {
                                 </Row>
 
                                 <Row className="mb-2">
-                                    <Form.Group as={Col} sm={5} controlId="formGridContract">
+                                    <Form.Group as={Col} sm={5} controlId="formGridAnalyst">
                                         <Form.Label>Analista no banco</Form.Label>
                                         <Form.Control
                                             type="text"
@@ -494,7 +499,7 @@ export default function NewProject() {
                                         <Form.Control.Feedback type="invalid">{touched.analyst && errors.analyst}</Form.Control.Feedback>
                                     </Form.Group>
 
-                                    <Form.Group as={Col} sm={7} controlId="formGridContract">
+                                    <Form.Group as={Col} sm={7} controlId="formGridAnalystContact">
                                         <Form.Label>Contatos do analista</Form.Label>
                                         <Form.Control
                                             type="text"

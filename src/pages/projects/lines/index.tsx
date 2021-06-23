@@ -6,10 +6,13 @@ import { FaPlus } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import produce from 'immer';
+import { AccessControl } from 'accesscontrol';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { PageWaiting } from '../../../components/PageWaiting';
 import ProjectLines, { ProjectLine } from '../../../components/ProjectLines';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
@@ -18,13 +21,18 @@ const validationSchema = Yup.object().shape({
     order: Yup.number().required(),
 });
 
+const ac = new AccessControl();
+
 export default function Lines() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { loading, user } = useContext(AuthContext);
+
     const [projectLines, setProjectLines] = useState<ProjectLine[]>([]);
 
-    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(true);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
+    const [accessVerified, setAccessVerified] = useState(false);
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -35,20 +43,28 @@ export default function Lines() {
     const handleShowModalNewLine = () => setShowModalNewLine(true);
 
     useEffect(() => {
-        handleItemSideBar('projects');
-        handleSelectedMenu('projects-lines');
+        if (user) {
+            ac.setGrants(user.grants);
 
-        api.get('projects/lines').then(res => {
-            setProjectLines(res.data);
+            if (ac.hasRole(user.id) && ac.can(user.id).updateAny('projects').granted) {
+                handleItemSideBar('projects');
+                handleSelectedMenu('projects-lines');
 
-            setLoading(false);
-        }).catch(err => {
-            console.log('Error to get project lines, ', err);
+                api.get('projects/lines').then(res => {
+                    setProjectLines(res.data);
 
-            setTypeLoadingMessage("error");
-            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-        })
-    }, []);
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error to get project lines, ', err);
+
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                });
+            }
+
+            setAccessVerified(true);
+        }
+    }, [user]);
 
     async function handleListLines() {
         const res = await api.get('projects/lines');
@@ -94,171 +110,179 @@ export default function Lines() {
         });
     }
 
-    return <Container className="content-page">
-        <Row>
-            <Col>
-                <Button variant="outline-success" onClick={handleShowModalNewLine}>
-                    <FaPlus /> Criar um item
-                </Button>
-            </Col>
-        </Row>
-
-        <article className="mt-3">
-            {
-                loading ? <Col>
-                    <Row>
-                        <Col>
-                            <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
-                        </Col>
-                    </Row>
-
-                    {
-                        typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
-                            <Col sm={3}>
-                                <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
+    return !user || loading || !accessVerified ? <PageWaiting status="waiting" /> :
+        <Container className="content-page">
+            <>
+                {
+                    ac.hasRole(user.id) && ac.can(user.id).updateAny('projects').granted ? <>
+                        <Row>
+                            <Col>
+                                <Button variant="outline-success" onClick={handleShowModalNewLine}>
+                                    <FaPlus /> Criar um item
+                                </Button>
                             </Col>
                         </Row>
-                    }
-                </Col> :
-                    <Row>
-                        {
-                            !!projectLines.length ? <Col>
-                                <DragDropContext onDragEnd={handleOnDragEnd}>
-                                    <Droppable droppableId="lines">
-                                        {provided => (
-                                            <div
-                                                {...provided.droppableProps}
-                                                ref={provided.innerRef}
-                                            >
-                                                <ListGroup>
-                                                    {
-                                                        projectLines && projectLines.map((line, index) => {
-                                                            return <Draggable key={line.id} draggableId={line.id} index={index}>
-                                                                {(provided) => (
-                                                                    <div
-                                                                        {...provided.draggableProps}
-                                                                        {...provided.dragHandleProps}
-                                                                        ref={provided.innerRef}
-                                                                    >
-                                                                        <ProjectLines
-                                                                            line={line}
-                                                                            listLines={projectLines}
-                                                                            handleListLines={handleListLines}
-                                                                        />
-                                                                    </div>
-                                                                )}
 
-                                                            </Draggable>
-                                                        })
-                                                    }
-                                                </ListGroup>
-                                                {provided.placeholder}
-                                            </div>
-                                        )}
-                                    </Droppable>
-                                </DragDropContext>
-                            </Col> :
-                                <Col>
-                                    <Row>
-                                        <Col className="text-center">
-                                            <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhuma linha de crédito registrada.</p>
-                                        </Col>
-                                    </Row>
-
-                                    <Row className="justify-content-center mt-3 mb-3">
-                                        <Col sm={3}>
-                                            <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
-                                        </Col>
-                                    </Row>
-                                </Col>
-                        }
-                    </Row>
-            }
-        </article>
-
-        <Modal show={showModalNewLine} onHide={handleCloseModalLine}>
-            <Modal.Header closeButton>
-                <Modal.Title>Criar um item</Modal.Title>
-            </Modal.Header>
-            <Formik
-                initialValues={
-                    {
-                        name: '',
-                        active: true,
-                        order: 0,
-                    }
-                }
-                onSubmit={async values => {
-                    setTypeMessage("waiting");
-                    setMessageShow(true);
-
-                    try {
-                        if (projectLines) {
-                            await api.post('projects/lines', {
-                                name: values.name,
-                                active: values.active,
-                                order: projectLines.length,
-                            });
-
-                            await handleListLines();
-
-                            setTypeMessage("success");
-
-                            setTimeout(() => {
-                                setMessageShow(false);
-                                handleCloseModalLine();
-                            }, 1500);
-                        }
-                    }
-                    catch (err) {
-                        setTypeMessage("error");
-
-                        setTimeout(() => {
-                            setMessageShow(false);
-                        }, 4000);
-
-                        console.log('error create project line.');
-                        console.log(err);
-                    }
-
-                }}
-                validationSchema={validationSchema}
-            >
-                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                    <Form onSubmit={handleSubmit}>
-                        <Modal.Body>
-                            <Form.Group controlId="lineFormGridName">
-                                <Form.Label>Nome</Form.Label>
-                                <Form.Control type="text"
-                                    placeholder="Nome"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.name}
-                                    name="name"
-                                    isInvalid={!!errors.name && touched.name}
-                                />
-                                <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
-                            </Form.Group>
-
-                        </Modal.Body>
-                        <Modal.Footer>
+                        <article className="mt-3">
                             {
-                                messageShow ? <AlertMessage status={typeMessage} /> :
-                                    <>
-                                        <Button variant="secondary" onClick={handleCloseModalLine}>
-                                            Cancelar
-                                        </Button>
-                                        <Button variant="success" type="submit">Salvar</Button>
-                                    </>
+                                loadingData ? <Col>
+                                    <Row>
+                                        <Col>
+                                            <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
+                                        </Col>
+                                    </Row>
 
+                                    {
+                                        typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
+                                            <Col sm={3}>
+                                                <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
+                                            </Col>
+                                        </Row>
+                                    }
+                                </Col> :
+                                    <Row>
+                                        {
+                                            !!projectLines.length ? <Col>
+                                                <DragDropContext onDragEnd={handleOnDragEnd}>
+                                                    <Droppable droppableId="lines">
+                                                        {provided => (
+                                                            <div
+                                                                {...provided.droppableProps}
+                                                                ref={provided.innerRef}
+                                                            >
+                                                                <ListGroup>
+                                                                    {
+                                                                        projectLines && projectLines.map((line, index) => {
+                                                                            return <Draggable key={line.id} draggableId={line.id} index={index}>
+                                                                                {(provided) => (
+                                                                                    <div
+                                                                                        {...provided.draggableProps}
+                                                                                        {...provided.dragHandleProps}
+                                                                                        ref={provided.innerRef}
+                                                                                    >
+                                                                                        <ProjectLines
+                                                                                            line={line}
+                                                                                            listLines={projectLines}
+                                                                                            handleListLines={handleListLines}
+                                                                                        />
+                                                                                    </div>
+                                                                                )}
+
+                                                                            </Draggable>
+                                                                        })
+                                                                    }
+                                                                </ListGroup>
+                                                                {provided.placeholder}
+                                                            </div>
+                                                        )}
+                                                    </Droppable>
+                                                </DragDropContext>
+                                            </Col> :
+                                                <Col>
+                                                    <Row>
+                                                        <Col className="text-center">
+                                                            <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhuma linha de crédito registrada.</p>
+                                                        </Col>
+                                                    </Row>
+
+                                                    <Row className="justify-content-center mt-3 mb-3">
+                                                        <Col sm={3}>
+                                                            <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                                        </Col>
+                                                    </Row>
+                                                </Col>
+                                        }
+                                    </Row>
                             }
-                        </Modal.Footer>
-                    </Form>
-                )}
-            </Formik>
-        </Modal>
-    </Container>
+                        </article>
+
+                        <Modal show={showModalNewLine} onHide={handleCloseModalLine}>
+                            <Modal.Header closeButton>
+                                <Modal.Title>Criar um item</Modal.Title>
+                            </Modal.Header>
+                            <Formik
+                                initialValues={
+                                    {
+                                        name: '',
+                                        active: true,
+                                        order: 0,
+                                    }
+                                }
+                                onSubmit={async values => {
+                                    setTypeMessage("waiting");
+                                    setMessageShow(true);
+
+                                    try {
+                                        if (projectLines) {
+                                            await api.post('projects/lines', {
+                                                name: values.name,
+                                                active: values.active,
+                                                order: projectLines.length,
+                                            });
+
+                                            await handleListLines();
+
+                                            setTypeMessage("success");
+
+                                            setTimeout(() => {
+                                                setMessageShow(false);
+                                                handleCloseModalLine();
+                                            }, 1500);
+                                        }
+                                    }
+                                    catch (err) {
+                                        setTypeMessage("error");
+
+                                        setTimeout(() => {
+                                            setMessageShow(false);
+                                        }, 4000);
+
+                                        console.log('error create project line.');
+                                        console.log(err);
+                                    }
+
+                                }}
+                                validationSchema={validationSchema}
+                            >
+                                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                                    <Form onSubmit={handleSubmit}>
+                                        <Modal.Body>
+                                            <Form.Group controlId="lineFormGridName">
+                                                <Form.Label>Nome</Form.Label>
+                                                <Form.Control type="text"
+                                                    placeholder="Nome"
+                                                    onChange={handleChange}
+                                                    onBlur={handleBlur}
+                                                    value={values.name}
+                                                    name="name"
+                                                    isInvalid={!!errors.name && touched.name}
+                                                />
+                                                <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                                <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
+                                            </Form.Group>
+
+                                        </Modal.Body>
+                                        <Modal.Footer>
+                                            {
+                                                messageShow ? <AlertMessage status={typeMessage} /> :
+                                                    <>
+                                                        <Button variant="secondary" onClick={handleCloseModalLine}>
+                                                            Cancelar
+                                                        </Button>
+                                                        <Button variant="success" type="submit">Salvar</Button>
+                                                    </>
+
+                                            }
+                                        </Modal.Footer>
+                                    </Form>
+                                )}
+                            </Formik>
+                        </Modal>
+                    </> :
+                        <PageWaiting status="warning" message="Acesso negado!" />
+                }
+            </>
+        </Container>
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
