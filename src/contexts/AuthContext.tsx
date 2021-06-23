@@ -2,14 +2,13 @@ import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { createContext, useState } from 'react';
 import Cookies from 'js-cookie';
-import { AccessControl } from 'accesscontrol';
 
 import api from '../api/api';
 import { NotificationsContext } from './NotificationsContext';
-import { User } from '../components/Users';
+import { User, Grants } from '../components/Users';
 
 interface AuthContextData {
-    user: User | null;
+    user: User | undefined;
     signed: boolean;
     loading: boolean;
     handleAuthenticated(): Promise<void>;
@@ -24,7 +23,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
     const { handleNotifications } = useContext(NotificationsContext);
 
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | undefined>(undefined);
     const [signed, setSigned] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -46,9 +45,8 @@ const AuthProvider: React.FC = ({ children }) => {
 
             handleNotifications(userRes.notifications);
 
-            setUserGrants(user);
-            setUser(userRes);
             setSigned(true);
+            setUser({ ...userRes, grants: setUserGrants(userRes) });
 
             setLoading(false);
         }
@@ -73,9 +71,9 @@ const AuthProvider: React.FC = ({ children }) => {
             if (res.status === 201) {
                 const { user, token } = res.data;
 
-                setUserGrants(user);
+                const userRes: User = user;
 
-                setUser(user);
+                setUser({ ...userRes, grants: setUserGrants(userRes) });
 
                 api.defaults.headers['Authorization'] = `Bearer ${token}`;
 
@@ -98,42 +96,71 @@ const AuthProvider: React.FC = ({ children }) => {
     }
 
     function setUserGrants(user: User) {
-        const ac = new AccessControl();
+        let listGrants: Grants[] = [];
 
         user.roles.forEach(role => {
             if (role.view) {
-                ac.grant(user.id).readAny(role.role);
+                listGrants.push({
+                    role: user.id,
+                    resource: role.role,
+                    action: 'read:any'
+                });
             }
 
             if (role.view_self) {
-                ac.grant(user.id).readOwn(role.role);
+                listGrants.push({
+                    role: user.id,
+                    resource: role.role,
+                    action: 'read:own'
+                });
             }
 
             if (role.create) {
-                ac.grant(user.id).create(role.role);
+                listGrants.push({
+                    role: user.id,
+                    resource: role.role,
+                    action: 'create'
+                });
             }
 
             if (role.update) {
-                ac.grant(user.id).updateAny(role.role);
+                listGrants.push({
+                    role: user.id,
+                    resource: role.role,
+                    action: 'update:any'
+                });
+
             }
 
             if (role.update_self) {
-                ac.grant(user.id).updateOwn(role.role);
+                listGrants.push({
+                    role: user.id,
+                    resource: role.role,
+                    action: 'update:own'
+                });
+
             }
 
             if (role.remove) {
-                ac.grant(user.id).delete(role.role);
+                listGrants.push({
+                    role: user.id,
+                    resource: role.role,
+                    action: 'delete'
+                });
             }
         });
 
-        ac.lock();
+        return listGrants;
     }
 
     async function handleLogout() {
         setLoading(true);
         setSigned(false);
+        setUser(undefined);
+
         Cookies.remove('user');
         Cookies.remove('token');
+
         api.defaults.headers.Authorization = undefined;
 
         router.replace('/');

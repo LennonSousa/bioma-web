@@ -81,62 +81,64 @@ export function Header() {
                         </Button>
                     </Col>
 
-                    <Col>
-                        <Button
-                            variant="outline-light"
-                            onClick={toggleShowUserDetails}
-                            title={user ? user.name : ''}
-                        >
-                            <FaRegUserCircle />
-                        </Button>
+                    {
+                        user && <Col>
+                            <Button
+                                variant="outline-light"
+                                onClick={toggleShowUserDetails}
+                                title={user ? user.name : ''}
+                            >
+                                <FaRegUserCircle />
+                            </Button>
 
-                        <Toast
-                            show={showUserDetails}
-                            onClose={toggleShowUserDetails}
-                            autohide
-                            delay={5000}
-                            style={{
-                                position: 'absolute',
-                                minWidth: '250px',
-                                top: 0,
-                                right: 0,
-                                zIndex: 999,
-                            }}
-                        >
-                            <Toast.Header className="justify-content-center">
-                                <FaUserTie style={{ marginRight: '.5rem' }} /><strong className="me-auto">{user.name}</strong>
-                            </Toast.Header>
-                            <Toast.Body>
-                                <Row className="mb-3">
-                                    <Col>
-                                        <Button
-                                            variant="light"
-                                            type="button"
-                                            onClick={() => handleRoute(`/users/details/${user.id}`)}
-                                            style={{ width: '100%' }}
-                                            title="Ver detalhes do usuário."
-                                        >
-                                            <FaUserCog style={{ marginRight: '.5rem' }} /> Detalhes
-                                        </Button>
-                                    </Col>
-                                </Row>
+                            <Toast
+                                show={showUserDetails}
+                                onClose={toggleShowUserDetails}
+                                autohide
+                                delay={5000}
+                                style={{
+                                    position: 'absolute',
+                                    minWidth: '250px',
+                                    top: 0,
+                                    right: 0,
+                                    zIndex: 999,
+                                }}
+                            >
+                                <Toast.Header className="justify-content-center">
+                                    <FaUserTie style={{ marginRight: '.5rem' }} /><strong className="me-auto">{user.name}</strong>
+                                </Toast.Header>
+                                <Toast.Body>
+                                    <Row className="mb-3">
+                                        <Col>
+                                            <Button
+                                                variant="light"
+                                                type="button"
+                                                onClick={() => handleRoute(`/users/details/${user.id}`)}
+                                                style={{ width: '100%' }}
+                                                title="Ver detalhes do usuário."
+                                            >
+                                                <FaUserCog style={{ marginRight: '.5rem' }} /> Detalhes
+                                            </Button>
+                                        </Col>
+                                    </Row>
 
-                                <Row>
-                                    <Col>
-                                        <Button
-                                            variant="light"
-                                            type="button"
-                                            onClick={handleLogout}
-                                            style={{ width: '100%' }}
-                                            title="Sair do sistema."
-                                        >
-                                            <FaSignOutAlt style={{ marginRight: '.5rem' }} /> Sair
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            </Toast.Body>
-                        </Toast>
-                    </Col>
+                                    <Row>
+                                        <Col>
+                                            <Button
+                                                variant="light"
+                                                type="button"
+                                                onClick={handleLogout}
+                                                style={{ width: '100%' }}
+                                                title="Sair do sistema."
+                                            >
+                                                <FaSignOutAlt style={{ marginRight: '.5rem' }} /> Sair
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                </Toast.Body>
+                            </Toast>
+                        </Col>
+                    }
                 </Row>
             </Form>
         </Container>

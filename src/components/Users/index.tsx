@@ -21,6 +21,7 @@ export interface User {
     sudo: boolean;
     created_at: Date;
     roles: UserRole[];
+    grants: Grants[];
     customerMembers: CustomerMember[];
     licensingMembers: LicensingMember[];
     projectMembers: ProjectMember[];
@@ -37,6 +38,12 @@ export interface UserRole {
     update: boolean;
     update_self: boolean;
     remove: boolean;
+}
+
+export interface Grants {
+    role: string;
+    resource: string;
+    action: string;
 }
 
 interface UsersProps {

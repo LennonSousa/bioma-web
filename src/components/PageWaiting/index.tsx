@@ -46,30 +46,34 @@ const PageWaiting: React.FC<PageWaitingProps> = ({ status, message = "Aguarde, c
         }
     }
 
-    return <Container className="content-page" style={{ height: '100vh' }}>
-        <Row className="justify-content-center align-items-center text-center">
+    return <Container className="content-page justify-content-center align-items-center">
+        <Row className="justify-content-center align-items-center text-center pt-5 pb-5">
             <Col>
-                {
-                    circleWaiting && <Spinner animation="border" variant="info" size="sm" />
-                }
-                {
-                    successWaiting && <FaCheckCircle />
-                }
-                {
-                    warningWaiting && <Row className="justify-content-center mt-3 mb-3">
-                        <Col sm={3}>
-                            <Image src="/assets/images/undraw_access_denied_re_awnf.svg" alt="Sem dados para mostrar." fluid />
-                        </Col>
-                    </Row>
-                }
-                {
-                    errorWaiting && <FaTimesCircle />
-                }
-            </Col>
-        </Row>
-        <Row className="justify-content-center align-items-center text-center">
-            <Col>
-                <h1>{message}</h1>
+                <Row>
+                    <Col>
+                        {
+                            circleWaiting && <Spinner animation="border" variant="info" size="sm" />
+                        }
+                        {
+                            successWaiting && <FaCheckCircle />
+                        }
+                        {
+                            warningWaiting && <Row className="justify-content-center mt-3 mb-3">
+                                <Col sm={3}>
+                                    <Image src="/assets/images/undraw_access_denied_re_awnf.svg" alt="Acesso negado!" fluid />
+                                </Col>
+                            </Row>
+                        }
+                        {
+                            errorWaiting && <FaTimesCircle />
+                        }
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <h1>{message}</h1>
+                    </Col>
+                </Row>
             </Col>
         </Row>
     </Container>

@@ -29,11 +29,12 @@ import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import styles from './styles.module.css';
 
+const ac = new AccessControl();
+
 const Sidebar: React.FC = () => {
     const router = useRouter();
     const { itemSideBar, selectedMenu, handleItemSideBar } = useContext(SideBarContext);
     const { signed, user } = useContext(AuthContext);
-    const ac = new AccessControl();
 
     const [showPageHeader, setShowPageHeader] = useState(false);
 
@@ -42,17 +43,22 @@ const Sidebar: React.FC = () => {
     useEffect(() => {
         let show = false;
 
-        if (signed && !pathsNotShow.find(item => { return item === router.route })) show = true;
+        if (signed && user) {
+
+            ac.setGrants(user.grants);
+
+            if (!pathsNotShow.find(item => { return item === router.route })) show = true;
+        }
 
         setShowPageHeader(show);
-    }, [signed, router.route]);
+    }, [signed, router.route, user, ac]);
 
     function handleToDashboard() {
         router.push('/dashboard');
     }
 
     return (
-        showPageHeader && user ? <div className={styles.sideBarContainer}>
+        showPageHeader && user && ac.hasRole(user.id) ? <div className={styles.sideBarContainer}>
             <Accordion activeKey={itemSideBar} className={styles.accordionContainer}>
                 <Card className={styles.menuCard}>
                     <Accordion.Toggle
