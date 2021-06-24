@@ -85,14 +85,14 @@ export default function Institutions() {
                                 </Col> :
                                     <Row>
                                         {
-                                            !!users.length ? <Col>
+                                            user && !!users.length ? <Col>
                                                 <ListGroup>
                                                     {
-                                                        users && users.map((user, index) => {
+                                                        users && users.map((userItem, index) => {
                                                             return <Users
                                                                 key={index}
-                                                                user={user}
-                                                                canEdit={can(user, "users", "update:any")}
+                                                                user={userItem}
+                                                                userAuthenticated={user}
                                                                 handleListUsers={handleListUsers}
                                                             />
                                                         })

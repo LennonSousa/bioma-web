@@ -51,7 +51,7 @@ export interface Grants {
 
 interface UsersProps {
     user: User;
-    canEdit?: boolean;
+    userAuthenticated: User;
     handleListUsers(): Promise<void>;
 }
 
@@ -65,7 +65,7 @@ export function can(user: User, resource: Resource, action: Action) {
     return false;
 }
 
-const Users: React.FC<UsersProps> = ({ user, canEdit = true, handleListUsers }) => {
+const Users: React.FC<UsersProps> = ({ user, userAuthenticated, handleListUsers }) => {
     const router = useRouter();
 
     const [userPausing, setCategoryPausing] = useState(false);
@@ -74,13 +74,15 @@ const Users: React.FC<UsersProps> = ({ user, canEdit = true, handleListUsers }) 
         setCategoryPausing(true);
 
         try {
-            await api.put(`users/${user.id}`, {
-                name: user.name,
-                phone: user.phone,
-                paused: !user.paused,
-            });
+            if (userAuthenticated.id !== user.id && !user.sudo) {
+                await api.put(`users/${user.id}`, {
+                    name: user.name,
+                    phone: user.phone,
+                    paused: !user.paused,
+                });
 
-            await handleListUsers();
+                await handleListUsers();
+            }
         }
         catch (err) {
             console.log("Error to pause user");
@@ -106,7 +108,9 @@ const Users: React.FC<UsersProps> = ({ user, canEdit = true, handleListUsers }) 
                 }
 
                 {
-                    canEdit && <Col className="col-row text-end">
+                    userAuthenticated.id !== user.id
+                    && !user.sudo
+                    && <Col className="col-row text-end">
                         <Button
                             variant="outline-success"
                             className="button-link"
@@ -138,7 +142,7 @@ const Users: React.FC<UsersProps> = ({ user, canEdit = true, handleListUsers }) 
                 </Col>
 
                 {
-                    canEdit && <Col className="col-row text-end">
+                    can(userAuthenticated, "users", "update:any") && <Col className="col-row text-end">
                         <Button
                             variant="outline-success"
                             className="button-link"

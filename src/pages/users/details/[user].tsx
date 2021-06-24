@@ -75,11 +75,7 @@ export default function UserDetails() {
                 api.get(`users/${userId}`).then(res => {
                     let userRes: User = res.data;
 
-                    setUsersRoles(userRes.roles.map(role => {
-                        const translatedRole = translatedRoles.find(item => { return item.role === role.role });
-
-                        return { ...role, role: translatedRole ? translatedRole.translated : role.role };
-                    }));
+                    setUsersRoles(userRes.roles);
 
                     setUserData(userRes);
 
@@ -129,19 +125,19 @@ export default function UserDetails() {
 
                                                             {
                                                                 can(user, "users", "update:any") ||
-                                                                can(user, "users", "update:own") &&
-                                                                userId === user.id &&
-                                                                <Col className="col-row">
-                                                                    <ButtonGroup size="sm" className="col-12">
-                                                                        <Button
-                                                                            title="Editar usuário."
-                                                                            variant="success"
-                                                                            onClick={() => handleRoute(`/users/edit/${userData.id}`)}
-                                                                        >
-                                                                            <FaUserEdit />
-                                                                        </Button>
-                                                                    </ButtonGroup>
-                                                                </Col>
+                                                                    can(user, "users", "update:own") &&
+                                                                    userId === user.id ?
+                                                                    <Col className="col-row">
+                                                                        <ButtonGroup size="sm" className="col-12">
+                                                                            <Button
+                                                                                title="Editar usuário."
+                                                                                variant="success"
+                                                                                onClick={() => handleRoute(`/users/edit/${userData.id}`)}
+                                                                            >
+                                                                                <FaUserEdit />
+                                                                            </Button>
+                                                                        </ButtonGroup>
+                                                                    </Col> : <Col></Col>
                                                             }
                                                         </Row>
                                                     </Col>
@@ -208,10 +204,16 @@ export default function UserDetails() {
                                                                 <ListGroup className="mb-3">
                                                                     {
                                                                         usersRoles.map((role, index) => {
+                                                                            const translatedRole = translatedRoles.find(item => { return item.role === role.role });
+
                                                                             return <ListGroup.Item key={index} as="div" variant="light">
                                                                                 <Row>
                                                                                     <Col>
-                                                                                        <h6 className="text-success">{role.role} </h6>
+                                                                                        <h6 className="text-success" >
+                                                                                            {
+                                                                                                translatedRole ? translatedRole.translated : role.role
+                                                                                            }
+                                                                                        </h6>
                                                                                     </Col>
 
                                                                                     {
@@ -235,7 +237,7 @@ export default function UserDetails() {
 
 
                                                                                     {
-                                                                                        role.id === 'users' && role.update_self && <Col className="col-row">
+                                                                                        role.role === 'users' && role.update_self && <Col className="col-row">
                                                                                             <span>Editar próprio</span>
                                                                                         </Col>
                                                                                     }

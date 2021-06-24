@@ -390,7 +390,7 @@ export default function NewUser() {
                                                     <Row className="justify-content-end">
                                                         {
                                                             messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                                                <Col sm={2}>
+                                                                <Col className="col-row">
                                                                     <Button variant="success" type="submit">Convidar usuário</Button>
                                                                 </Col>
 
