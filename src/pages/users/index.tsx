@@ -52,76 +52,74 @@ export default function Institutions() {
     }
 
     return !user || loading ? <PageWaiting status="waiting" /> :
-        <Container className="content-page">
-            <>
-                {
-                    can(user, "users", "read:any") ? <>
-                        {
-                            can(user, "users", "create") && <Row>
-                                <Col>
-                                    <Button variant="outline-success" onClick={goNewUser}>
-                                        <FaPlus /> Criar um usuário
-                                    </Button>
-                                </Col>
-                            </Row>
-                        }
+        <>
+            {
+                can(user, "users", "read:any") ? <Container className="content-page">
+                    {
+                        can(user, "users", "create") && <Row>
+                            <Col>
+                                <Button variant="outline-success" onClick={goNewUser}>
+                                    <FaPlus /> Criar um usuário
+                                </Button>
+                            </Col>
+                        </Row>
+                    }
 
-                        <article className="mt-3">
-                            {
-                                loadingData ? <Col>
-                                    <Row>
-                                        <Col>
-                                            <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
+                    <article className="mt-3">
+                        {
+                            loadingData ? <Col>
+                                <Row>
+                                    <Col>
+                                        <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
+                                    </Col>
+                                </Row>
+
+                                {
+                                    typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
+                                        <Col sm={3}>
+                                            <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
                                         </Col>
                                     </Row>
-
+                                }
+                            </Col> :
+                                <Row>
                                     {
-                                        typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
-                                            <Col sm={3}>
-                                                <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
+                                        user && !!users.length ? <Col>
+                                            <ListGroup>
+                                                {
+                                                    users && users.map((userItem, index) => {
+                                                        return <Users
+                                                            key={index}
+                                                            user={userItem}
+                                                            userAuthenticated={user}
+                                                            handleListUsers={handleListUsers}
+                                                        />
+                                                    })
+                                                }
+                                            </ListGroup>
+                                        </Col> :
+                                            <Col>
+                                                <Row>
+                                                    <Col className="text-center">
+                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum usuário registrado.</p>
+                                                    </Col>
+                                                </Row>
+
+                                                <Row className="justify-content-center mt-3 mb-3">
+                                                    <Col sm={3}>
+                                                        <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                                    </Col>
+                                                </Row>
                                             </Col>
-                                        </Row>
                                     }
-                                </Col> :
-                                    <Row>
-                                        {
-                                            user && !!users.length ? <Col>
-                                                <ListGroup>
-                                                    {
-                                                        users && users.map((userItem, index) => {
-                                                            return <Users
-                                                                key={index}
-                                                                user={userItem}
-                                                                userAuthenticated={user}
-                                                                handleListUsers={handleListUsers}
-                                                            />
-                                                        })
-                                                    }
-                                                </ListGroup>
-                                            </Col> :
-                                                <Col>
-                                                    <Row>
-                                                        <Col className="text-center">
-                                                            <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum usuário registrado.</p>
-                                                        </Col>
-                                                    </Row>
+                                </Row>
+                        }
+                    </article>
+                </Container> :
+                    <PageWaiting status="warning" message="Acesso negado!" />
+            }
+        </>
 
-                                                    <Row className="justify-content-center mt-3 mb-3">
-                                                        <Col sm={3}>
-                                                            <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
-                                                        </Col>
-                                                    </Row>
-                                                </Col>
-                                        }
-                                    </Row>
-                            }
-                        </article>
-                    </> :
-                        <PageWaiting status="warning" message="Acesso negado!" />
-                }
-
-            </>
-        </Container>
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

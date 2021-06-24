@@ -257,11 +257,19 @@ export default function UserEdit() {
                                                 {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
                                                     <Form onSubmit={handleSubmit}>
                                                         {
-                                                            can(user, "users", "read:any") && <Row className="mb-3">
+                                                            can(user, "users", "read:any") ? <Row className="mb-3">
                                                                 <Col>
-                                                                    <PageBack href="/users" subTitle="Voltar para os detalhes do usuário." />
+                                                                    <PageBack href="/users" subTitle="Voltar para a lista usuários." />
                                                                 </Col>
-                                                            </Row>
+                                                            </Row> :
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <PageBack
+                                                                            href={`/users/details/${userData.id}`}
+                                                                            subTitle="Voltar para os detalhes do usuário."
+                                                                        />
+                                                                    </Col>
+                                                                </Row>
                                                         }
 
                                                         <Row className="mb-3">

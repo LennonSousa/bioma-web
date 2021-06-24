@@ -10,6 +10,9 @@ import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { User, UserRole, can } from '../../../components/Users';
+import CustomerListItem from '../../../components/CustomerListItem';
+import LicensingListItem from '../../../components/LicensingListItem';
+import ProjectListItem from '../../../components/ProjectListItem';
 import PropertyListItem from '../../../components/PropertyListItem';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
@@ -260,51 +263,95 @@ export default function UserDetails() {
 
                                                 <Col className="border-top mb-3"></Col>
 
-                                                <Tabs defaultActiveKey="properties" id="relations-customer">
-                                                    <Tab eventKey="properties" title="Imóveis">
-                                                        <Row className={styles.relationsContainer}>
-                                                            <Col>
-                                                                <Row className={styles.relationsContent}>
-                                                                    {
-                                                                        !!userData.propertyMembers.length ? userData.propertyMembers.map((propertyMember, index) => {
-                                                                            return <PropertyListItem
-                                                                                key={index}
-                                                                                property={propertyMember.property}
-                                                                                showCustomer={false}
-                                                                            />
-                                                                        }) :
-                                                                            <Col>
-                                                                                <span className="text-success">Nenhum imóvel registrado.</span>
-                                                                            </Col>
-                                                                    }
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    </Tab>
+                                                <Tabs defaultActiveKey="customers" id="relations-customer">
+                                                    {
+                                                        can(user, "customers", "read:any") && <Tab eventKey="customers" title="Clientes">
+                                                            <Row className={styles.relationsContainer}>
+                                                                <Col>
+                                                                    <Row className={styles.relationsContent}>
+                                                                        {
+                                                                            !!userData.customerMembers.length ? userData.customerMembers.map((customerMember, index) => {
+                                                                                return <CustomerListItem
+                                                                                    key={index}
+                                                                                    customer={customerMember.customer}
+                                                                                />
+                                                                            }) :
+                                                                                <Col>
+                                                                                    <span className="text-success">Nenhum cliente registrado.</span>
+                                                                                </Col>
+                                                                        }
+                                                                    </Row>
+                                                                </Col>
+                                                            </Row>
+                                                        </Tab>
+                                                    }
 
-                                                    <Tab eventKey="projects" title="Projetos">
-                                                        <Row className={styles.relationsContainer}>
-                                                            <Col>
-                                                                <Row className={styles.relationsContent}>
-                                                                    <Col>
-                                                                        <span className="text-success">Nenhum projeto registrado.</span>
-                                                                    </Col>
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    </Tab>
+                                                    {
+                                                        can(user, "properties", "read:any") && <Tab eventKey="properties" title="Imóveis">
+                                                            <Row className={styles.relationsContainer}>
+                                                                <Col>
+                                                                    <Row className={styles.relationsContent}>
+                                                                        {
+                                                                            !!userData.propertyMembers.length ? userData.propertyMembers.map((propertyMember, index) => {
+                                                                                return <PropertyListItem
+                                                                                    key={index}
+                                                                                    property={propertyMember.property}
+                                                                                    showCustomer={false}
+                                                                                />
+                                                                            }) :
+                                                                                <Col>
+                                                                                    <span className="text-success">Nenhum imóvel registrado.</span>
+                                                                                </Col>
+                                                                        }
+                                                                    </Row>
+                                                                </Col>
+                                                            </Row>
+                                                        </Tab>
+                                                    }
 
-                                                    <Tab eventKey="licensings" title="Licenciamentos">
-                                                        <Row className={styles.relationsContainer}>
-                                                            <Col>
-                                                                <Row className={styles.relationsContent}>
-                                                                    <Col>
-                                                                        <span className="text-success">Nenhum licenciamento registrado.</span>
-                                                                    </Col>
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    </Tab>
+                                                    {
+                                                        can(user, "projects", "read:any") && <Tab eventKey="projects" title="Projetos">
+                                                            <Row className={styles.relationsContainer}>
+                                                                <Col>
+                                                                    <Row className={styles.relationsContent}>
+                                                                        {
+                                                                            !!userData.projectMembers.length ? userData.projectMembers.map((projectMember, index) => {
+                                                                                return <ProjectListItem
+                                                                                    key={index}
+                                                                                    project={projectMember.project}
+                                                                                />
+                                                                            }) :
+                                                                                <Col>
+                                                                                    <span className="text-success">Nenhum projeto registrado.</span>
+                                                                                </Col>
+                                                                        }
+                                                                    </Row>
+                                                                </Col>
+                                                            </Row>
+                                                        </Tab>
+                                                    }
+
+                                                    {
+                                                        can(user, "licensings", "read:any") && <Tab eventKey="licensings" title="Licenciamentos">
+                                                            <Row className={styles.relationsContainer}>
+                                                                <Col>
+                                                                    <Row className={styles.relationsContent}>
+                                                                        {
+                                                                            !!userData.licensingMembers.length ? userData.licensingMembers.map((licensingMember, index) => {
+                                                                                return <LicensingListItem
+                                                                                    key={index}
+                                                                                    licensing={licensingMember.licensing}
+                                                                                />
+                                                                            }) :
+                                                                                <Col>
+                                                                                    <span className="text-success">Nenhum licenciamento registrado.</span>
+                                                                                </Col>
+                                                                        }
+                                                                    </Row>
+                                                                </Col>
+                                                            </Row>
+                                                        </Tab>
+                                                    }
                                                 </Tabs>
                                             </Col>
                                         </Row>

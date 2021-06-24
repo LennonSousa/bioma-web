@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
@@ -8,6 +8,7 @@ import * as Yup from 'yup';
 import { FaKey } from 'react-icons/fa';
 
 import api from '../../../../api/api';
+import { AuthContext } from '../../../../contexts/AuthContext';
 import { User } from '../../../../components/Users';
 import { cellphone } from '../../../../components/InputMask/masks';
 import { AlertMessage, statusModal } from '../../../../components/interfaces/AlertMessage';
@@ -23,6 +24,7 @@ const validationSchema = Yup.object().shape({
 
 export default function NewCustomer({ authenticated, user, token }) {
     const router = useRouter();
+    const { signed, handleAuthenticated, handleLogout } = useContext(AuthContext)
     const [authenticatedUser, setAuthenticatedUser] = useState<User>(undefined);
 
     const [messageShow, setMessageShow] = useState(false);
@@ -32,6 +34,16 @@ export default function NewCustomer({ authenticated, user, token }) {
 
     const handleCloseModal = () => setShowModal(false);
     const handleShowModal = () => setShowModal(true);
+
+    useEffect(() => {
+        handleAuthenticated();
+    }, []);
+
+    useEffect(() => {
+        if (signed) {
+            handleLogout(false);
+        }
+    }, [signed]);
 
     useEffect(() => {
         if (authenticated && user) {
@@ -144,7 +156,7 @@ export default function NewCustomer({ authenticated, user, token }) {
                                                         <Form.Control.Feedback type="invalid">{touched.password && errors.password}</Form.Control.Feedback>
                                                     </Form.Group>
 
-                                                    <Form.Group className="mb-4" controlId="formLoginPassword">
+                                                    <Form.Group className="mb-4" controlId="formLoginPassword02">
                                                         <Form.Label>Senha</Form.Label>
                                                         <Form.Control type="password"
                                                             onChange={handleChange}

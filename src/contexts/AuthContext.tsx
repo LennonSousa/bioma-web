@@ -13,7 +13,7 @@ interface AuthContextData {
     loading: boolean;
     handleAuthenticated(): Promise<void>;
     handleLogin(email: string, password: string): Promise<boolean | "error">;
-    handleLogout(): Promise<void>;
+    handleLogout(redirect?: Boolean): Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -33,7 +33,7 @@ const AuthProvider: React.FC = ({ children }) => {
             const storagedToken = Cookies.get('token');
 
             if (!storagedUser || !storagedToken) {
-                handleLogout();
+                handleLogout(true);
                 return;
             }
 
@@ -51,7 +51,7 @@ const AuthProvider: React.FC = ({ children }) => {
             setLoading(false);
         }
         catch {
-            handleLogout();
+            handleLogout(true);
         }
     }
 
@@ -153,7 +153,7 @@ const AuthProvider: React.FC = ({ children }) => {
         return listGrants;
     }
 
-    async function handleLogout() {
+    async function handleLogout(redirect?: Boolean) {
         setLoading(true);
         setSigned(false);
         setUser(undefined);
@@ -163,7 +163,9 @@ const AuthProvider: React.FC = ({ children }) => {
 
         api.defaults.headers.Authorization = undefined;
 
-        router.replace('/');
+        if (redirect) {
+            router.replace('/');
+        }
 
         setLoading(false);
     }

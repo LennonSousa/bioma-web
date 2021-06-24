@@ -109,6 +109,7 @@ const Users: React.FC<UsersProps> = ({ user, userAuthenticated, handleListUsers 
 
                 {
                     userAuthenticated.id !== user.id
+                    && can(userAuthenticated, "users", "update:any")
                     && !user.sudo
                     && <Col className="col-row text-end">
                         <Button
@@ -142,16 +143,19 @@ const Users: React.FC<UsersProps> = ({ user, userAuthenticated, handleListUsers 
                 </Col>
 
                 {
-                    can(userAuthenticated, "users", "update:any") && <Col className="col-row text-end">
-                        <Button
-                            variant="outline-success"
-                            className="button-link"
-                            onClick={() => handleRoute(`/users/edit/${user.id}`)}
-                            title="Editar usuário"
-                        >
-                            <FaUserEdit /> Editar
-                        </Button>
-                    </Col>
+                    can(userAuthenticated, "users", "update:any")
+                        || userAuthenticated.id === user.id
+                        && can(userAuthenticated, "users", "update:own")
+                        ? <Col className="col-row text-end">
+                            <Button
+                                variant="outline-success"
+                                className="button-link"
+                                onClick={() => handleRoute(`/users/edit/${user.id}`)}
+                                title="Editar usuário"
+                            >
+                                <FaUserEdit /> Editar
+                            </Button>
+                        </Col> : <></>
                 }
             </Row>
         </ListGroup.Item>
