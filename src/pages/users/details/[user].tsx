@@ -70,25 +70,27 @@ export default function UserDetails() {
         handleItemSideBar('users');
         handleSelectedMenu('users-index');
 
-        if (user && can(user, "users", "read:any")) {
-            api.get(`users/${userId}`).then(res => {
-                let userRes: User = res.data;
+        if (user) {
+            if (can(user, "users", "read:any") || userId === user.id) {
+                api.get(`users/${userId}`).then(res => {
+                    let userRes: User = res.data;
 
-                setUsersRoles(userRes.roles.map(role => {
-                    const translatedRole = translatedRoles.find(item => { return item.role === role.role });
+                    setUsersRoles(userRes.roles.map(role => {
+                        const translatedRole = translatedRoles.find(item => { return item.role === role.role });
 
-                    return { ...role, role: translatedRole ? translatedRole.translated : role.role };
-                }));
+                        return { ...role, role: translatedRole ? translatedRole.translated : role.role };
+                    }));
 
-                setUserData(userRes);
+                    setUserData(userRes);
 
-                setLoadingData(false);
-            }).catch(err => {
-                console.log('Error get user to edit, ', err);
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error get user to edit, ', err);
 
-                setTypeLoadingMessage("error");
-                setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-            });
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                });
+            }
         }
     }, [user]);
 
@@ -99,7 +101,7 @@ export default function UserDetails() {
     return !user || loading ? <PageWaiting status="waiting" /> :
         <>
             {
-                can(user, "users", "read:any") ? <>
+                can(user, "users", "read:any") || userId === user.id ? <>
                     {
                         loadingData ? <PageWaiting
                             status={typeLoadingMessage}
@@ -110,11 +112,13 @@ export default function UserDetails() {
                                     !userData || loadingData ? <PageWaiting status="waiting" /> :
                                         <Row>
                                             <Col>
-                                                <Row className="mb-3">
-                                                    <Col>
-                                                        <PageBack href="/users" subTitle="Voltar para a lista de usuários" />
-                                                    </Col>
-                                                </Row>
+                                                {
+                                                    can(user, "users", "read:any") && <Row className="mb-3">
+                                                        <Col>
+                                                            <PageBack href="/users" subTitle="Voltar para a lista de usuários" />
+                                                        </Col>
+                                                    </Row>
+                                                }
 
                                                 <Row className="mb-3">
                                                     <Col sm={6}>
@@ -122,17 +126,23 @@ export default function UserDetails() {
                                                             <Col className="col-row">
                                                                 <h3 className="form-control-plaintext text-success">{userData.name}</h3>
                                                             </Col>
-                                                            <Col className="col-row">
-                                                                <ButtonGroup size="sm" className="col-12">
-                                                                    <Button
-                                                                        title="Editar usuário."
-                                                                        variant="success"
-                                                                        onClick={() => handleRoute(`/users/edit/${userData.id}`)}
-                                                                    >
-                                                                        <FaUserEdit />
-                                                                    </Button>
-                                                                </ButtonGroup>
-                                                            </Col>
+
+                                                            {
+                                                                can(user, "users", "update:any") ||
+                                                                can(user, "users", "update:own") &&
+                                                                userId === user.id &&
+                                                                <Col className="col-row">
+                                                                    <ButtonGroup size="sm" className="col-12">
+                                                                        <Button
+                                                                            title="Editar usuário."
+                                                                            variant="success"
+                                                                            onClick={() => handleRoute(`/users/edit/${userData.id}`)}
+                                                                        >
+                                                                            <FaUserEdit />
+                                                                        </Button>
+                                                                    </ButtonGroup>
+                                                                </Col>
+                                                            }
                                                         </Row>
                                                     </Col>
                                                 </Row>

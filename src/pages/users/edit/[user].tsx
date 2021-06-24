@@ -1,7 +1,7 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
+import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FaKey } from 'react-icons/fa';
@@ -72,27 +72,35 @@ export default function UserEdit() {
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
     const [messageShow, setMessageShow] = useState(false);
+    const [deletingMessageShow, setDeletingMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+
+    const [showUserDelete, setShowUserDelete] = useState(false);
+
+    const handleCloseUsersDelete = () => setShowUserDelete(false);
+    const handelShowUsersDelete = () => setShowUserDelete(true);
 
     useEffect(() => {
         handleItemSideBar('users');
         handleSelectedMenu('users-index');
 
-        if (user && can(user, "users", "update:any")) {
-            api.get(`users/${userId}`).then(res => {
-                const userRes: User = res.data;
+        if (user) {
+            if (can(user, "users", "update:any") || can(user, "users", "update:own") && userId === user.id) {
+                api.get(`users/${userId}`).then(res => {
+                    const userRes: User = res.data;
 
-                setUsersRoles(userRes.roles);
+                    setUsersRoles(userRes.roles);
 
-                setUserData(userRes);
+                    setUserData(userRes);
 
-                setLoadingData(false);
-            }).catch(err => {
-                console.log('Error get user to edit, ', err);
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error get user to edit, ', err);
 
-                setTypeLoadingMessage("error");
-                setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-            });
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                });
+            }
         }
     }, [user]);
 
@@ -161,10 +169,37 @@ export default function UserEdit() {
         return updatedRole;
     }
 
+    async function handleUserDelete() {
+        setTypeMessage("waiting");
+        setDeletingMessageShow(true);
+
+        try {
+            if (can(user, "users", "delete")) {
+                await api.delete(`users/${userId}`);
+
+                setTypeMessage("success");
+
+                setTimeout(() => {
+                    router.push('/users');
+                }, 1500);
+            }
+        }
+        catch (err) {
+            console.log('error deleting user');
+            console.log(err);
+
+            setTypeMessage("error");
+
+            setTimeout(() => {
+                setDeletingMessageShow(false);
+            }, 4000);
+        }
+    }
+
     return !user || loading ? <PageWaiting status="waiting" /> :
         <>
             {
-                can(user, "users", "update:any") ? <>
+                can(user, "users", "update:any") || can(user, "users", "update:own") && userId === user.id ? <>
                     {
                         loadingData ? <PageWaiting
                             status={typeLoadingMessage}
@@ -188,17 +223,19 @@ export default function UserEdit() {
                                                         phone: values.phone,
                                                     });
 
-                                                    usersRoles.forEach(async role => {
-                                                        await api.put(`users/roles/${role.id}`, {
-                                                            role: role.role,
-                                                            view: role.view,
-                                                            view_self: role.view_self,
-                                                            create: role.create,
-                                                            update: role.update,
-                                                            update_self: role.update_self,
-                                                            remove: role.remove,
+                                                    if (userId !== user.id && !user.sudo) {
+                                                        usersRoles.forEach(async role => {
+                                                            await api.put(`users/roles/${role.id}`, {
+                                                                role: role.role,
+                                                                view: role.view,
+                                                                view_self: role.view_self,
+                                                                create: role.create,
+                                                                update: role.update,
+                                                                update_self: role.update_self,
+                                                                remove: role.remove,
+                                                            });
                                                         });
-                                                    });
+                                                    }
 
                                                     setTypeMessage("success");
 
@@ -218,11 +255,13 @@ export default function UserEdit() {
                                         >
                                             {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
                                                 <Form onSubmit={handleSubmit}>
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <PageBack href="/users" subTitle="Voltar para os detalhes do usuário." />
-                                                        </Col>
-                                                    </Row>
+                                                    {
+                                                        can(user, "users", "read:any") && <Row className="mb-3">
+                                                            <Col>
+                                                                <PageBack href="/users" subTitle="Voltar para os detalhes do usuário." />
+                                                            </Col>
+                                                        </Row>
+                                                    }
 
                                                     <Row className="mb-3">
                                                         <Form.Group as={Col} sm={6} controlId="formGridName">
@@ -257,131 +296,176 @@ export default function UserEdit() {
                                                         </Form.Group>
                                                     </Row>
 
-                                                    <Row>
-                                                        <Col>
-                                                            <h6 className="text-success">Permissões <FaKey /></h6>
-                                                        </Col>
-                                                    </Row>
+                                                    {
+                                                        userId !== user.id && !user.sudo && <>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-success">Permissões <FaKey /></h6>
+                                                                </Col>
+                                                            </Row>
 
-                                                    <Row>
-                                                        <Col>
-                                                            <ListGroup className="mb-3">
-                                                                {
-                                                                    usersRoles.map((role, index) => {
-                                                                        const translatedRole = translatedRoles.find(item => { return item.role === role.role });
+                                                            <Row>
+                                                                <Col>
+                                                                    <ListGroup className="mb-3">
+                                                                        {
+                                                                            usersRoles.map((role, index) => {
+                                                                                const translatedRole = translatedRoles.find(item => { return item.role === role.role });
 
-                                                                        return <ListGroup.Item key={index} as="div" variant="light">
-                                                                            <Row>
-                                                                                <Col>
-                                                                                    <h6 className="text-success">{translatedRole ? translatedRole.translated : role.role} </h6>
-                                                                                </Col>
+                                                                                return <ListGroup.Item key={index} as="div" variant="light">
+                                                                                    <Row>
+                                                                                        <Col>
+                                                                                            <h6 className="text-success">{translatedRole ? translatedRole.translated : role.role} </h6>
+                                                                                        </Col>
 
-                                                                                <Col>
-                                                                                    <Form.Check
-                                                                                        checked={role.view}
-                                                                                        type="checkbox"
-                                                                                        label="Visualizar"
-                                                                                        name="type"
-                                                                                        id={`formUserRoles${role.id}View`}
-                                                                                        value={`${role.id}@view`}
-                                                                                        onChange={handleChecks}
-                                                                                    />
-                                                                                </Col>
+                                                                                        <Col>
+                                                                                            <Form.Check
+                                                                                                checked={role.view}
+                                                                                                type="checkbox"
+                                                                                                label="Visualizar"
+                                                                                                name="type"
+                                                                                                id={`formUserRoles${role.id}View`}
+                                                                                                value={`${role.id}@view`}
+                                                                                                onChange={handleChecks}
+                                                                                            />
+                                                                                        </Col>
 
-                                                                                <Col>
-                                                                                    <Form.Check
-                                                                                        checked={role.create}
-                                                                                        type="checkbox"
-                                                                                        label="Criar"
-                                                                                        name="type"
-                                                                                        id={`formUserRoles${role.id}Create`}
-                                                                                        value={`${role.id}@create`}
-                                                                                        onChange={handleChecks}
-                                                                                        disabled={!role.view}
-                                                                                    />
-                                                                                </Col>
+                                                                                        <Col>
+                                                                                            <Form.Check
+                                                                                                checked={role.create}
+                                                                                                type="checkbox"
+                                                                                                label="Criar"
+                                                                                                name="type"
+                                                                                                id={`formUserRoles${role.id}Create`}
+                                                                                                value={`${role.id}@create`}
+                                                                                                onChange={handleChecks}
+                                                                                                disabled={!role.view}
+                                                                                            />
+                                                                                        </Col>
 
-                                                                                <Col>
-                                                                                    <Form.Check
-                                                                                        checked={role.update}
-                                                                                        type="checkbox"
-                                                                                        label="Editar"
-                                                                                        name="type"
-                                                                                        id={`formUserRoles${role.id}Update`}
-                                                                                        value={`${role.id}@update`}
-                                                                                        onChange={handleChecks}
-                                                                                        disabled={!role.view}
-                                                                                    />
-                                                                                </Col>
+                                                                                        <Col>
+                                                                                            <Form.Check
+                                                                                                checked={role.update}
+                                                                                                type="checkbox"
+                                                                                                label="Editar"
+                                                                                                name="type"
+                                                                                                id={`formUserRoles${role.id}Update`}
+                                                                                                value={`${role.id}@update`}
+                                                                                                onChange={handleChecks}
+                                                                                                disabled={!role.view}
+                                                                                            />
+                                                                                        </Col>
 
-                                                                                {
-                                                                                    role.role === 'users' && <Col>
-                                                                                        <Form.Check
-                                                                                            checked={role.update_self}
-                                                                                            type="checkbox"
-                                                                                            label="Editar próprio"
-                                                                                            name="type"
-                                                                                            id={`formUserRoles${role.id}UpdateSelf`}
-                                                                                            value={`${role.id}@update_self`}
-                                                                                            onChange={handleChecks}
-                                                                                        />
-                                                                                    </Col>
-                                                                                }
-
-                                                                                <Col>
-                                                                                    <Form.Check
-                                                                                        checked={role.remove}
-                                                                                        type="checkbox"
-                                                                                        label="Excluir"
-                                                                                        name="type"
-                                                                                        id={`formUserRoles${role.id}Remove`}
-                                                                                        value={`${role.id}@remove`}
-                                                                                        onChange={handleChecks}
-                                                                                        disabled={!role.update}
-                                                                                    />
-                                                                                </Col>
-
-                                                                                <Col>
-                                                                                    <Form.Check
-                                                                                        checked={
-                                                                                            role.view &&
-                                                                                                role.view_self &&
-                                                                                                role.create &&
-                                                                                                role.update &&
-                                                                                                role.update_self &&
-                                                                                                role.remove ? true : false
+                                                                                        {
+                                                                                            role.role === 'users' && <Col>
+                                                                                                <Form.Check
+                                                                                                    checked={role.update_self}
+                                                                                                    type="checkbox"
+                                                                                                    label="Editar próprio"
+                                                                                                    name="type"
+                                                                                                    id={`formUserRoles${role.id}UpdateSelf`}
+                                                                                                    value={`${role.id}@update_self`}
+                                                                                                    onChange={handleChecks}
+                                                                                                />
+                                                                                            </Col>
                                                                                         }
-                                                                                        type="checkbox"
-                                                                                        label="Tudo"
-                                                                                        name="type"
-                                                                                        id={`formUserRoles${role.id}All`}
-                                                                                        value={`${role.id}@all`}
-                                                                                        onChange={handleChecks}
-                                                                                    />
-                                                                                </Col>
-                                                                            </Row>
-                                                                        </ListGroup.Item>
-                                                                    })
-                                                                }
-                                                            </ListGroup>
-                                                        </Col>
-                                                    </Row>
+
+                                                                                        <Col>
+                                                                                            <Form.Check
+                                                                                                checked={role.remove}
+                                                                                                type="checkbox"
+                                                                                                label="Excluir"
+                                                                                                name="type"
+                                                                                                id={`formUserRoles${role.id}Remove`}
+                                                                                                value={`${role.id}@remove`}
+                                                                                                onChange={handleChecks}
+                                                                                                disabled={!role.update}
+                                                                                            />
+                                                                                        </Col>
+
+                                                                                        <Col>
+                                                                                            <Form.Check
+                                                                                                checked={
+                                                                                                    role.view &&
+                                                                                                        role.view_self &&
+                                                                                                        role.create &&
+                                                                                                        role.update &&
+                                                                                                        role.update_self &&
+                                                                                                        role.remove ? true : false
+                                                                                                }
+                                                                                                type="checkbox"
+                                                                                                label="Tudo"
+                                                                                                name="type"
+                                                                                                id={`formUserRoles${role.id}All`}
+                                                                                                value={`${role.id}@all`}
+                                                                                                onChange={handleChecks}
+                                                                                            />
+                                                                                        </Col>
+                                                                                    </Row>
+                                                                                </ListGroup.Item>
+                                                                            })
+                                                                        }
+                                                                    </ListGroup>
+                                                                </Col>
+                                                            </Row>
+                                                        </>
+                                                    }
 
                                                     <Col className="border-top mb-3"></Col>
 
                                                     <Row className="justify-content-end">
                                                         {
                                                             messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                                                <Col sm={2}>
-                                                                    <Button variant="success" type="submit">Salvar</Button>
-                                                                </Col>
+                                                                <>
+                                                                    {
+                                                                        can(user, "users", "delete") && userId !== user.id && <Col sm={2}>
+                                                                            <Button variant="danger" type="submit">Excluir</Button>
+                                                                        </Col>
+                                                                    }
 
+                                                                    <Col sm={2}>
+                                                                        <Button variant="success" type="submit">Salvar</Button>
+                                                                    </Col>
+                                                                </>
                                                         }
                                                     </Row>
                                                 </Form>
                                             )}
                                         </Formik>
                                 }
+
+                                <Modal show={showUserDelete} onHide={handleCloseUsersDelete}>
+                                    <Modal.Header closeButton>
+                                        <Modal.Title>Excluir pessoa</Modal.Title>
+                                    </Modal.Header>
+                                    <Modal.Body>
+                                        Você tem certeza que deseja excluir o usuário <b>{user.name}</b>? Essa ação não poderá ser desfeita.
+                                    </Modal.Body>
+                                    <Modal.Footer>
+                                        {
+                                            deletingMessageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
+                                                <>
+                                                    {
+                                                        can(user, "users", "delete") && userId !== user.id && <Col sm={2}>
+                                                            <Button
+                                                                variant="danger"
+                                                                type="button"
+                                                                onClick={handleUserDelete}
+                                                            >
+                                                                Excluir
+                                                            </Button>
+                                                        </Col>
+                                                    }
+
+                                                    <Col sm={2}>
+                                                        <Button variant="success" type="submit">Salvar</Button>
+                                                    </Col>
+                                                </>
+                                        }
+                                        <Button variant="outline-danger" onClick={handleCloseUsersDelete}>
+                                            Cancelar
+                                        </Button>
+                                    </Modal.Footer>
+                                </Modal>
                             </Container>
                     }
                 </> :

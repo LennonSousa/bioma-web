@@ -51,6 +51,7 @@ export interface Grants {
 
 interface UsersProps {
     user: User;
+    canEdit?: boolean;
     handleListUsers(): Promise<void>;
 }
 
@@ -64,7 +65,7 @@ export function can(user: User, resource: Resource, action: Action) {
     return false;
 }
 
-const Users: React.FC<UsersProps> = ({ user, handleListUsers }) => {
+const Users: React.FC<UsersProps> = ({ user, canEdit = true, handleListUsers }) => {
     const router = useRouter();
 
     const [userPausing, setCategoryPausing] = useState(false);
@@ -104,24 +105,26 @@ const Users: React.FC<UsersProps> = ({ user, handleListUsers }) => {
                     </Col>
                 }
 
-                <Col className="col-row text-end">
-                    <Button
-                        variant="outline-success"
-                        className="button-link"
-                        onClick={togglePauseUser}
-                        title="Pausar usuário"
-                    >
-                        {
-                            userPausing ? <Spinner
-                                as="span"
-                                animation="border"
-                                size="sm"
-                                role="status"
-                                aria-hidden="true"
-                            /> : user.paused ? (<><FaPlay /> Pausado</>) : (<><FaPause /> Pausar</>)
-                        }
-                    </Button>
-                </Col>
+                {
+                    canEdit && <Col className="col-row text-end">
+                        <Button
+                            variant="outline-success"
+                            className="button-link"
+                            onClick={togglePauseUser}
+                            title="Pausar usuário"
+                        >
+                            {
+                                userPausing ? <Spinner
+                                    as="span"
+                                    animation="border"
+                                    size="sm"
+                                    role="status"
+                                    aria-hidden="true"
+                                /> : user.paused ? (<><FaPlay /> Pausado</>) : (<><FaPause /> Pausar</>)
+                            }
+                        </Button>
+                    </Col>
+                }
 
                 <Col className="col-row text-end">
                     <Button
@@ -134,16 +137,18 @@ const Users: React.FC<UsersProps> = ({ user, handleListUsers }) => {
                     </Button>
                 </Col>
 
-                <Col className="col-row text-end">
-                    <Button
-                        variant="outline-success"
-                        className="button-link"
-                        onClick={() => handleRoute(`/users/edit/${user.id}`)}
-                        title="Editar usuário"
-                    >
-                        <FaUserEdit /> Editar
-                    </Button>
-                </Col>
+                {
+                    canEdit && <Col className="col-row text-end">
+                        <Button
+                            variant="outline-success"
+                            className="button-link"
+                            onClick={() => handleRoute(`/users/edit/${user.id}`)}
+                            title="Editar usuário"
+                        >
+                            <FaUserEdit /> Editar
+                        </Button>
+                    </Col>
+                }
             </Row>
         </ListGroup.Item>
     )

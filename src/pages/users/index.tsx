@@ -27,19 +27,17 @@ export default function Institutions() {
         handleItemSideBar('users');
         handleSelectedMenu('users-index');
 
-        if (user) {
-            if (can(user, "users", "read:any")) {
-                api.get('users').then(res => {
-                    setUsers(res.data);
+        if (user && can(user, "users", "read:any")) {
+            api.get('users').then(res => {
+                setUsers(res.data);
 
-                    setLoadingData(false);
-                }).catch(err => {
-                    console.log('Error to get users, ', err);
+                setLoadingData(false);
+            }).catch(err => {
+                console.log('Error to get users, ', err);
 
-                    setTypeLoadingMessage("error");
-                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                });
-            }
+                setTypeLoadingMessage("error");
+                setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+            });
         }
     }, [user]);
 
@@ -94,6 +92,7 @@ export default function Institutions() {
                                                             return <Users
                                                                 key={index}
                                                                 user={user}
+                                                                canEdit={can(user, "users", "update:any")}
                                                                 handleListUsers={handleListUsers}
                                                             />
                                                         })
