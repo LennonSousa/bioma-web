@@ -7,15 +7,19 @@ import { FaPlus } from 'react-icons/fa';
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 import { SideBarContext } from '../../contexts/SideBarContext';
-import Users, { User } from '../../components/Users';
+import { AuthContext } from '../../contexts/AuthContext';
+import Users, { User, can } from '../../components/Users';
+import { PageWaiting } from '../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';
 
 export default function Institutions() {
     const router = useRouter();
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { loading, user } = useContext(AuthContext);
+
     const [users, setUsers] = useState<User[]>([]);
 
-    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(true);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
@@ -23,17 +27,21 @@ export default function Institutions() {
         handleItemSideBar('users');
         handleSelectedMenu('users-index');
 
-        api.get('users').then(res => {
-            setUsers(res.data);
+        if (user) {
+            if (can(user, "users", "read:any")) {
+                api.get('users').then(res => {
+                    setUsers(res.data);
 
-            setLoading(false);
-        }).catch(err => {
-            console.log('Error to get users, ', err);
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error to get users, ', err);
 
-            setTypeLoadingMessage("error");
-            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-        })
-    }, []);
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                });
+            }
+        }
+    }, [user]);
 
     async function handleListUsers() {
         const res = await api.get('users');
@@ -45,65 +53,76 @@ export default function Institutions() {
         router.push('/users/new');
     }
 
-    return <Container className="content-page">
-        <Row>
-            <Col>
-                <Button variant="outline-success" onClick={goNewUser}>
-                    <FaPlus /> Criar um usuário
-                </Button>
-            </Col>
-        </Row>
-
-        <article className="mt-3">
-            {
-                loading ? <Col>
-                    <Row>
-                        <Col>
-                            <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
-                        </Col>
-                    </Row>
-
-                    {
-                        typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
-                            <Col sm={3}>
-                                <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
-                            </Col>
-                        </Row>
-                    }
-                </Col> :
-                    <Row>
+    return !user || loading ? <PageWaiting status="waiting" /> :
+        <Container className="content-page">
+            <>
+                {
+                    can(user, "users", "read:any") ? <>
                         {
-                            !!users.length ? <Col>
-                                <ListGroup>
-                                    {
-                                        users && users.map((user, index) => {
-                                            return <Users
-                                                key={index}
-                                                user={user}
-                                                handleListUsers={handleListUsers}
-                                            />
-                                        })
-                                    }
-                                </ListGroup>
-                            </Col> :
+                            can(user, "users", "create") && <Row>
                                 <Col>
+                                    <Button variant="outline-success" onClick={goNewUser}>
+                                        <FaPlus /> Criar um usuário
+                                    </Button>
+                                </Col>
+                            </Row>
+                        }
+
+                        <article className="mt-3">
+                            {
+                                loadingData ? <Col>
                                     <Row>
-                                        <Col className="text-center">
-                                            <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum usuário registrado.</p>
+                                        <Col>
+                                            <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
                                         </Col>
                                     </Row>
 
-                                    <Row className="justify-content-center mt-3 mb-3">
-                                        <Col sm={3}>
-                                            <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
-                                        </Col>
+                                    {
+                                        typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
+                                            <Col sm={3}>
+                                                <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
+                                            </Col>
+                                        </Row>
+                                    }
+                                </Col> :
+                                    <Row>
+                                        {
+                                            !!users.length ? <Col>
+                                                <ListGroup>
+                                                    {
+                                                        users && users.map((user, index) => {
+                                                            return <Users
+                                                                key={index}
+                                                                user={user}
+                                                                handleListUsers={handleListUsers}
+                                                            />
+                                                        })
+                                                    }
+                                                </ListGroup>
+                                            </Col> :
+                                                <Col>
+                                                    <Row>
+                                                        <Col className="text-center">
+                                                            <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum usuário registrado.</p>
+                                                        </Col>
+                                                    </Row>
+
+                                                    <Row className="justify-content-center mt-3 mb-3">
+                                                        <Col sm={3}>
+                                                            <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                                        </Col>
+                                                    </Row>
+                                                </Col>
+                                        }
                                     </Row>
-                                </Col>
-                        }
-                    </Row>
-            }
-        </article>
-    </Container>
+                            }
+                        </article>
+                    </> :
+                        <PageWaiting status="warning" message="Acesso negado!" />
+                }
+
+            </>
+        </Container>
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

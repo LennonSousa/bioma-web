@@ -10,9 +10,11 @@ import api from '../../../api/api';
 import { cellphone } from '../../../components/InputMask/masks';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
-import { User, UserRole } from '../../../components/Users';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { User, UserRole, can } from '../../../components/Users';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
+import { PageWaiting, PageType } from '../../../components/PageWaiting';
 
 interface TranslateRoles {
     role: string,
@@ -57,13 +59,18 @@ const validationSchema = Yup.object().shape({
 
 export default function UserEdit() {
     const router = useRouter();
-    const { user } = router.query;
+    const userId = router.query['user'];
+
+    const { loading, user } = useContext(AuthContext);
 
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
 
     const [userData, setUserData] = useState<User>();
     const [usersRoles, setUsersRoles] = useState<UserRole[]>([]);
 
+    const [loadingData, setLoadingData] = useState(true);
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
+    const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
@@ -71,16 +78,23 @@ export default function UserEdit() {
         handleItemSideBar('users');
         handleSelectedMenu('users-index');
 
-        api.get(`users/${user}`).then(res => {
-            const userRes: User = res.data;
+        if (user && can(user, "users", "update:any")) {
+            api.get(`users/${userId}`).then(res => {
+                const userRes: User = res.data;
 
-            setUsersRoles(userRes.roles);
+                setUsersRoles(userRes.roles);
 
-            setUserData(userRes);
-        }).catch(err => {
-            console.log('Error get user to edit, ', err);
-        });
-    }, []);
+                setUserData(userRes);
+
+                setLoadingData(false);
+            }).catch(err => {
+                console.log('Error get user to edit, ', err);
+
+                setTypeLoadingMessage("error");
+                setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+            });
+        }
+    }, [user]);
 
     function handleChecks(event: ChangeEvent<HTMLInputElement>) {
         const roleId = event.target.value.split("@", 1)[0];
@@ -147,218 +161,234 @@ export default function UserEdit() {
         return updatedRole;
     }
 
-    return <Container className="content-page">
-        {
-            userData && <Formik
-                initialValues={{
-                    name: userData.name,
-                    phone: userData.phone,
-                }}
-                onSubmit={async values => {
-                    setTypeMessage("waiting");
-                    setMessageShow(true);
+    return !user || loading ? <PageWaiting status="waiting" /> :
+        <>
+            {
+                can(user, "users", "update:any") ? <>
+                    {
+                        loadingData ? <PageWaiting
+                            status={typeLoadingMessage}
+                            message={textLoadingMessage}
+                        /> :
+                            <Container className="content-page">
+                                {
+                                    !userData || loadingData ? <PageWaiting status="waiting" /> :
+                                        <Formik
+                                            initialValues={{
+                                                name: userData.name,
+                                                phone: userData.phone,
+                                            }}
+                                            onSubmit={async values => {
+                                                setTypeMessage("waiting");
+                                                setMessageShow(true);
 
-                    try {
-                        await api.put(`users/${userData.id}`, {
-                            name: values.name,
-                            phone: values.phone,
-                        });
+                                                try {
+                                                    await api.put(`users/${userData.id}`, {
+                                                        name: values.name,
+                                                        phone: values.phone,
+                                                    });
 
-                        usersRoles.forEach(async role => {
-                            await api.put(`users/roles/${role.id}`, {
-                                role: role.role,
-                                view: role.view,
-                                view_self: role.view_self,
-                                create: role.create,
-                                update: role.update,
-                                update_self: role.update_self,
-                                remove: role.remove,
-                            });
-                        });
+                                                    usersRoles.forEach(async role => {
+                                                        await api.put(`users/roles/${role.id}`, {
+                                                            role: role.role,
+                                                            view: role.view,
+                                                            view_self: role.view_self,
+                                                            create: role.create,
+                                                            update: role.update,
+                                                            update_self: role.update_self,
+                                                            remove: role.remove,
+                                                        });
+                                                    });
 
-                        setTypeMessage("success");
+                                                    setTypeMessage("success");
 
-                        setTimeout(() => {
-                            router.push(`/users/details/${userData.id}`);
-                        }, 1500);
-                    }
-                    catch {
-                        setTypeMessage("error");
+                                                    setTimeout(() => {
+                                                        router.push(`/users/details/${userData.id}`);
+                                                    }, 1500);
+                                                }
+                                                catch {
+                                                    setTypeMessage("error");
 
-                        setTimeout(() => {
-                            setMessageShow(false);
-                        }, 4000);
-                    }
-                }}
-                validationSchema={validationSchema}
-            >
-                {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
-                    <Form onSubmit={handleSubmit}>
-                        <Row className="mb-3">
-                            <Col>
-                                <PageBack href="/users" subTitle="Voltar para os detalhes do usuário." />
-                            </Col>
-                        </Row>
-
-                        <Row className="mb-3">
-                            <Form.Group as={Col} sm={6} controlId="formGridName">
-                                <Form.Label>Nome</Form.Label>
-                                <Form.Control
-                                    type="name"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.name}
-                                    name="name"
-                                    isInvalid={!!errors.name && touched.name}
-                                />
-                                <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                            </Form.Group>
-
-                            <Form.Group className="mb-4" controlId="formLoginPhone">
-                                <Form.Label>Telefone</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    maxLength={15}
-                                    onChange={(e) => {
-                                        setFieldValue('phone', cellphone(e.target.value));
-                                    }}
-                                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                                        setFieldValue('phone', cellphone(e.target.value));
-                                    }}
-                                    value={values.phone}
-                                    name="phone"
-                                    isInvalid={!!errors.phone && touched.phone}
-                                />
-                                <Form.Control.Feedback type="invalid">{touched.phone && errors.phone}</Form.Control.Feedback>
-                            </Form.Group>
-                        </Row>
-
-                        <Row>
-                            <Col>
-                                <h6 className="text-success">Permissões <FaKey /></h6>
-                            </Col>
-                        </Row>
-
-                        <Row>
-                            <Col>
-                                <ListGroup className="mb-3">
-                                    {
-                                        usersRoles.map((role, index) => {
-                                            const translatedRole = translatedRoles.find(item => { return item.role === role.role });
-
-                                            return <ListGroup.Item key={index} as="div" variant="light">
-                                                <Row>
-                                                    <Col>
-                                                        <h6 className="text-success">{translatedRole ? translatedRole.translated : role.role} </h6>
-                                                    </Col>
-
-                                                    <Col>
-                                                        <Form.Check
-                                                            checked={role.view}
-                                                            type="checkbox"
-                                                            label="Visualizar"
-                                                            name="type"
-                                                            id={`formUserRoles${role.id}View`}
-                                                            value={`${role.id}@view`}
-                                                            onChange={handleChecks}
-                                                        />
-                                                    </Col>
-
-                                                    <Col>
-                                                        <Form.Check
-                                                            checked={role.create}
-                                                            type="checkbox"
-                                                            label="Criar"
-                                                            name="type"
-                                                            id={`formUserRoles${role.id}Create`}
-                                                            value={`${role.id}@create`}
-                                                            onChange={handleChecks}
-                                                            disabled={!role.view}
-                                                        />
-                                                    </Col>
-
-                                                    <Col>
-                                                        <Form.Check
-                                                            checked={role.update}
-                                                            type="checkbox"
-                                                            label="Editar"
-                                                            name="type"
-                                                            id={`formUserRoles${role.id}Update`}
-                                                            value={`${role.id}@update`}
-                                                            onChange={handleChecks}
-                                                            disabled={!role.view}
-                                                        />
-                                                    </Col>
-
-                                                    {
-                                                        role.id === 'users' && <Col>
-                                                            <Form.Check
-                                                                checked={role.update_self}
-                                                                type="checkbox"
-                                                                label="Editar próprio"
-                                                                name="type"
-                                                                id={`formUserRoles${role.id}UpdateSelf`}
-                                                                value={`${role.id}@update_self`}
-                                                                onChange={handleChecks}
-                                                            />
+                                                    setTimeout(() => {
+                                                        setMessageShow(false);
+                                                    }, 4000);
+                                                }
+                                            }}
+                                            validationSchema={validationSchema}
+                                        >
+                                            {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
+                                                <Form onSubmit={handleSubmit}>
+                                                    <Row className="mb-3">
+                                                        <Col>
+                                                            <PageBack href="/users" subTitle="Voltar para os detalhes do usuário." />
                                                         </Col>
-                                                    }
+                                                    </Row>
 
-                                                    <Col>
-                                                        <Form.Check
-                                                            checked={role.remove}
-                                                            type="checkbox"
-                                                            label="Excluir"
-                                                            name="type"
-                                                            id={`formUserRoles${role.id}Remove`}
-                                                            value={`${role.id}@remove`}
-                                                            onChange={handleChecks}
-                                                            disabled={!role.update}
-                                                        />
-                                                    </Col>
+                                                    <Row className="mb-3">
+                                                        <Form.Group as={Col} sm={6} controlId="formGridName">
+                                                            <Form.Label>Nome</Form.Label>
+                                                            <Form.Control
+                                                                type="name"
+                                                                onChange={handleChange}
+                                                                onBlur={handleBlur}
+                                                                value={values.name}
+                                                                name="name"
+                                                                isInvalid={!!errors.name && touched.name}
+                                                            />
+                                                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                                        </Form.Group>
 
-                                                    <Col>
-                                                        <Form.Check
-                                                            checked={
-                                                                role.view &&
-                                                                    role.view_self &&
-                                                                    role.create &&
-                                                                    role.update &&
-                                                                    role.update_self &&
-                                                                    role.remove ? true : false
-                                                            }
-                                                            type="checkbox"
-                                                            label="Tudo"
-                                                            name="type"
-                                                            id={`formUserRoles${role.id}All`}
-                                                            value={`${role.id}@all`}
-                                                            onChange={handleChecks}
-                                                        />
-                                                    </Col>
-                                                </Row>
-                                            </ListGroup.Item>
-                                        })
-                                    }
-                                </ListGroup>
-                            </Col>
-                        </Row>
+                                                        <Form.Group className="mb-4" controlId="formLoginPhone">
+                                                            <Form.Label>Telefone</Form.Label>
+                                                            <Form.Control
+                                                                type="text"
+                                                                maxLength={15}
+                                                                onChange={(e) => {
+                                                                    setFieldValue('phone', cellphone(e.target.value));
+                                                                }}
+                                                                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                                                    setFieldValue('phone', cellphone(e.target.value));
+                                                                }}
+                                                                value={values.phone}
+                                                                name="phone"
+                                                                isInvalid={!!errors.phone && touched.phone}
+                                                            />
+                                                            <Form.Control.Feedback type="invalid">{touched.phone && errors.phone}</Form.Control.Feedback>
+                                                        </Form.Group>
+                                                    </Row>
 
-                        <Col className="border-top mb-3"></Col>
+                                                    <Row>
+                                                        <Col>
+                                                            <h6 className="text-success">Permissões <FaKey /></h6>
+                                                        </Col>
+                                                    </Row>
 
-                        <Row className="justify-content-end">
-                            {
-                                messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                    <Col sm={2}>
-                                        <Button variant="success" type="submit">Salvar</Button>
-                                    </Col>
+                                                    <Row>
+                                                        <Col>
+                                                            <ListGroup className="mb-3">
+                                                                {
+                                                                    usersRoles.map((role, index) => {
+                                                                        const translatedRole = translatedRoles.find(item => { return item.role === role.role });
 
-                            }
-                        </Row>
-                    </Form>
-                )}
-            </Formik>
-        }
-    </Container >
+                                                                        return <ListGroup.Item key={index} as="div" variant="light">
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <h6 className="text-success">{translatedRole ? translatedRole.translated : role.role} </h6>
+                                                                                </Col>
+
+                                                                                <Col>
+                                                                                    <Form.Check
+                                                                                        checked={role.view}
+                                                                                        type="checkbox"
+                                                                                        label="Visualizar"
+                                                                                        name="type"
+                                                                                        id={`formUserRoles${role.id}View`}
+                                                                                        value={`${role.id}@view`}
+                                                                                        onChange={handleChecks}
+                                                                                    />
+                                                                                </Col>
+
+                                                                                <Col>
+                                                                                    <Form.Check
+                                                                                        checked={role.create}
+                                                                                        type="checkbox"
+                                                                                        label="Criar"
+                                                                                        name="type"
+                                                                                        id={`formUserRoles${role.id}Create`}
+                                                                                        value={`${role.id}@create`}
+                                                                                        onChange={handleChecks}
+                                                                                        disabled={!role.view}
+                                                                                    />
+                                                                                </Col>
+
+                                                                                <Col>
+                                                                                    <Form.Check
+                                                                                        checked={role.update}
+                                                                                        type="checkbox"
+                                                                                        label="Editar"
+                                                                                        name="type"
+                                                                                        id={`formUserRoles${role.id}Update`}
+                                                                                        value={`${role.id}@update`}
+                                                                                        onChange={handleChecks}
+                                                                                        disabled={!role.view}
+                                                                                    />
+                                                                                </Col>
+
+                                                                                {
+                                                                                    role.role === 'users' && <Col>
+                                                                                        <Form.Check
+                                                                                            checked={role.update_self}
+                                                                                            type="checkbox"
+                                                                                            label="Editar próprio"
+                                                                                            name="type"
+                                                                                            id={`formUserRoles${role.id}UpdateSelf`}
+                                                                                            value={`${role.id}@update_self`}
+                                                                                            onChange={handleChecks}
+                                                                                        />
+                                                                                    </Col>
+                                                                                }
+
+                                                                                <Col>
+                                                                                    <Form.Check
+                                                                                        checked={role.remove}
+                                                                                        type="checkbox"
+                                                                                        label="Excluir"
+                                                                                        name="type"
+                                                                                        id={`formUserRoles${role.id}Remove`}
+                                                                                        value={`${role.id}@remove`}
+                                                                                        onChange={handleChecks}
+                                                                                        disabled={!role.update}
+                                                                                    />
+                                                                                </Col>
+
+                                                                                <Col>
+                                                                                    <Form.Check
+                                                                                        checked={
+                                                                                            role.view &&
+                                                                                                role.view_self &&
+                                                                                                role.create &&
+                                                                                                role.update &&
+                                                                                                role.update_self &&
+                                                                                                role.remove ? true : false
+                                                                                        }
+                                                                                        type="checkbox"
+                                                                                        label="Tudo"
+                                                                                        name="type"
+                                                                                        id={`formUserRoles${role.id}All`}
+                                                                                        value={`${role.id}@all`}
+                                                                                        onChange={handleChecks}
+                                                                                    />
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </ListGroup.Item>
+                                                                    })
+                                                                }
+                                                            </ListGroup>
+                                                        </Col>
+                                                    </Row>
+
+                                                    <Col className="border-top mb-3"></Col>
+
+                                                    <Row className="justify-content-end">
+                                                        {
+                                                            messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
+                                                                <Col sm={2}>
+                                                                    <Button variant="success" type="submit">Salvar</Button>
+                                                                </Col>
+
+                                                        }
+                                                    </Row>
+                                                </Form>
+                                            )}
+                                        </Formik>
+                                }
+                            </Container>
+                    }
+                </> :
+                    <PageWaiting status="warning" message="Acesso negado!" />
+            }
+
+        </>
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

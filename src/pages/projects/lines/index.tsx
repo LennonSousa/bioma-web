@@ -6,22 +6,20 @@ import { FaPlus } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import produce from 'immer';
-import { AccessControl } from 'accesscontrol';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
-import { PageWaiting } from '../../../components/PageWaiting';
+import { can } from '../../../components/Users';
 import ProjectLines, { ProjectLine } from '../../../components/ProjectLines';
+import { PageWaiting } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
     order: Yup.number().required(),
 });
-
-const ac = new AccessControl();
 
 export default function Lines() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
@@ -32,7 +30,6 @@ export default function Lines() {
     const [loadingData, setLoadingData] = useState(true);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
-    const [accessVerified, setAccessVerified] = useState(false);
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
@@ -43,13 +40,11 @@ export default function Lines() {
     const handleShowModalNewLine = () => setShowModalNewLine(true);
 
     useEffect(() => {
+        handleItemSideBar('projects');
+        handleSelectedMenu('projects-lines');
+
         if (user) {
-            ac.setGrants(user.grants);
-
-            if (ac.hasRole(user.id) && ac.can(user.id).updateAny('projects').granted) {
-                handleItemSideBar('projects');
-                handleSelectedMenu('projects-lines');
-
+            if (can(user, "projects", "update:any")) {
                 api.get('projects/lines').then(res => {
                     setProjectLines(res.data);
 
@@ -61,8 +56,6 @@ export default function Lines() {
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
                 });
             }
-
-            setAccessVerified(true);
         }
     }, [user]);
 
@@ -110,11 +103,11 @@ export default function Lines() {
         });
     }
 
-    return !user || loading || !accessVerified ? <PageWaiting status="waiting" /> :
+    return !user || loading ? <PageWaiting status="waiting" /> :
         <Container className="content-page">
             <>
                 {
-                    ac.hasRole(user.id) && ac.can(user.id).updateAny('projects').granted ? <>
+                    can(user, "projects", "update:any") ? <>
                         <Row>
                             <Col>
                                 <Button variant="outline-success" onClick={handleShowModalNewLine}>

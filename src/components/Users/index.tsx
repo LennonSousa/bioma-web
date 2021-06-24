@@ -10,6 +10,9 @@ import { Member as ProjectMember } from '../../components/ProjectMembers';
 import { Member as PropertyMember } from '../../components/PropertyMembers';
 import { Notification } from '../../components/Notifications';
 
+type Resource = 'customers' | 'institutions' | 'licensings' | 'properties' | 'projects' | 'banks' | 'users';
+type Action = 'read:any' | 'read:own' | 'create' | 'update:any' | 'update:own' | 'delete';
+
 export interface User {
     id: string,
     name: string;
@@ -49,6 +52,16 @@ export interface Grants {
 interface UsersProps {
     user: User;
     handleListUsers(): Promise<void>;
+}
+
+export function can(user: User, resource: Resource, action: Action) {
+    const foundResource = user.grants.find(grant => {
+        return grant.role === user.id && grant.resource === resource && grant.action === action
+    });
+
+    if (foundResource) return true;
+
+    return false;
 }
 
 const Users: React.FC<UsersProps> = ({ user, handleListUsers }) => {

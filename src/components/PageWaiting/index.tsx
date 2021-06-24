@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Col, Container, Image, Row, Spinner } from 'react-bootstrap';
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaCheckCircle } from 'react-icons/fa';
+
+export type PageType = 'waiting' | 'success' | 'warning' | 'empty' | 'error';
 
 interface PageWaitingProps {
-    status: 'waiting' | 'success' | 'warning' | 'empty' | 'error',
+    status: PageType,
     message?: string;
 }
 
@@ -18,7 +20,7 @@ const PageWaiting: React.FC<PageWaitingProps> = ({ status, message = "Aguarde, c
         handleAlert(status);
     }, [status, message]);
 
-    function handleAlert(status: 'waiting' | 'success' | 'warning' | 'empty' | 'error') {
+    function handleAlert(status: PageType) {
         if (status === 'waiting') {
             setCircleWaiting(true);
             setSuccessWaiting(false);
@@ -93,7 +95,7 @@ const PageWaiting: React.FC<PageWaitingProps> = ({ status, message = "Aguarde, c
                 </Row>
                 <Row>
                     <Col>
-                        <h4 className="text-success">{message}</h4>
+                        <h5 className="text-success">{message}</h5>
                     </Col>
                 </Row>
             </Col>

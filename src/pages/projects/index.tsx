@@ -1,70 +1,68 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { Container, Row } from 'react-bootstrap';
-import { AccessControl } from 'accesscontrol';
 
 import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
+import { can } from '../../components/Users';
 import { Project } from '../../components/Projects';
 import ProjectListItem from '../../components/ProjectListItem';
-import { PageWaiting } from '../../components/PageWaiting';
+import { PageWaiting, PageType } from '../../components/PageWaiting';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
-
-const ac = new AccessControl();
 
 export default function Projects() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
     const [projects, setProjects] = useState<Project[]>([]);
-
-    const [accessVerified, setAccessVerified] = useState(false);
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
+    const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
     const [loadingData, setLoadingData] = useState(true);
 
     useEffect(() => {
+        handleItemSideBar('projects');
+        handleSelectedMenu('projects-index');
+
         if (user) {
-            ac.setGrants(user.grants);
+            if (can(user, "projects", "read:any")) {
+                api.get('projects').then(res => {
+                    setProjects(res.data);
 
-            if (ac.hasRole(user.id)) {
-                if (ac.can(user.id).readAny('projects').granted) {
-                    handleItemSideBar('projects');
-                    handleSelectedMenu('projects-index');
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error to get projects, ', err);
 
-                    api.get('projects').then(res => {
-                        setProjects(res.data);
-
-                        setLoadingData(false);
-                    }).catch(err => {
-                        console.log('Error to get projects, ', err);
-                    });
-                }
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                });
             }
-
-            setAccessVerified(true);
         }
     }, [user]);
 
     return (
-        !user || loading || !accessVerified ? <PageWaiting status="waiting" /> :
+        !user || loading ? <PageWaiting status="waiting" /> :
             <Container>
                 <Row>
                     {
-                        loadingData ? <PageWaiting status="waiting" /> :
-                            <>
-                                {
-                                    ac.hasRole(user.id) && ac.can(user.id).readAny('projects').granted ? <>
+                        can(user, "projects", "read:any") ? <>
+                            {
+                                loadingData ? <PageWaiting
+                                    status={typeLoadingMessage}
+                                    message={textLoadingMessage}
+                                /> :
+                                    <>
                                         {
                                             !!projects.length ? projects.map((project, index) => {
                                                 return <ProjectListItem key={index} project={project} />
                                             }) :
                                                 <PageWaiting status="empty" message="Você ainda não tem nenhum projeto registrado." />
                                         }
-                                    </> :
-                                        <PageWaiting status="warning" message="Acesso negado!" />
-                                }
-                            </>
+                                    </>
+                            }
+                        </> :
+                            <PageWaiting status="warning" message="Acesso negado!" />
                     }
                 </Row>
             </Container>
