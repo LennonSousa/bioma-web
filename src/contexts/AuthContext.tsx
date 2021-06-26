@@ -13,7 +13,7 @@ interface AuthContextData {
     loading: boolean;
     handleAuthenticated(): Promise<void>;
     handleLogin(email: string, password: string): Promise<boolean | "error">;
-    handleLogout(redirect?: Boolean): Promise<void>;
+    handleLogout(): Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -33,7 +33,7 @@ const AuthProvider: React.FC = ({ children }) => {
             const storagedToken = Cookies.get('token');
 
             if (!storagedUser || !storagedToken) {
-                handleLogout(true);
+                handleLogout();
                 return;
             }
 
@@ -51,7 +51,7 @@ const AuthProvider: React.FC = ({ children }) => {
             setLoading(false);
         }
         catch {
-            handleLogout(true);
+            handleLogout();
         }
     }
 
@@ -73,12 +73,14 @@ const AuthProvider: React.FC = ({ children }) => {
 
                 const userRes: User = user;
 
+                handleNotifications(userRes.notifications);
+
                 setUser({ ...userRes, grants: setUserGrants(userRes) });
 
                 api.defaults.headers['Authorization'] = `Bearer ${token}`;
 
-                Cookies.set('user', user.id, { expires: 1 });
-                Cookies.set('token', token, { expires: 1 });
+                Cookies.set('user', user.id, { expires: 1, secure: true });
+                Cookies.set('token', token, { expires: 1, secure: true });
 
                 setSigned(true);
                 setLoading(false);
@@ -153,7 +155,7 @@ const AuthProvider: React.FC = ({ children }) => {
         return listGrants;
     }
 
-    async function handleLogout(redirect?: Boolean) {
+    async function handleLogout() {
         setLoading(true);
         setSigned(false);
         setUser(undefined);
@@ -163,9 +165,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
         api.defaults.headers.Authorization = undefined;
 
-        if (redirect) {
-            router.replace('/');
-        }
+        router.replace('/');
 
         setLoading(false);
     }

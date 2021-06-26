@@ -119,14 +119,16 @@ export default function NewProperty() {
                     });
 
                     api.get('docs/property').then(res => {
-                        const documentsRes: DocsProperty[] = res.data;
+                        let docsProperty: DocsProperty[] = res.data;
+
+                        docsProperty = docsProperty.filter(docProperty => { return docProperty.active });
 
                         propertyRes = {
-                            ...propertyRes, docs: documentsRes.map(doc => {
-                                const customerDoc = propertyRes.docs.find(item => { return item.doc.id === doc.id });
+                            ...propertyRes, docs: docsProperty.map(docProperty => {
+                                const propertyDoc = propertyRes.docs.find(propertyDoc => { return propertyDoc.doc.id === docProperty.id });
 
-                                if (customerDoc)
-                                    return { ...customerDoc, property: propertyRes };
+                                if (propertyDoc)
+                                    return { ...propertyDoc, property: propertyRes };
 
                                 return {
                                     id: '0',
@@ -134,7 +136,7 @@ export default function NewProperty() {
                                     received_at: new Date(),
                                     checked: false,
                                     property: propertyRes,
-                                    doc: doc,
+                                    doc: docProperty,
                                 };
                             })
                         }

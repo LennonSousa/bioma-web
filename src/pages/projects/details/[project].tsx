@@ -53,11 +53,13 @@ export default function PropertyDetails() {
                             let projecRes: Project = res.data;
 
                             api.get('docs/project').then(res => {
-                                const documentsRes: DocsProject[] = res.data;
+                                let docsProject: DocsProject[] = res.data;
+
+                                docsProject = docsProject.filter(docProject => { return docProject.active });
 
                                 projecRes = {
-                                    ...projecRes, docs: documentsRes.map(doc => {
-                                        const projectDoc = projecRes.docs.find(item => { return item.doc.id === doc.id });
+                                    ...projecRes, docs: docsProject.map(docProject => {
+                                        const projectDoc = projecRes.docs.find(projectDoc => { return projectDoc.doc.id === docProject.id });
 
                                         if (projectDoc)
                                             return { ...projectDoc, project: projecRes };
@@ -68,7 +70,7 @@ export default function PropertyDetails() {
                                             received_at: new Date(),
                                             checked: false,
                                             project: projecRes,
-                                            doc: doc,
+                                            doc: docProject,
                                         };
                                     })
                                 }

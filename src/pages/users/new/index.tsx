@@ -102,7 +102,7 @@ export default function NewUser() {
                         view_self: false,
                         create: false,
                         update: false,
-                        update_self: false,
+                        update_self: true,
                         remove: false,
                     }
                 }));

@@ -174,7 +174,7 @@ export default function UserEdit() {
         setDeletingMessageShow(true);
 
         try {
-            if (can(user, "users", "delete") && !user.sudo) {
+            if (can(user, "users", "delete") && !userData.sudo) {
                 await api.delete(`users/${userId}`);
 
                 setTypeMessage("success");
@@ -224,7 +224,7 @@ export default function UserEdit() {
                                                             phone: values.phone,
                                                         });
 
-                                                        if (userId !== user.id && !user.sudo) {
+                                                        if (userId !== user.id && !userData.sudo) {
                                                             usersRoles.forEach(async role => {
                                                                 await api.put(`users/roles/${role.id}`, {
                                                                     role: role.role,
@@ -306,7 +306,7 @@ export default function UserEdit() {
                                                         </Row>
 
                                                         {
-                                                            userId !== user.id && !user.sudo && <>
+                                                            userId !== user.id && !userData.sudo && <>
                                                                 <Row>
                                                                     <Col>
                                                                         <h6 className="text-success">Permissões <FaKey /></h6>
@@ -432,7 +432,7 @@ export default function UserEdit() {
                                                                         {
                                                                             can(user, "users", "delete")
                                                                             && userId !== user.id
-                                                                            && !user.sudo
+                                                                            && !userData.sudo
                                                                             && <Col className="col-row">
                                                                                 <Button
                                                                                     variant="danger"
@@ -468,7 +468,7 @@ export default function UserEdit() {
                                                                     {
                                                                         can(user, "users", "delete")
                                                                         && userId !== user.id
-                                                                        && !user.sudo
+                                                                        && !userData.sudo
                                                                         && <Col className="col-row">
                                                                             <Button
                                                                                 variant="danger"

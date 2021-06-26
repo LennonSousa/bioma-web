@@ -69,14 +69,28 @@ export default function NewLicensing() {
 
         api.get('users').then(res => {
             setUsers(res.data);
+
             const usersRes: User[] = res.data;
+            let newMembersAddedList: Member[] = [];
 
             if (user) {
-                const newMembersAddedList = [{
-                    id: '',
-                    licensing: undefined,
-                    user,
-                }];
+                const rootUsers = usersRes.filter(userItem => { return userItem.sudo });
+
+                rootUsers.forEach(userItem => {
+                    newMembersAddedList.push({
+                        id: userItem.id,
+                        licensing: undefined,
+                        user: userItem,
+                    });
+                });
+
+                if (!newMembersAddedList.find(newMember => { return newMember.id === user.id })) {
+                    newMembersAddedList.push({
+                        id: user.id,
+                        licensing: undefined,
+                        user,
+                    });
+                }
 
                 handleUsersToAdd(usersRes, newMembersAddedList);
 

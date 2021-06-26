@@ -63,14 +63,28 @@ export default function NewProperty() {
 
         api.get('users').then(res => {
             setUsers(res.data);
+
             const usersRes: User[] = res.data;
+            let newMembersAddedList: Member[] = [];
 
             if (user) {
-                const newMembersAddedList = [{
-                    id: '',
-                    property: undefined,
-                    user,
-                }];
+                const rootUsers = usersRes.filter(userItem => { return userItem.sudo });
+
+                rootUsers.forEach(userItem => {
+                    newMembersAddedList.push({
+                        id: userItem.id,
+                        property: undefined,
+                        user: userItem,
+                    });
+                });
+
+                if (!newMembersAddedList.find(newMember => { return newMember.id === user.id })) {
+                    newMembersAddedList.push({
+                        id: user.id,
+                        property: undefined,
+                        user,
+                    });
+                }
 
                 handleUsersToAdd(usersRes, newMembersAddedList);
 
@@ -87,7 +101,11 @@ export default function NewProperty() {
         });
 
         api.get('docs/property').then(res => {
-            setDocsProperty(res.data);
+            let docsPropertyRes: DocsProperty[] = res.data;
+
+            docsPropertyRes = docsPropertyRes.filter(docProperty => { return docProperty.active });
+
+            setDocsProperty(docsPropertyRes);
         }).catch(err => {
             console.log('Error to get docs property, ', err);
         });

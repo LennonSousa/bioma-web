@@ -187,11 +187,13 @@ export default function NewCustomer() {
                             });
 
                             api.get('docs/project').then(res => {
-                                const documentsRes: DocsProject[] = res.data;
+                                let docsProject: DocsProject[] = res.data;
+
+                                docsProject = docsProject.filter(docProject => { return docProject.active });
 
                                 projectRes = {
-                                    ...projectRes, docs: documentsRes.map(doc => {
-                                        const projectDoc = projectRes.docs.find(item => { return item.doc.id === doc.id });
+                                    ...projectRes, docs: docsProject.map(docProject => {
+                                        const projectDoc = projectRes.docs.find(projectDoc => { return projectDoc.doc.id === docProject.id });
 
                                         if (projectDoc)
                                             return { ...projectDoc, project: projectRes };
@@ -202,7 +204,7 @@ export default function NewCustomer() {
                                             received_at: new Date(),
                                             checked: false,
                                             project: projectRes,
-                                            doc: doc,
+                                            doc: docProject,
                                         };
                                     })
                                 }

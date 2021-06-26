@@ -127,7 +127,7 @@ export function Header() {
                                             <Button
                                                 variant="light"
                                                 type="button"
-                                                onClick={() => handleLogout(true)}
+                                                onClick={handleLogout}
                                                 style={{ width: '100%' }}
                                                 title="Sair do sistema."
                                             >

@@ -87,14 +87,28 @@ export default function NewProject() {
 
                     api.get('users').then(res => {
                         setUsers(res.data);
+
                         const usersRes: User[] = res.data;
+                        let newMembersAddedList: Member[] = [];
 
                         if (user) {
-                            const newMembersAddedList = [{
-                                id: '',
-                                project: undefined,
-                                user,
-                            }];
+                            const rootUsers = usersRes.filter(userItem => { return userItem.sudo });
+
+                            rootUsers.forEach(userItem => {
+                                newMembersAddedList.push({
+                                    id: userItem.id,
+                                    project: undefined,
+                                    user: userItem,
+                                });
+                            });
+
+                            if (!newMembersAddedList.find(newMember => { return newMember.id === user.id })) {
+                                newMembersAddedList.push({
+                                    id: user.id,
+                                    project: undefined,
+                                    user,
+                                });
+                            }
 
                             handleUsersToAdd(usersRes, newMembersAddedList);
 
@@ -135,7 +149,11 @@ export default function NewProject() {
                     });
 
                     api.get('docs/project').then(res => {
-                        setDocsProject(res.data);
+                        let docsProjectRes: DocsProject[] = res.data;
+
+                        docsProjectRes = docsProjectRes.filter(docProject => { return docProject.active });
+
+                        setDocsProject(docsProjectRes);
                     }).catch(err => {
                         console.log('Error to get docs project, ', err);
                     });

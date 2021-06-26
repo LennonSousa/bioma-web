@@ -330,7 +330,7 @@ const PropertyAttachments: React.FC<PropertyAttachmentsProps> = ({ attachment, c
                                                             attachment.logs.map(log => {
                                                                 let action = 'Criação';
 
-                                                                if (log.action === 'view') action = 'Visualização';
+                                                                if (log.action === 'view') action = 'Download';
                                                                 else if (log.action === 'update') action = 'Edição';
 
                                                                 return <tr key={log.id}>

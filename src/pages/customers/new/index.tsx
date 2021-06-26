@@ -62,14 +62,28 @@ export default function NewCustomer() {
 
         api.get('users').then(res => {
             setUsers(res.data);
+
             const usersRes: User[] = res.data;
+            let newMembersAddedList: Member[] = [];
 
             if (user) {
-                const newMembersAddedList = [{
-                    id: '',
-                    customer: undefined,
-                    user,
-                }];
+                const rootUsers = usersRes.filter(userItem => { return userItem.sudo });
+
+                rootUsers.forEach(userItem => {
+                    newMembersAddedList.push({
+                        id: userItem.id,
+                        customer: undefined,
+                        user: userItem,
+                    });
+                });
+
+                if (!newMembersAddedList.find(newMember => { return newMember.id === user.id })) {
+                    newMembersAddedList.push({
+                        id: user.id,
+                        customer: undefined,
+                        user,
+                    });
+                }
 
                 handleUsersToAdd(usersRes, newMembersAddedList);
 
@@ -86,7 +100,11 @@ export default function NewCustomer() {
         });
 
         api.get('docs/customer').then(res => {
-            setDocsCustomer(res.data);
+            let docsCustomerRes: DocsCustomer[] = res.data;
+
+            docsCustomerRes = docsCustomerRes.filter(docCustomer => { return docCustomer.active });
+
+            setDocsCustomer(docsCustomerRes);
         }).catch(err => {
             console.log('Error to get docs customer, ', err);
         });

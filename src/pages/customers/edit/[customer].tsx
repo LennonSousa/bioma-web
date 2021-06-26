@@ -123,11 +123,13 @@ export default function NewCustomer() {
                 });
 
                 api.get('docs/customer').then(res => {
-                    const documentsRes: DocsCustomer[] = res.data;
+                    let docsCustomer: DocsCustomer[] = res.data;
+
+                    docsCustomer = docsCustomer.filter(docCustomer => { return docCustomer.active });
 
                     customerRes = {
-                        ...customerRes, docs: documentsRes.map(doc => {
-                            const customerDoc = customerRes.docs.find(item => { return item.doc.id === doc.id });
+                        ...customerRes, docs: docsCustomer.map(docCustomer => {
+                            const customerDoc = customerRes.docs.find(customerDoc => { return customerDoc.doc.id === docCustomer.id });
 
                             if (customerDoc)
                                 return { ...customerDoc, customer: customerRes };
@@ -138,7 +140,7 @@ export default function NewCustomer() {
                                 received_at: new Date(),
                                 checked: false,
                                 customer: customerRes,
-                                doc: doc,
+                                doc: docCustomer,
                             };
                         })
                     }

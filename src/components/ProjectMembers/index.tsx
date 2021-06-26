@@ -87,7 +87,7 @@ const Members: React.FC<MemberProps> = ({ member, canRemove = true, isNewItem = 
                     <FaUserTie style={{ marginRight: '.5rem' }} /><strong className="me-auto">{member.user.name}</strong>
                 </Toast.Header>
                 {
-                    canRemove && <Toast.Body>
+                    canRemove && !member.user.sudo && <Toast.Body>
                         {
                             messageShow ? <AlertMessage status={typeMessage} /> :
                                 <Button

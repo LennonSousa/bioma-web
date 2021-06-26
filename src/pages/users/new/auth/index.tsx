@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
@@ -6,9 +6,9 @@ import { Button, Col, Container, Form, Image, Modal, Row } from 'react-bootstrap
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FaKey } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
 import api from '../../../../api/api';
-import { AuthContext } from '../../../../contexts/AuthContext';
 import { User } from '../../../../components/Users';
 import { cellphone } from '../../../../components/InputMask/masks';
 import { AlertMessage, statusModal } from '../../../../components/interfaces/AlertMessage';
@@ -18,17 +18,17 @@ import styles from '../../../../styles/index.module.css';
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
     phone: Yup.string().notRequired().nullable(),
-    password: Yup.string().required('Obrigatório!'),
-    password02: Yup.string().required('Obrigatório!'),
+    password: Yup.string().required('Obrigatório!').min(8, 'Mínimo 8 caracteres.'),
+    repeat: Yup.string().required('Obrigatório!').min(8, 'Mínimo 8 caracteres.'),
 });
 
 export default function NewCustomer({ authenticated, user, token }) {
     const router = useRouter();
-    const { signed, handleAuthenticated, handleLogout } = useContext(AuthContext)
     const [authenticatedUser, setAuthenticatedUser] = useState<User>(undefined);
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [isEqualPassword, setIsEqualPassword] = useState(false);
 
     const [showModal, setShowModal] = useState(false);
 
@@ -36,16 +36,9 @@ export default function NewCustomer({ authenticated, user, token }) {
     const handleShowModal = () => setShowModal(true);
 
     useEffect(() => {
-        handleAuthenticated();
-    }, []);
+        Cookies.remove('user');
+        Cookies.remove('token');
 
-    useEffect(() => {
-        if (signed) {
-            handleLogout(false);
-        }
-    }, [signed]);
-
-    useEffect(() => {
         if (authenticated && user) {
             setAuthenticatedUser(user);
         }
@@ -73,38 +66,40 @@ export default function NewCustomer({ authenticated, user, token }) {
                                 <Formik
                                     initialValues={{
                                         name: authenticatedUser.name,
-                                        phone: authenticatedUser.phone,
+                                        phone: authenticatedUser.phone ? authenticatedUser.phone : '',
                                         password: '',
-                                        password02: '',
+                                        repeat: '',
                                     }}
                                     onSubmit={async values => {
-                                        setTypeMessage("waiting");
-                                        setMessageShow(true);
+                                        if (isEqualPassword) {
+                                            setTypeMessage("waiting");
+                                            setMessageShow(true);
 
-                                        try {
-                                            const res = await api.put(`users/new/${authenticatedUser.id}`, {
-                                                name: values.name,
-                                                phone: values.phone,
-                                                password: values.password,
-                                            }, {
-                                                headers: { 'Authorization': `Bearer ${token}` }
-                                            });
+                                            try {
+                                                const res = await api.put(`users/new/${authenticatedUser.id}`, {
+                                                    name: values.name,
+                                                    phone: values.phone,
+                                                    password: values.password,
+                                                }, {
+                                                    headers: { 'Authorization': `Bearer ${token}` }
+                                                });
 
-                                            if (res.status === 204) {
+                                                if (res.status === 204) {
 
-                                                setTypeMessage("success");
-                                                handleShowModal();
-                                                return;
+                                                    setTypeMessage("success");
+                                                    handleShowModal();
+                                                    return;
+                                                }
+
+                                                setTypeMessage("error");
                                             }
+                                            catch {
+                                                setTypeMessage("error");
 
-                                            setTypeMessage("error");
-                                        }
-                                        catch {
-                                            setTypeMessage("error");
-
-                                            setTimeout(() => {
-                                                setMessageShow(false);
-                                            }, 4000);
+                                                setTimeout(() => {
+                                                    setMessageShow(false);
+                                                }, 4000);
+                                            }
                                         }
                                     }}
                                     validationSchema={validationSchema}
@@ -129,7 +124,7 @@ export default function NewCustomer({ authenticated, user, token }) {
                                                     <Form.Group className="mb-4" controlId="formLoginPhone">
                                                         <Form.Label>Telefone</Form.Label>
                                                         <Form.Control
-                                                            type="text"
+                                                            type="phone"
                                                             maxLength={15}
                                                             onChange={(e) => {
                                                                 setFieldValue('phone', cellphone(e.target.value));
@@ -148,7 +143,14 @@ export default function NewCustomer({ authenticated, user, token }) {
                                                         <Form.Label>Senha</Form.Label>
                                                         <Form.Control type="password"
                                                             onChange={handleChange}
-                                                            onBlur={handleBlur}
+                                                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                                                if (values.password !== values.repeat || errors.repeat)
+                                                                    setIsEqualPassword(false);
+                                                                else
+                                                                    setIsEqualPassword(true);
+
+                                                                setFieldValue('password', e.target.value);
+                                                            }}
                                                             value={values.password}
                                                             name="password"
                                                             isInvalid={!!errors.password && touched.password}
@@ -157,22 +159,27 @@ export default function NewCustomer({ authenticated, user, token }) {
                                                     </Form.Group>
 
                                                     <Form.Group className="mb-4" controlId="formLoginPassword02">
-                                                        <Form.Label>Senha</Form.Label>
+                                                        <Form.Label>Repita a senha</Form.Label>
                                                         <Form.Control type="password"
                                                             onChange={handleChange}
-                                                            onBlur={handleBlur}
-                                                            value={values.password02}
-                                                            name="password02"
-                                                            isInvalid={!!errors.password02 && touched.password02}
+                                                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                                                if (values.password !== values.repeat || errors.repeat)
+                                                                    setIsEqualPassword(false);
+                                                                else
+                                                                    setIsEqualPassword(true);
+
+                                                                setFieldValue('repeat', e.target.value);
+                                                            }}
+                                                            value={values.repeat}
+                                                            name="repeat"
+                                                            isInvalid={!!errors.repeat && touched.repeat}
                                                         />
-                                                        <Form.Control.Feedback type="invalid">{touched.password02 && errors.password02}</Form.Control.Feedback>
-                                                        {
-                                                            values.password !== values.password02 && touched.password02 && errors.password02 &&
-                                                            <Form.Control.Feedback type="invalid">
-                                                                As senhas devem ser iguais.
-                                                            </Form.Control.Feedback>
-                                                        }
+                                                        <Form.Control.Feedback type="invalid">{touched.repeat && errors.repeat}</Form.Control.Feedback>
                                                     </Form.Group>
+                                                    {
+                                                        touched.repeat && !isEqualPassword &&
+                                                        <small className="text-danger">As senhas devem ser iguais.</small>
+                                                    }
                                                 </Col>
                                             </Row>
 
