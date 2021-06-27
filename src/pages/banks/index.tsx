@@ -8,32 +8,69 @@ import BankListItem from '../../components/BankListItem';
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 import { SideBarContext } from '../../contexts/SideBarContext';
+import { AuthContext } from '../../contexts/AuthContext';
+import { can } from '../../components/Users';
+import { PageWaiting, PageType } from '../../components/PageWaiting';
 
 export default function Banks() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { loading, user } = useContext(AuthContext);
+
     const [banks, setBanks] = useState<Bank[]>([]);
+
+    const [loadingData, setLoadingData] = useState(true);
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
+    const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
     useEffect(() => {
         handleItemSideBar('banks');
         handleSelectedMenu('banks-index');
 
-        api.get('banks').then(res => {
-            setBanks(res.data);
-        }).catch(err => {
-            console.log('Error to get banks, ', err);
-        })
-    }, []);
+        if (user) {
+            if (can(user, "banks", "read:any")) {
+                api.get('banks').then(res => {
+                    setBanks(res.data);
+
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error to get banks, ', err);
+
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    setLoadingData(false);
+                });
+            }
+        }
+
+    }, [user]);
 
     return (
-        <Container>
-            <Row>
+        !user || loading ? <PageWaiting status="waiting" /> :
+            <>
                 {
-                    banks.map((bank, index) => {
-                        return <BankListItem key={index} bank={bank} />
-                    })
+                    can(user, "banks", "read:any") ? <>
+                        <Container>
+                            <Row>
+                                {
+                                    loadingData ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <>
+                                            {
+                                                !!banks.length ? banks.map((bank, index) => {
+                                                    return <BankListItem key={index} bank={bank} />
+                                                }) :
+                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum banco registrado." />
+                                            }
+                                        </>
+                                }
+                            </Row>
+                        </Container>
+                    </> :
+                        <PageWaiting status="warning" message="Acesso negado!" />
                 }
-            </Row>
-        </Container>
+            </>
     )
 }
 

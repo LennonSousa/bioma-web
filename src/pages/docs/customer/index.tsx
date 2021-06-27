@@ -10,7 +10,10 @@ import produce from 'immer';
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { can } from '../../../components/Users';
 import DocCustomer, { DocsCustomer } from '../../../components/DocsCustomer';
+import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -19,10 +22,16 @@ const validationSchema = Yup.object().shape({
     order: Yup.number().required(),
 });
 
-export default function NewCustomer() {
+export default function DocsCustomerPage() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { loading, user } = useContext(AuthContext);
 
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
+
+    const [loadingData, setLoadingData] = useState(true);
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
+
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
 
@@ -35,12 +44,22 @@ export default function NewCustomer() {
         handleItemSideBar('customers');
         handleSelectedMenu('customers-docs');
 
-        api.get('docs/customer').then(res => {
-            setDocsCustomer(res.data);
-        }).catch(err => {
-            console.log('Error to get docs customer, ', err);
-        })
-    }, []);
+        if (user) {
+            if (can(user, "customers", "update:any")) {
+                api.get('docs/customer').then(res => {
+                    setDocsCustomer(res.data);
+
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error to get customers, ', err);
+
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    setLoadingData(false);
+                });
+            }
+        }
+    }, [user]);
 
     async function handleListDocs() {
         const res = await api.get('docs/customer');
@@ -87,149 +106,176 @@ export default function NewCustomer() {
         });
     }
 
-    return <Container className="content-page">
-        <Row>
-            <Col>
-                <Button variant="outline-success" onClick={handleShowModalNewDoc}>
-                    <FaPlus /> Criar um documento
-                </Button>
-            </Col>
-        </Row>
+    return !user || loading ? <PageWaiting status="waiting" /> :
+        <>
+            {
+                can(user, "customers", "update:any") ? <Container className="content-page">
+                    {
+                        can(user, "customers", "update:any") && <Row>
+                            <Col>
+                                <Button variant="outline-success" onClick={handleShowModalNewDoc}>
+                                    <FaPlus /> Criar um documento
+                                </Button>
+                            </Col>
+                        </Row>
+                    }
 
-        <article className="mt-3">
-            <Row>
-                {!!docsCustomer.length ? <Col>
-                    <DragDropContext onDragEnd={handleOnDragEnd}>
-                        <Droppable droppableId="docs">
-                            {provided => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                >
-                                    <ListGroup>
-                                        {
-                                            docsCustomer && docsCustomer.map((doc, index) => {
-                                                return <Draggable key={doc.id} draggableId={doc.id} index={index}>
-                                                    {(provided) => (
+                    <article className="mt-3">
+                        {
+                            loadingData ? <Col>
+                                <Row>
+                                    <Col>
+                                        <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
+                                    </Col>
+                                </Row>
+
+                                {
+                                    typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
+                                        <Col sm={3}>
+                                            <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
+                                        </Col>
+                                    </Row>
+                                }
+                            </Col> :
+                                <Row>
+                                    {
+                                        !!docsCustomer.length ? <Col>
+                                            <DragDropContext onDragEnd={handleOnDragEnd}>
+                                                <Droppable droppableId="docs">
+                                                    {provided => (
                                                         <div
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
+                                                            {...provided.droppableProps}
                                                             ref={provided.innerRef}
                                                         >
-                                                            <DocCustomer doc={doc} listDocs={docsCustomer} handleListDocs={handleListDocs} />
+                                                            <ListGroup>
+                                                                {
+                                                                    docsCustomer && docsCustomer.map((doc, index) => {
+                                                                        return <Draggable key={doc.id} draggableId={doc.id} index={index}>
+                                                                            {(provided) => (
+                                                                                <div
+                                                                                    {...provided.draggableProps}
+                                                                                    {...provided.dragHandleProps}
+                                                                                    ref={provided.innerRef}
+                                                                                >
+                                                                                    <DocCustomer doc={doc} listDocs={docsCustomer} handleListDocs={handleListDocs} />
+                                                                                </div>
+                                                                            )}
+
+                                                                        </Draggable>
+                                                                    })
+                                                                }
+                                                            </ListGroup>
+                                                            {provided.placeholder}
                                                         </div>
                                                     )}
+                                                </Droppable>
+                                            </DragDropContext>
+                                        </Col> :
+                                            <Col>
+                                                <Row>
+                                                    <Col className="text-center">
+                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum documento registrado.</p>
+                                                    </Col>
+                                                </Row>
 
-                                                </Draggable>
-                                            })
-                                        }
-                                    </ListGroup>
-                                    {provided.placeholder}
-                                </div>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
-                </Col> :
-                    <Col>
-                        <Row>
-                            <Col className="text-center">
-                                <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum documento registrado.</p>
-                            </Col>
-                        </Row>
-
-                        <Row className="justify-content-center mt-3 mb-3">
-                            <Col sm={3}>
-                                <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
-                            </Col>
-                        </Row>
-                    </Col>
-                }
-            </Row>
-        </article>
-
-        <Modal show={showModalNewDoc} onHide={handleCloseModalNewDoc}>
-            <Modal.Header closeButton>
-                <Modal.Title>Criar um documento</Modal.Title>
-            </Modal.Header>
-            <Formik
-                initialValues={
-                    {
-                        name: '',
-                        active: true,
-                        order: 0,
-                    }
-                }
-                onSubmit={async values => {
-                    setTypeMessage("waiting");
-                    setMessageShow(true);
-
-                    try {
-                        if (docsCustomer) {
-                            await api.post('docs/customer', {
-                                name: values.name,
-                                active: values.active,
-                                order: docsCustomer.length,
-                            });
-
-                            await handleListDocs();
-
-                            setTypeMessage("success");
-
-                            setTimeout(() => {
-                                setMessageShow(false);
-                                handleCloseModalNewDoc();
-                            }, 1000);
+                                                <Row className="justify-content-center mt-3 mb-3">
+                                                    <Col sm={3}>
+                                                        <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                                    </Col>
+                                                </Row>
+                                            </Col>
+                                    }
+                                </Row>
                         }
-                    }
-                    catch (err) {
-                        setTypeMessage("error");
+                    </article>
 
-                        setTimeout(() => {
-                            setMessageShow(false);
-                        }, 4000);
-
-                        console.log('error create doc customer.');
-                        console.log(err);
-                    }
-
-                }}
-                validationSchema={validationSchema}
-            >
-                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                    <Form onSubmit={handleSubmit}>
-                        <Modal.Body>
-                            <Form.Group controlId="categoryFormGridName">
-                                <Form.Label>Nome do documento</Form.Label>
-                                <Form.Control type="text"
-                                    placeholder="Nome"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.name}
-                                    name="name"
-                                    isInvalid={!!errors.name && touched.name}
-                                />
-                                <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
-                            </Form.Group>
-
-                        </Modal.Body>
-                        <Modal.Footer>
-                            {
-                                messageShow ? <AlertMessage status={typeMessage} /> :
-                                    <>
-                                        <Button variant="secondary" onClick={handleCloseModalNewDoc}>
-                                            Cancelar
-                                        </Button>
-                                        <Button variant="success" type="submit">Salvar</Button>
-                                    </>
-
+                    <Modal show={showModalNewDoc} onHide={handleCloseModalNewDoc}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Criar um documento</Modal.Title>
+                        </Modal.Header>
+                        <Formik
+                            initialValues={
+                                {
+                                    name: '',
+                                    active: true,
+                                    order: 0,
+                                }
                             }
-                        </Modal.Footer>
-                    </Form>
-                )}
-            </Formik>
-        </Modal>
-    </Container>
+                            onSubmit={async values => {
+                                if (can(user, "customers", "update:any")) {
+                                    setTypeMessage("waiting");
+                                    setMessageShow(true);
+
+                                    try {
+                                        if (docsCustomer) {
+                                            await api.post('docs/customer', {
+                                                name: values.name,
+                                                active: values.active,
+                                                order: docsCustomer.length,
+                                            });
+
+                                            await handleListDocs();
+
+                                            setTypeMessage("success");
+
+                                            setTimeout(() => {
+                                                setMessageShow(false);
+                                                handleCloseModalNewDoc();
+                                            }, 1000);
+                                        }
+                                    }
+                                    catch (err) {
+                                        setTypeMessage("error");
+
+                                        setTimeout(() => {
+                                            setMessageShow(false);
+                                        }, 4000);
+
+                                        console.log('error create doc customer.');
+                                        console.log(err);
+                                    }
+                                }
+                            }}
+                            validationSchema={validationSchema}
+                        >
+                            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                                <Form onSubmit={handleSubmit}>
+                                    <Modal.Body>
+                                        <Form.Group controlId="categoryFormGridName">
+                                            <Form.Label>Nome do documento</Form.Label>
+                                            <Form.Control type="text"
+                                                placeholder="Nome"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.name}
+                                                name="name"
+                                                isInvalid={!!errors.name && touched.name}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                            <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
+                                        </Form.Group>
+
+                                    </Modal.Body>
+                                    <Modal.Footer>
+                                        {
+                                            messageShow ? <AlertMessage status={typeMessage} /> :
+                                                <>
+                                                    <Button variant="secondary" onClick={handleCloseModalNewDoc}>
+                                                        Cancelar
+                                                    </Button>
+                                                    <Button variant="success" type="submit">Salvar</Button>
+                                                </>
+
+                                        }
+                                    </Modal.Footer>
+                                </Form>
+                            )}
+                        </Formik>
+                    </Modal>
+                </Container> :
+                    <PageWaiting status="warning" message="Acesso negado!" />
+            }
+        </>
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

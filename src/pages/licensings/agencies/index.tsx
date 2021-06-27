@@ -10,7 +10,10 @@ import produce from 'immer';
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { can } from '../../../components/Users';
 import LicensingAgencies, { LicensingAgency } from '../../../components/LicensingAgencies';
+import { PageWaiting } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -20,9 +23,11 @@ const validationSchema = Yup.object().shape({
 
 export default function Lines() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { loading, user } = useContext(AuthContext);
+
     const [licensingAgencies, setLicensingAgencies] = useState<LicensingAgency[]>([]);
 
-    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(true);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
@@ -38,17 +43,22 @@ export default function Lines() {
         handleItemSideBar('licensings');
         handleSelectedMenu('licensings-agencies');
 
-        api.get('licensings/agencies').then(res => {
-            setLicensingAgencies(res.data);
+        if (user) {
+            if (can(user, "licensings", "update:any")) {
+                api.get('licensings/agencies').then(res => {
+                    setLicensingAgencies(res.data);
 
-            setLoading(false);
-        }).catch(err => {
-            console.log('Error to get licensings agencies, ', err);
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error to get customers, ', err);
 
-            setTypeLoadingMessage("error");
-            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-        })
-    }, []);
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    setLoadingData(false);
+                });
+            }
+        }
+    }, [user]);
 
     async function handleListAgencies() {
         const res = await api.get('licensings/agencies');
@@ -94,171 +104,177 @@ export default function Lines() {
         });
     }
 
-    return <Container className="content-page">
-        <Row>
-            <Col>
-                <Button variant="outline-success" onClick={handleShowModalNewAgency}>
-                    <FaPlus /> Criar um orgão
-                </Button>
-            </Col>
-        </Row>
-
-        <article className="mt-3">
+    return !user || loading ? <PageWaiting status="waiting" /> :
+        <>
             {
-                loading ? <Col>
+                can(user, "licensings", "update:any") ? <Container className="content-page">
                     <Row>
                         <Col>
-                            <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
+                            <Button variant="outline-success" onClick={handleShowModalNewAgency}>
+                                <FaPlus /> Criar um orgão
+                            </Button>
                         </Col>
                     </Row>
 
-                    {
-                        typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
-                            <Col sm={3}>
-                                <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
-                            </Col>
-                        </Row>
-                    }
-                </Col> :
-                    <Row>
+                    <article className="mt-3">
                         {
-                            !!licensingAgencies.length ? <Col>
-                                <DragDropContext onDragEnd={handleOnDragEnd}>
-                                    <Droppable droppableId="lines">
-                                        {provided => (
-                                            <div
-                                                {...provided.droppableProps}
-                                                ref={provided.innerRef}
-                                            >
-                                                <ListGroup>
-                                                    {
-                                                        licensingAgencies && licensingAgencies.map((agency, index) => {
-                                                            return <Draggable key={agency.id} draggableId={agency.id} index={index}>
-                                                                {(provided) => (
-                                                                    <div
-                                                                        {...provided.draggableProps}
-                                                                        {...provided.dragHandleProps}
-                                                                        ref={provided.innerRef}
-                                                                    >
-                                                                        <LicensingAgencies
-                                                                            agency={agency}
-                                                                            listAgencies={licensingAgencies}
-                                                                            handleListAgencies={handleListAgencies}
-                                                                        />
-                                                                    </div>
-                                                                )}
+                            loadingData ? <Col>
+                                <Row>
+                                    <Col>
+                                        <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
+                                    </Col>
+                                </Row>
 
-                                                            </Draggable>
-                                                        })
-                                                    }
-                                                </ListGroup>
-                                                {provided.placeholder}
-                                            </div>
-                                        )}
-                                    </Droppable>
-                                </DragDropContext>
-                            </Col> :
-                                <Col>
-                                    <Row>
-                                        <Col className="text-center">
-                                            <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum orgão registrado.</p>
-                                        </Col>
-                                    </Row>
-
-                                    <Row className="justify-content-center mt-3 mb-3">
+                                {
+                                    typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
                                         <Col sm={3}>
-                                            <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                            <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
                                         </Col>
                                     </Row>
-                                </Col>
+                                }
+                            </Col> :
+                                <Row>
+                                    {
+                                        !!licensingAgencies.length ? <Col>
+                                            <DragDropContext onDragEnd={handleOnDragEnd}>
+                                                <Droppable droppableId="lines">
+                                                    {provided => (
+                                                        <div
+                                                            {...provided.droppableProps}
+                                                            ref={provided.innerRef}
+                                                        >
+                                                            <ListGroup>
+                                                                {
+                                                                    licensingAgencies && licensingAgencies.map((agency, index) => {
+                                                                        return <Draggable key={agency.id} draggableId={agency.id} index={index}>
+                                                                            {(provided) => (
+                                                                                <div
+                                                                                    {...provided.draggableProps}
+                                                                                    {...provided.dragHandleProps}
+                                                                                    ref={provided.innerRef}
+                                                                                >
+                                                                                    <LicensingAgencies
+                                                                                        agency={agency}
+                                                                                        listAgencies={licensingAgencies}
+                                                                                        handleListAgencies={handleListAgencies}
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+
+                                                                        </Draggable>
+                                                                    })
+                                                                }
+                                                            </ListGroup>
+                                                            {provided.placeholder}
+                                                        </div>
+                                                    )}
+                                                </Droppable>
+                                            </DragDropContext>
+                                        </Col> :
+                                            <Col>
+                                                <Row>
+                                                    <Col className="text-center">
+                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum orgão registrado.</p>
+                                                    </Col>
+                                                </Row>
+
+                                                <Row className="justify-content-center mt-3 mb-3">
+                                                    <Col sm={3}>
+                                                        <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                                    </Col>
+                                                </Row>
+                                            </Col>
+                                    }
+                                </Row>
                         }
-                    </Row>
-            }
-        </article>
+                    </article>
 
-        <Modal show={showModalNewAgency} onHide={handleCloseModalAgency}>
-            <Modal.Header closeButton>
-                <Modal.Title>Criar um orgão</Modal.Title>
-            </Modal.Header>
-            <Formik
-                initialValues={
-                    {
-                        name: '',
-                        active: true,
-                        order: 0,
-                    }
-                }
-                onSubmit={async values => {
-                    setTypeMessage("waiting");
-                    setMessageShow(true);
-
-                    try {
-                        if (licensingAgencies) {
-                            await api.post('licensings/agencies', {
-                                name: values.name,
-                                active: values.active,
-                                order: licensingAgencies.length,
-                            });
-
-                            await handleListAgencies();
-
-                            setTypeMessage("success");
-
-                            setTimeout(() => {
-                                setMessageShow(false);
-                                handleCloseModalAgency();
-                            }, 1500);
-                        }
-                    }
-                    catch (err) {
-                        setTypeMessage("error");
-
-                        setTimeout(() => {
-                            setMessageShow(false);
-                        }, 4000);
-
-                        console.log('error create licensings agencies.');
-                        console.log(err);
-                    }
-
-                }}
-                validationSchema={validationSchema}
-            >
-                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                    <Form onSubmit={handleSubmit}>
-                        <Modal.Body>
-                            <Form.Group controlId="lineFormGridName">
-                                <Form.Label>Nome</Form.Label>
-                                <Form.Control type="text"
-                                    placeholder="Nome"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.name}
-                                    name="name"
-                                    isInvalid={!!errors.name && touched.name}
-                                />
-                                <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
-                            </Form.Group>
-
-                        </Modal.Body>
-                        <Modal.Footer>
-                            {
-                                messageShow ? <AlertMessage status={typeMessage} /> :
-                                    <>
-                                        <Button variant="secondary" onClick={handleCloseModalAgency}>
-                                            Cancelar
-                                        </Button>
-                                        <Button variant="success" type="submit">Salvar</Button>
-                                    </>
-
+                    <Modal show={showModalNewAgency} onHide={handleCloseModalAgency}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Criar um orgão</Modal.Title>
+                        </Modal.Header>
+                        <Formik
+                            initialValues={
+                                {
+                                    name: '',
+                                    active: true,
+                                    order: 0,
+                                }
                             }
-                        </Modal.Footer>
-                    </Form>
-                )}
-            </Formik>
-        </Modal>
-    </Container>
+                            onSubmit={async values => {
+                                setTypeMessage("waiting");
+                                setMessageShow(true);
+
+                                try {
+                                    if (licensingAgencies) {
+                                        await api.post('licensings/agencies', {
+                                            name: values.name,
+                                            active: values.active,
+                                            order: licensingAgencies.length,
+                                        });
+
+                                        await handleListAgencies();
+
+                                        setTypeMessage("success");
+
+                                        setTimeout(() => {
+                                            setMessageShow(false);
+                                            handleCloseModalAgency();
+                                        }, 1500);
+                                    }
+                                }
+                                catch (err) {
+                                    setTypeMessage("error");
+
+                                    setTimeout(() => {
+                                        setMessageShow(false);
+                                    }, 4000);
+
+                                    console.log('error create licensings agencies.');
+                                    console.log(err);
+                                }
+
+                            }}
+                            validationSchema={validationSchema}
+                        >
+                            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                                <Form onSubmit={handleSubmit}>
+                                    <Modal.Body>
+                                        <Form.Group controlId="lineFormGridName">
+                                            <Form.Label>Nome</Form.Label>
+                                            <Form.Control type="text"
+                                                placeholder="Nome"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.name}
+                                                name="name"
+                                                isInvalid={!!errors.name && touched.name}
+                                            />
+                                            <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
+                                            <Form.Text className="text-muted text-right">{`${values.name.length}/50 caracteres.`}</Form.Text>
+                                        </Form.Group>
+
+                                    </Modal.Body>
+                                    <Modal.Footer>
+                                        {
+                                            messageShow ? <AlertMessage status={typeMessage} /> :
+                                                <>
+                                                    <Button variant="secondary" onClick={handleCloseModalAgency}>
+                                                        Cancelar
+                                                    </Button>
+                                                    <Button variant="success" type="submit">Salvar</Button>
+                                                </>
+
+                                        }
+                                    </Modal.Footer>
+                                </Form>
+                            )}
+                        </Formik>
+                    </Modal>
+                </Container> :
+                    <PageWaiting status="warning" message="Acesso negado!" />
+            }
+        </>
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

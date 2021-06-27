@@ -7,7 +7,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { can } from '../../components/Users';
 import { Licensing } from '../../components/Licensings';
 import LicensingListItem from '../../components/LicensingListItem';
-import { PageWaiting } from '../../components/PageWaiting';
+import { PageWaiting, PageType } from '../../components/PageWaiting';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
@@ -19,6 +19,8 @@ export default function Licensings() {
     const [licensings, setLicensings] = useState<Licensing[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
+    const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
     useEffect(() => {
         handleItemSideBar('licensings');
@@ -32,6 +34,10 @@ export default function Licensings() {
                     setLoadingData(false);
                 }).catch(err => {
                     console.log('Error to get licensings, ', err);
+
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    setLoadingData(false);
                 });
             }
         }
@@ -39,27 +45,31 @@ export default function Licensings() {
 
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
-            <Container>
-                <Row>
-                    {
-                        loadingData ? <PageWaiting status="waiting" /> :
-                            <>
+            <>
+                {
+                    can(user, "licensings", "read:any") ? <>
+                        <Container>
+                            <Row>
                                 {
-                                    can(user, "licensings", "read:any") ? <>
-                                        {
-                                            !!licensings.length ? licensings.map((licensing, index) => {
-                                                return <LicensingListItem key={index} licensing={licensing} />
-                                            }) :
-                                                <PageWaiting status="empty" message="Você ainda não tem nenhum licenciamento registrado." />
-                                        }
-                                    </> :
-                                        <PageWaiting status="warning" message="Acesso negado!" />
+                                    loadingData ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <>
+                                            {
+                                                !!licensings.length ? licensings.map((licensing, index) => {
+                                                    return <LicensingListItem key={index} licensing={licensing} />
+                                                }) :
+                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum licenciamento registrado." />
+                                            }
+                                        </>
                                 }
-
-                            </>
-                    }
-                </Row>
-            </Container>
+                            </Row>
+                        </Container>
+                    </> :
+                        <PageWaiting status="warning" message="Acesso negado!" />
+                }
+            </>
     )
 }
 

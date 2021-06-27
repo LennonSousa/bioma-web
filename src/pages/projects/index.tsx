@@ -36,6 +36,7 @@ export default function Projects() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    setLoadingData(false);
                 });
             }
         }
@@ -43,29 +44,33 @@ export default function Projects() {
 
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
-            <Container>
-                <Row>
-                    {
-                        can(user, "projects", "read:any") ? <>
-                            {
-                                loadingData ? <PageWaiting
-                                    status={typeLoadingMessage}
-                                    message={textLoadingMessage}
-                                /> :
-                                    <>
-                                        {
-                                            !!projects.length ? projects.map((project, index) => {
-                                                return <ProjectListItem key={index} project={project} />
-                                            }) :
-                                                <PageWaiting status="empty" message="Você ainda não tem nenhum projeto registrado." />
-                                        }
-                                    </>
-                            }
-                        </> :
-                            <PageWaiting status="warning" message="Acesso negado!" />
-                    }
-                </Row>
-            </Container>
+            <>
+                {
+                    can(user, "projects", "read:any") ? <>
+                        <Container>
+                            <Row>
+
+                                {
+                                    loadingData ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <>
+                                            {
+                                                !!projects.length ? projects.map((project, index) => {
+                                                    return <ProjectListItem key={index} project={project} />
+                                                }) :
+                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum projeto registrado." />
+                                            }
+                                        </>
+
+                                }
+                            </Row>
+                        </Container>
+                    </> :
+                        <PageWaiting status="warning" message="Acesso negado!" />
+                }
+            </>
     )
 }
 
