@@ -62,179 +62,181 @@ export default function BankDetails() {
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :
-                            <Container className="content-page">
+                            <>
                                 {
-                                    !bankData || loadingData ? <PageWaiting status="waiting" /> :
-                                        <Row>
-                                            <Col>
-                                                <Row className="mb-3">
-                                                    <Col>
-                                                        <PageBack href="/banks" subTitle="Voltar para a lista de bancos" />
-                                                    </Col>
-                                                </Row>
+                                    !bankData ? <PageWaiting status="waiting" /> :
+                                        <Container className="content-page">
+                                            <Row>
+                                                <Col>
+                                                    <Row className="mb-3">
+                                                        <Col>
+                                                            <PageBack href="/banks" subTitle="Voltar para a lista de bancos" />
+                                                        </Col>
+                                                    </Row>
 
-                                                <Row className="mb-3">
-                                                    <Col sm={6}>
-                                                        <Row className="align-items-center">
-                                                            <Col>
-                                                                <h3 className="form-control-plaintext text-success">{bankData.institution.name}</h3>
-                                                            </Col>
+                                                    <Row className="mb-3">
+                                                        <Col sm={6}>
+                                                            <Row className="align-items-center">
+                                                                <Col>
+                                                                    <h3 className="form-control-plaintext text-success">{bankData.institution.name}</h3>
+                                                                </Col>
 
-                                                            <Col>
-                                                                <Link href={`/banks/edit/${bankData.id}`}>
-                                                                    <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
-                                                                </Link>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
+                                                                <Col>
+                                                                    <Link href={`/banks/edit/${bankData.id}`}>
+                                                                        <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
+                                                                    </Link>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
 
-                                                    <Col sm={6} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Agência</span>
-                                                            </Col>
-                                                        </Row>
+                                                        <Col sm={6} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Agência</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.agency}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.agency}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
 
-                                                <Row className="mb-3">
-                                                    <Col sm={3}>
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Telefone comercial</span>
-                                                            </Col>
-                                                        </Row>
+                                                    <Row className="mb-3">
+                                                        <Col sm={3}>
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Telefone comercial</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.phone}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.phone}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
 
-                                                    <Col sm={3} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Celular</span>
-                                                            </Col>
-                                                        </Row>
+                                                        <Col sm={3} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Celular</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.cellphone}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.cellphone}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
 
-                                                <Row className="mb-3">
-                                                    <Col sm={6}>
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Endereço</span>
-                                                            </Col>
-                                                        </Row>
+                                                    <Row className="mb-3">
+                                                        <Col sm={6}>
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Endereço</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.address}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.address}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
 
-                                                    <Col sm={4} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Cidade</span>
-                                                            </Col>
-                                                        </Row>
+                                                        <Col sm={4} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Cidade</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.city}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.city}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
 
-                                                    <Col sm={2} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Estado</span>
-                                                            </Col>
-                                                        </Row>
+                                                        <Col sm={2} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Estado</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.state}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.state}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
 
-                                                <Row className="mb-3">
-                                                    <Col sm={3}>
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Setor/gerente</span>
-                                                            </Col>
-                                                        </Row>
+                                                    <Row className="mb-3">
+                                                        <Col sm={3}>
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Setor/gerente</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.sector}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.sector}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
 
-                                                    <Col sm={3} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Departamento</span>
-                                                            </Col>
-                                                        </Row>
+                                                        <Col sm={3} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Departamento</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{bankData.department}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{bankData.department}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
 
-                                                <Col className="border-top mb-3"></Col>
+                                                    <Col className="border-top mb-3"></Col>
 
-                                                <Tabs defaultActiveKey="projects" id="relations-projects">
-                                                    <Tab eventKey="projects" title="Projetos">
-                                                        <Row className={styles.relationsContainer}>
-                                                            <Col>
-                                                                <Row className={styles.relationsContent}>
-                                                                    {
-                                                                        !!bankData.projects.length ? bankData.projects.map((project, index) => {
-                                                                            return <ProjectListItem
-                                                                                key={index}
-                                                                                project={project}
-                                                                                showBank={false}
-                                                                            />
-                                                                        }) :
-                                                                            <Col>
-                                                                                <span className="text-success">Nenhum projeto registrado.</span>
-                                                                            </Col>
-                                                                    }
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    </Tab>
-                                                </Tabs>
-                                            </Col>
-                                        </Row>
+                                                    <Tabs defaultActiveKey="projects" id="relations-projects">
+                                                        <Tab eventKey="projects" title="Projetos">
+                                                            <Row className={styles.relationsContainer}>
+                                                                <Col>
+                                                                    <Row className={styles.relationsContent}>
+                                                                        {
+                                                                            !!bankData.projects.length ? bankData.projects.map((project, index) => {
+                                                                                return <ProjectListItem
+                                                                                    key={index}
+                                                                                    project={project}
+                                                                                    showBank={false}
+                                                                                />
+                                                                            }) :
+                                                                                <Col>
+                                                                                    <span className="text-success">Nenhum projeto registrado.</span>
+                                                                                </Col>
+                                                                        }
+                                                                    </Row>
+                                                                </Col>
+                                                            </Row>
+                                                        </Tab>
+                                                    </Tabs>
+                                                </Col>
+                                            </Row>
+                                        </Container>
                                 }
-                            </Container>
+                            </>
                     }
                 </> :
                     <PageWaiting status="warning" message="Acesso negado!" />

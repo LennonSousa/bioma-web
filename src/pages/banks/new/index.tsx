@@ -7,11 +7,14 @@ import * as Yup from 'yup';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { can } from '../../../components/Users';
 import { Institution } from '../../../components/Institutions';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
 import PageBack from '../../../components/PageBack';
+import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -28,6 +31,7 @@ const validationSchema = Yup.object().shape({
 
 export default function NewBank() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+    const { loading, user } = useContext(AuthContext);
 
     const [institutions, setInstitutions] = useState<Institution[]>([]);
     const [messageShow, setMessageShow] = useState(false);
@@ -40,246 +44,269 @@ export default function NewBank() {
         handleItemSideBar('banks');
         handleSelectedMenu('banks-new');
 
-        api.get('institutions').then(res => {
-            setInstitutions(res.data);
+        if (user) {
+            if (can(user, "banks", "create")) {
+                api.get('institutions').then(res => {
+                    setInstitutions(res.data);
 
-        }).catch(err => {
-            console.log('Error crate institution, ', err);
-        });
-    }, []);
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error crate institution, ', err);
 
-    return <Container className="content-page">
-        <Formik
-            initialValues={{
-                agency: '',
-                address: '',
-                city: '',
-                state: '',
-                sector: '',
-                department: '',
-                phone: '',
-                cellphone: '',
-                institution: '',
-            }}
-            onSubmit={async values => {
-                setTypeMessage("waiting");
-                setMessageShow(true);
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    setLoadingData(false);
+                });
+            }
+        }
+    }, [user]);
 
-                try {
-                    const res = await api.post('banks', {
-                        agency: values.agency,
-                        address: values.address,
-                        city: values.city,
-                        state: values.state,
-                        sector: values.sector,
-                        department: values.department,
-                        phone: values.phone,
-                        cellphone: values.cellphone,
-                        institution: values.institution,
-                    });
+    return !user || loading ? <PageWaiting status="waiting" /> :
+        <>
+            {
+                can(user, "banks", "create") ? <>
+                    {
+                        loadingData ? <PageWaiting
+                            status={typeLoadingMessage}
+                            message={textLoadingMessage}
+                        /> :
+                            <Container className="content-page">
+                                <Formik
+                                    initialValues={{
+                                        agency: '',
+                                        address: '',
+                                        city: '',
+                                        state: '',
+                                        sector: '',
+                                        department: '',
+                                        phone: '',
+                                        cellphone: '',
+                                        institution: '',
+                                    }}
+                                    onSubmit={async values => {
+                                        setTypeMessage("waiting");
+                                        setMessageShow(true);
 
-                    setTypeMessage("success");
+                                        try {
+                                            const res = await api.post('banks', {
+                                                agency: values.agency,
+                                                address: values.address,
+                                                city: values.city,
+                                                state: values.state,
+                                                sector: values.sector,
+                                                department: values.department,
+                                                phone: values.phone,
+                                                cellphone: values.cellphone,
+                                                institution: values.institution,
+                                            });
 
-                    setTimeout(() => {
-                        router.push(`/banks/details/${res.data.id}`);
-                    }, 1500);
-                }
-                catch {
-                    setTypeMessage("error");
+                                            setTypeMessage("success");
 
-                    setTimeout(() => {
-                        setMessageShow(false);
-                    }, 4000);
-                }
-            }}
-            validationSchema={validationSchema}
-        >
-            {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
-                <Form onSubmit={handleSubmit}>
-                    <Row className="mb-3">
-                        <Col>
-                            <PageBack href="/banks" subTitle="Voltar para a lista de bancos." />
-                        </Col>
-                    </Row>
+                                            setTimeout(() => {
+                                                router.push(`/banks/details/${res.data.id}`);
+                                            }, 1500);
+                                        }
+                                        catch {
+                                            setTypeMessage("error");
 
-                    <Row className="mb-3">
-                        <Form.Group as={Col} sm={6} controlId="formGridInstitution">
-                            <Form.Label>Instituição</Form.Label>
-                            <Form.Control
-                                as="select"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.institution}
-                                name="institution"
-                                isInvalid={!!errors.institution && touched.institution}
-                            >
-                                <option hidden>...</option>
-                                {
-                                    institutions.map((institution, index) => {
-                                        return <option key={index} value={institution.id}>{institution.name}</option>
-                                    })
-                                }
-                            </Form.Control>
-                            <Form.Control.Feedback type="invalid">{touched.institution && errors.institution}</Form.Control.Feedback>
-                        </Form.Group>
+                                            setTimeout(() => {
+                                                setMessageShow(false);
+                                            }, 4000);
+                                        }
+                                    }}
+                                    validationSchema={validationSchema}
+                                >
+                                    {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                                        <Form onSubmit={handleSubmit}>
+                                            <Row className="mb-3">
+                                                <Col>
+                                                    <PageBack href="/banks" subTitle="Voltar para a lista de bancos." />
+                                                </Col>
+                                            </Row>
 
-                        <Form.Group as={Col} sm={6} controlId="formGridAgency">
-                            <Form.Label>Agência</Form.Label>
-                            <Form.Control
-                                type="Name"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.agency}
-                                name="agency"
-                                isInvalid={!!errors.agency && touched.agency}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.agency && errors.agency}</Form.Control.Feedback>
-                        </Form.Group>
-                    </Row>
+                                            <Row className="mb-3">
+                                                <Form.Group as={Col} sm={6} controlId="formGridInstitution">
+                                                    <Form.Label>Instituição</Form.Label>
+                                                    <Form.Control
+                                                        as="select"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.institution}
+                                                        name="institution"
+                                                        isInvalid={!!errors.institution && touched.institution}
+                                                    >
+                                                        <option hidden>...</option>
+                                                        {
+                                                            institutions.map((institution, index) => {
+                                                                return <option key={index} value={institution.id}>{institution.name}</option>
+                                                            })
+                                                        }
+                                                    </Form.Control>
+                                                    <Form.Control.Feedback type="invalid">{touched.institution && errors.institution}</Form.Control.Feedback>
+                                                </Form.Group>
 
-                    <Row className="mb-3">
-                        <Form.Group as={Col} sm={3} controlId="formGridPhone">
-                            <Form.Label>Telefone comercial</Form.Label>
-                            <Form.Control
-                                type="text"
-                                maxLength={15}
-                                onChange={(e) => {
-                                    setFieldValue('phone', cellphone(e.target.value));
-                                }}
-                                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                                    setFieldValue('phone', cellphone(e.target.value));
-                                }}
-                                value={values.phone}
-                                name="phone"
-                                isInvalid={!!errors.phone && touched.phone}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.phone && errors.phone}</Form.Control.Feedback>
-                        </Form.Group>
+                                                <Form.Group as={Col} sm={6} controlId="formGridAgency">
+                                                    <Form.Label>Agência</Form.Label>
+                                                    <Form.Control
+                                                        type="Name"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.agency}
+                                                        name="agency"
+                                                        isInvalid={!!errors.agency && touched.agency}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{touched.agency && errors.agency}</Form.Control.Feedback>
+                                                </Form.Group>
+                                            </Row>
 
-                        <Form.Group as={Col} sm={3} controlId="formGridCellphone">
-                            <Form.Label>Celular</Form.Label>
-                            <Form.Control
-                                type="text"
-                                maxLength={15}
-                                onChange={(e) => {
-                                    setFieldValue('cellphone', cellphone(e.target.value));
-                                }}
-                                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                                    setFieldValue('cellphone', cellphone(e.target.value));
-                                }}
-                                value={values.cellphone}
-                                name="cellphone"
-                                isInvalid={!!errors.cellphone && touched.cellphone}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.cellphone && errors.cellphone}</Form.Control.Feedback>
-                        </Form.Group>
-                    </Row>
+                                            <Row className="mb-3">
+                                                <Form.Group as={Col} sm={3} controlId="formGridPhone">
+                                                    <Form.Label>Telefone comercial</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        maxLength={15}
+                                                        onChange={(e) => {
+                                                            setFieldValue('phone', cellphone(e.target.value));
+                                                        }}
+                                                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                                            setFieldValue('phone', cellphone(e.target.value));
+                                                        }}
+                                                        value={values.phone}
+                                                        name="phone"
+                                                        isInvalid={!!errors.phone && touched.phone}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{touched.phone && errors.phone}</Form.Control.Feedback>
+                                                </Form.Group>
 
-                    <Row className="mb-2">
-                        <Form.Group as={Col} sm={6} controlId="formGridAddress">
-                            <Form.Label>Endereço</Form.Label>
-                            <Form.Control
-                                type="address"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.address}
-                                name="address"
-                                isInvalid={!!errors.address && touched.address}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.address && errors.address}</Form.Control.Feedback>
-                        </Form.Group>
+                                                <Form.Group as={Col} sm={3} controlId="formGridCellphone">
+                                                    <Form.Label>Celular</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        maxLength={15}
+                                                        onChange={(e) => {
+                                                            setFieldValue('cellphone', cellphone(e.target.value));
+                                                        }}
+                                                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                                            setFieldValue('cellphone', cellphone(e.target.value));
+                                                        }}
+                                                        value={values.cellphone}
+                                                        name="cellphone"
+                                                        isInvalid={!!errors.cellphone && touched.cellphone}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{touched.cellphone && errors.cellphone}</Form.Control.Feedback>
+                                                </Form.Group>
+                                            </Row>
 
-                        <Form.Group as={Col} sm={2} controlId="formGridState">
-                            <Form.Label>Estado</Form.Label>
-                            <Form.Control
-                                as="select"
-                                onChange={(e) => {
-                                    setFieldValue('state', e.target.value);
-                                    const stateCities = statesCities.estados.find(item => { return item.nome === e.target.value })
+                                            <Row className="mb-2">
+                                                <Form.Group as={Col} sm={6} controlId="formGridAddress">
+                                                    <Form.Label>Endereço</Form.Label>
+                                                    <Form.Control
+                                                        type="address"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.address}
+                                                        name="address"
+                                                        isInvalid={!!errors.address && touched.address}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{touched.address && errors.address}</Form.Control.Feedback>
+                                                </Form.Group>
 
-                                    if (stateCities)
-                                        setCities(stateCities.cidades);
-                                }}
-                                onBlur={handleBlur}
-                                value={values.state ? values.state : '...'}
-                                name="state"
-                                isInvalid={!!errors.state && touched.state}
-                            >
-                                <option hidden>...</option>
-                                {
-                                    statesCities.estados.map((estado, index) => {
-                                        return <option key={index} value={estado.nome}>{estado.nome}</option>
-                                    })
-                                }
-                            </Form.Control>
-                            <Form.Control.Feedback type="invalid">{touched.state && errors.state}</Form.Control.Feedback>
-                        </Form.Group>
+                                                <Form.Group as={Col} sm={2} controlId="formGridState">
+                                                    <Form.Label>Estado</Form.Label>
+                                                    <Form.Control
+                                                        as="select"
+                                                        onChange={(e) => {
+                                                            setFieldValue('state', e.target.value);
+                                                            const stateCities = statesCities.estados.find(item => { return item.nome === e.target.value })
 
-                        <Form.Group as={Col} sm={4} controlId="formGridCity">
-                            <Form.Label>Cidade</Form.Label>
-                            <Form.Control
-                                as="select"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.city ? values.city : '...'}
-                                name="city"
-                                isInvalid={!!errors.city && touched.city}
-                                disabled={!!!values.state}
-                            >
-                                <option hidden>...</option>
-                                {
-                                    !!values.state && cities.map((city, index) => {
-                                        return <option key={index} value={city}>{city}</option>
-                                    })
-                                }
-                            </Form.Control>
-                            <Form.Control.Feedback type="invalid">{touched.city && errors.city}</Form.Control.Feedback>
-                        </Form.Group>
-                    </Row>
+                                                            if (stateCities)
+                                                                setCities(stateCities.cidades);
+                                                        }}
+                                                        onBlur={handleBlur}
+                                                        value={values.state ? values.state : '...'}
+                                                        name="state"
+                                                        isInvalid={!!errors.state && touched.state}
+                                                    >
+                                                        <option hidden>...</option>
+                                                        {
+                                                            statesCities.estados.map((estado, index) => {
+                                                                return <option key={index} value={estado.nome}>{estado.nome}</option>
+                                                            })
+                                                        }
+                                                    </Form.Control>
+                                                    <Form.Control.Feedback type="invalid">{touched.state && errors.state}</Form.Control.Feedback>
+                                                </Form.Group>
 
-                    <Row className="mb-3">
-                        <Form.Group as={Col} sm={6} controlId="formGridSector">
-                            <Form.Label>Setor/gerente</Form.Label>
-                            <Form.Control
-                                type="Name"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.sector}
-                                name="sector"
-                                isInvalid={!!errors.sector && touched.sector}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.sector && errors.sector}</Form.Control.Feedback>
-                        </Form.Group>
+                                                <Form.Group as={Col} sm={4} controlId="formGridCity">
+                                                    <Form.Label>Cidade</Form.Label>
+                                                    <Form.Control
+                                                        as="select"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.city ? values.city : '...'}
+                                                        name="city"
+                                                        isInvalid={!!errors.city && touched.city}
+                                                        disabled={!!!values.state}
+                                                    >
+                                                        <option hidden>...</option>
+                                                        {
+                                                            !!values.state && cities.map((city, index) => {
+                                                                return <option key={index} value={city}>{city}</option>
+                                                            })
+                                                        }
+                                                    </Form.Control>
+                                                    <Form.Control.Feedback type="invalid">{touched.city && errors.city}</Form.Control.Feedback>
+                                                </Form.Group>
+                                            </Row>
 
-                        <Form.Group as={Col} sm={3} controlId="formGridDepartment">
-                            <Form.Label>Departamento</Form.Label>
-                            <Form.Control
-                                type="Name"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.department}
-                                name="department"
-                                isInvalid={!!errors.department && touched.department}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.department && errors.department}</Form.Control.Feedback>
-                        </Form.Group>
-                    </Row>
+                                            <Row className="mb-3">
+                                                <Form.Group as={Col} sm={6} controlId="formGridSector">
+                                                    <Form.Label>Setor/gerente</Form.Label>
+                                                    <Form.Control
+                                                        type="Name"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.sector}
+                                                        name="sector"
+                                                        isInvalid={!!errors.sector && touched.sector}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{touched.sector && errors.sector}</Form.Control.Feedback>
+                                                </Form.Group>
 
-                    <Col className="border-top mb-3"></Col>
+                                                <Form.Group as={Col} sm={3} controlId="formGridDepartment">
+                                                    <Form.Label>Departamento</Form.Label>
+                                                    <Form.Control
+                                                        type="Name"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.department}
+                                                        name="department"
+                                                        isInvalid={!!errors.department && touched.department}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">{touched.department && errors.department}</Form.Control.Feedback>
+                                                </Form.Group>
+                                            </Row>
 
-                    <Row className="justify-content-end">
-                        {
-                            messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                <Col sm={1}>
-                                    <Button variant="success" type="submit">Salvar</Button>
-                                </Col>
+                                            <Col className="border-top mb-3"></Col>
 
-                        }
-                    </Row>
-                </Form>
-            )}
-        </Formik>
-    </Container>
+                                            <Row className="justify-content-end">
+                                                {
+                                                    messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
+                                                        <Col sm={1}>
+                                                            <Button variant="success" type="submit">Salvar</Button>
+                                                        </Col>
+
+                                                }
+                                            </Row>
+                                        </Form>
+                                    )}
+                                </Formik>
+                            </Container>
+                    }
+                </> :
+                    <PageWaiting status="warning" message="Acesso negado!" />
+            }
+        </>
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

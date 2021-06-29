@@ -88,6 +88,7 @@ export default function UserDetails() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    setLoadingData(false);
                 });
             }
         }
@@ -106,257 +107,260 @@ export default function UserDetails() {
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :
-                            <Container className="content-page">
+                            <>
                                 {
-                                    !userData || loadingData ? <PageWaiting status="waiting" /> :
-                                        <Row>
-                                            <Col>
-                                                {
-                                                    can(user, "users", "read:any") && <Row className="mb-3">
-                                                        <Col>
-                                                            <PageBack href="/users" subTitle="Voltar para a lista de usuários" />
+                                    !userData ? <PageWaiting status="waiting" /> :
+                                        <Container className="content-page">
+                                            <PageWaiting status="waiting" /> :
+                                            <Row>
+                                                <Col>
+                                                    {
+                                                        can(user, "users", "read:any") && <Row className="mb-3">
+                                                            <Col>
+                                                                <PageBack href="/users" subTitle="Voltar para a lista de usuários" />
+                                                            </Col>
+                                                        </Row>
+                                                    }
+
+                                                    <Row className="mb-3">
+                                                        <Col sm={6}>
+                                                            <Row className="align-items-center">
+                                                                <Col className="col-row">
+                                                                    <h3 className="form-control-plaintext text-success">{userData.name}</h3>
+                                                                </Col>
+
+                                                                {
+                                                                    can(user, "users", "update:any") ||
+                                                                        can(user, "users", "update:own") &&
+                                                                        userId === user.id ?
+                                                                        <Col className="col-row">
+                                                                            <ButtonGroup size="sm" className="col-12">
+                                                                                <Button
+                                                                                    title="Editar usuário."
+                                                                                    variant="success"
+                                                                                    onClick={() => handleRoute(`/users/edit/${userData.id}`)}
+                                                                                >
+                                                                                    <FaUserEdit />
+                                                                                </Button>
+                                                                            </ButtonGroup>
+                                                                        </Col> : <Col></Col>
+                                                                }
+                                                            </Row>
                                                         </Col>
                                                     </Row>
-                                                }
 
-                                                <Row className="mb-3">
-                                                    <Col sm={6}>
-                                                        <Row className="align-items-center">
-                                                            <Col className="col-row">
-                                                                <h3 className="form-control-plaintext text-success">{userData.name}</h3>
-                                                            </Col>
+                                                    <Row className="mb-3">
+                                                        <Col sm={3} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Celular</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                            {
-                                                                can(user, "users", "update:any") ||
-                                                                    can(user, "users", "update:own") &&
-                                                                    userId === user.id ?
-                                                                    <Col className="col-row">
-                                                                        <ButtonGroup size="sm" className="col-12">
-                                                                            <Button
-                                                                                title="Editar usuário."
-                                                                                variant="success"
-                                                                                onClick={() => handleRoute(`/users/edit/${userData.id}`)}
-                                                                            >
-                                                                                <FaUserEdit />
-                                                                            </Button>
-                                                                        </ButtonGroup>
-                                                                    </Col> : <Col></Col>
-                                                            }
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{userData.phone}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
 
-                                                <Row className="mb-3">
-                                                    <Col sm={3} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Celular</span>
-                                                            </Col>
-                                                        </Row>
+                                                        <Col sm={6} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">E-mail</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{userData.phone}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{userData.email}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
 
-                                                    <Col sm={6} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">E-mail</span>
-                                                            </Col>
-                                                        </Row>
+                                                    <Col className="border-top mb-3"></Col>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{userData.email}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
+                                                    <Row className="mb-3">
+                                                        <Col sm={4} >
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-success">Criado em</span>
+                                                                </Col>
+                                                            </Row>
 
-                                                <Col className="border-top mb-3"></Col>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-secondary">{format(new Date(userData.created_at), 'dd/MM/yyyy')}</h6>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
 
-                                                <Row className="mb-3">
-                                                    <Col sm={4} >
-                                                        <Row>
-                                                            <Col>
-                                                                <span className="text-success">Criado em</span>
-                                                            </Col>
-                                                        </Row>
+                                                    <Row className="mb-3">
+                                                        <Col>
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-success">Permissões <FaKey /></h6>
+                                                                </Col>
+                                                            </Row>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-secondary">{format(new Date(userData.created_at), 'dd/MM/yyyy')}</h6>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
+                                                            <Row>
+                                                                <Col>
+                                                                    <ListGroup className="mb-3">
+                                                                        {
+                                                                            usersRoles.map((role, index) => {
+                                                                                const translatedRole = translatedRoles.find(item => { return item.role === role.role });
 
-                                                <Row className="mb-3">
-                                                    <Col>
-                                                        <Row>
-                                                            <Col>
-                                                                <h6 className="text-success">Permissões <FaKey /></h6>
-                                                            </Col>
-                                                        </Row>
+                                                                                return <ListGroup.Item key={index} as="div" variant="light">
+                                                                                    <Row>
+                                                                                        <Col>
+                                                                                            <h6 className="text-success" >
+                                                                                                {
+                                                                                                    translatedRole ? translatedRole.translated : role.role
+                                                                                                }
+                                                                                            </h6>
+                                                                                        </Col>
 
-                                                        <Row>
-                                                            <Col>
-                                                                <ListGroup className="mb-3">
-                                                                    {
-                                                                        usersRoles.map((role, index) => {
-                                                                            const translatedRole = translatedRoles.find(item => { return item.role === role.role });
+                                                                                        {
+                                                                                            role.view && <Col className="col-row">
+                                                                                                <span>Visualizar</span>
+                                                                                            </Col>
+                                                                                        }
 
-                                                                            return <ListGroup.Item key={index} as="div" variant="light">
-                                                                                <Row>
+                                                                                        {
+                                                                                            role.create && <Col className="col-row">
+                                                                                                <span>Criar</span>
+                                                                                            </Col>
+                                                                                        }
+
+                                                                                        {
+                                                                                            role.update && <Col className="col-row">
+                                                                                                <span>Editar</span>
+                                                                                            </Col>
+                                                                                        }
+
+
+
+                                                                                        {
+                                                                                            role.role === 'users' && role.update_self && <Col className="col-row">
+                                                                                                <span>Editar próprio</span>
+                                                                                            </Col>
+                                                                                        }
+
+                                                                                        {
+                                                                                            role.remove && <Col className="col-row">
+                                                                                                <span>Excluir</span>
+                                                                                            </Col>
+                                                                                        }
+                                                                                    </Row>
+                                                                                </ListGroup.Item>
+                                                                            })
+                                                                        }
+                                                                    </ListGroup>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
+
+
+                                                    <Col className="border-top mb-3"></Col>
+
+                                                    <Tabs defaultActiveKey="customers" id="relations-customer">
+                                                        {
+                                                            can(user, "customers", "read:any") && <Tab eventKey="customers" title="Clientes">
+                                                                <Row className={styles.relationsContainer}>
+                                                                    <Col>
+                                                                        <Row className={styles.relationsContent}>
+                                                                            {
+                                                                                !!userData.customerMembers.length ? userData.customerMembers.map((customerMember, index) => {
+                                                                                    return <CustomerListItem
+                                                                                        key={index}
+                                                                                        customer={customerMember.customer}
+                                                                                    />
+                                                                                }) :
                                                                                     <Col>
-                                                                                        <h6 className="text-success" >
-                                                                                            {
-                                                                                                translatedRole ? translatedRole.translated : role.role
-                                                                                            }
-                                                                                        </h6>
+                                                                                        <span className="text-success">Nenhum cliente registrado.</span>
                                                                                     </Col>
+                                                                            }
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+                                                            </Tab>
+                                                        }
 
-                                                                                    {
-                                                                                        role.view && <Col className="col-row">
-                                                                                            <span>Visualizar</span>
-                                                                                        </Col>
-                                                                                    }
+                                                        {
+                                                            can(user, "properties", "read:any") && <Tab eventKey="properties" title="Imóveis">
+                                                                <Row className={styles.relationsContainer}>
+                                                                    <Col>
+                                                                        <Row className={styles.relationsContent}>
+                                                                            {
+                                                                                !!userData.propertyMembers.length ? userData.propertyMembers.map((propertyMember, index) => {
+                                                                                    return <PropertyListItem
+                                                                                        key={index}
+                                                                                        property={propertyMember.property}
+                                                                                        showCustomer={false}
+                                                                                    />
+                                                                                }) :
+                                                                                    <Col>
+                                                                                        <span className="text-success">Nenhum imóvel registrado.</span>
+                                                                                    </Col>
+                                                                            }
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+                                                            </Tab>
+                                                        }
 
-                                                                                    {
-                                                                                        role.create && <Col className="col-row">
-                                                                                            <span>Criar</span>
-                                                                                        </Col>
-                                                                                    }
+                                                        {
+                                                            can(user, "projects", "read:any") && <Tab eventKey="projects" title="Projetos">
+                                                                <Row className={styles.relationsContainer}>
+                                                                    <Col>
+                                                                        <Row className={styles.relationsContent}>
+                                                                            {
+                                                                                !!userData.projectMembers.length ? userData.projectMembers.map((projectMember, index) => {
+                                                                                    return <ProjectListItem
+                                                                                        key={index}
+                                                                                        project={projectMember.project}
+                                                                                    />
+                                                                                }) :
+                                                                                    <Col>
+                                                                                        <span className="text-success">Nenhum projeto registrado.</span>
+                                                                                    </Col>
+                                                                            }
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+                                                            </Tab>
+                                                        }
 
-                                                                                    {
-                                                                                        role.update && <Col className="col-row">
-                                                                                            <span>Editar</span>
-                                                                                        </Col>
-                                                                                    }
-
-
-
-                                                                                    {
-                                                                                        role.role === 'users' && role.update_self && <Col className="col-row">
-                                                                                            <span>Editar próprio</span>
-                                                                                        </Col>
-                                                                                    }
-
-                                                                                    {
-                                                                                        role.remove && <Col className="col-row">
-                                                                                            <span>Excluir</span>
-                                                                                        </Col>
-                                                                                    }
-                                                                                </Row>
-                                                                            </ListGroup.Item>
-                                                                        })
-                                                                    }
-                                                                </ListGroup>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
-
-
-                                                <Col className="border-top mb-3"></Col>
-
-                                                <Tabs defaultActiveKey="customers" id="relations-customer">
-                                                    {
-                                                        can(user, "customers", "read:any") && <Tab eventKey="customers" title="Clientes">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={styles.relationsContent}>
-                                                                        {
-                                                                            !!userData.customerMembers.length ? userData.customerMembers.map((customerMember, index) => {
-                                                                                return <CustomerListItem
-                                                                                    key={index}
-                                                                                    customer={customerMember.customer}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum cliente registrado.</span>
-                                                                                </Col>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
-                                                    }
-
-                                                    {
-                                                        can(user, "properties", "read:any") && <Tab eventKey="properties" title="Imóveis">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={styles.relationsContent}>
-                                                                        {
-                                                                            !!userData.propertyMembers.length ? userData.propertyMembers.map((propertyMember, index) => {
-                                                                                return <PropertyListItem
-                                                                                    key={index}
-                                                                                    property={propertyMember.property}
-                                                                                    showCustomer={false}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum imóvel registrado.</span>
-                                                                                </Col>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
-                                                    }
-
-                                                    {
-                                                        can(user, "projects", "read:any") && <Tab eventKey="projects" title="Projetos">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={styles.relationsContent}>
-                                                                        {
-                                                                            !!userData.projectMembers.length ? userData.projectMembers.map((projectMember, index) => {
-                                                                                return <ProjectListItem
-                                                                                    key={index}
-                                                                                    project={projectMember.project}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum projeto registrado.</span>
-                                                                                </Col>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
-                                                    }
-
-                                                    {
-                                                        can(user, "licensings", "read:any") && <Tab eventKey="licensings" title="Licenciamentos">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={styles.relationsContent}>
-                                                                        {
-                                                                            !!userData.licensingMembers.length ? userData.licensingMembers.map((licensingMember, index) => {
-                                                                                return <LicensingListItem
-                                                                                    key={index}
-                                                                                    licensing={licensingMember.licensing}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum licenciamento registrado.</span>
-                                                                                </Col>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
-                                                    }
-                                                </Tabs>
-                                            </Col>
-                                        </Row>
+                                                        {
+                                                            can(user, "licensings", "read:any") && <Tab eventKey="licensings" title="Licenciamentos">
+                                                                <Row className={styles.relationsContainer}>
+                                                                    <Col>
+                                                                        <Row className={styles.relationsContent}>
+                                                                            {
+                                                                                !!userData.licensingMembers.length ? userData.licensingMembers.map((licensingMember, index) => {
+                                                                                    return <LicensingListItem
+                                                                                        key={index}
+                                                                                        licensing={licensingMember.licensing}
+                                                                                    />
+                                                                                }) :
+                                                                                    <Col>
+                                                                                        <span className="text-success">Nenhum licenciamento registrado.</span>
+                                                                                    </Col>
+                                                                            }
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+                                                            </Tab>
+                                                        }
+                                                    </Tabs>
+                                                </Col>
+                                            </Row>
+                                        </Container>
                                 }
-                            </Container>
+                            </>
                     }
                 </> :
                     <PageWaiting status="warning" message="Acesso negado!" />
