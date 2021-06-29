@@ -23,13 +23,12 @@ import {
     FaUsers,
     FaUsersCog
 } from 'react-icons/fa';
-import { AccessControl } from 'accesscontrol';
 
 import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
-import styles from './styles.module.css';
+import { can } from '../../components/Users';
 
-const ac = new AccessControl();
+import styles from './styles.module.css';
 
 const Sidebar: React.FC = () => {
     const router = useRouter();
@@ -44,21 +43,18 @@ const Sidebar: React.FC = () => {
         let show = false;
 
         if (signed && user) {
-
-            ac.setGrants(user.grants);
-
             if (!pathsNotShow.find(item => { return item === router.route })) show = true;
         }
 
         setShowPageHeader(show);
-    }, [signed, router.route, user, ac]);
+    }, [signed, router.route, user]);
 
     function handleToDashboard() {
         router.push('/dashboard');
     }
 
     return (
-        showPageHeader && user && ac.hasRole(user.id) ? <div className={styles.sideBarContainer}>
+        showPageHeader && user ? <div className={styles.sideBarContainer}>
             <Accordion activeKey={itemSideBar} className={styles.accordionContainer}>
                 <Card className={styles.menuCard}>
                     <Accordion.Toggle
@@ -74,7 +70,7 @@ const Sidebar: React.FC = () => {
                 </Card>
 
                 {
-                    ac.can(user.id).readAny('customers').granted && <Card className={styles.menuCard}>
+                    can(user, "customers", "read:any") && <Card className={styles.menuCard}>
                         <Accordion.Toggle
                             as={Card.Header}
                             className={styles.menuCardHeader}
@@ -107,25 +103,27 @@ const Sidebar: React.FC = () => {
                                 </Link>
 
                                 {
-                                    ac.can(user.id).create('customers').granted && <>
-                                        <Link href="/customers/new">
-                                            <a title="Criar um novo cliente" data-title="Criar um novo cliente">
-                                                <Row
-                                                    className={
-                                                        selectedMenu === 'customers-new' ? styles.selectedMenuCardBodyItem :
-                                                            styles.menuCardBodyItem
-                                                    }
-                                                >
-                                                    <Col sm={1}>
-                                                        <FaPlus size={14} />
-                                                    </Col>
-                                                    <Col>
-                                                        <span>Novo</span>
-                                                    </Col>
-                                                </Row>
-                                            </a>
-                                        </Link>
+                                    can(user, "customers", "create") && <Link href="/customers/new">
+                                        <a title="Criar um novo cliente" data-title="Criar um novo cliente">
+                                            <Row
+                                                className={
+                                                    selectedMenu === 'customers-new' ? styles.selectedMenuCardBodyItem :
+                                                        styles.menuCardBodyItem
+                                                }
+                                            >
+                                                <Col sm={1}>
+                                                    <FaPlus size={14} />
+                                                </Col>
+                                                <Col>
+                                                    <span>Novo</span>
+                                                </Col>
+                                            </Row>
+                                        </a>
+                                    </Link>
+                                }
 
+                                {
+                                    can(user, "customers", "update:any") && <>
                                         <Link href="/docs/customer">
                                             <a title="Listar os documentos para clientes" data-title="Listar os documentos para clientes">
                                                 <Row
@@ -166,8 +164,9 @@ const Sidebar: React.FC = () => {
                                     </>
                                 }
 
+
                                 {
-                                    ac.can(user.id).readAny('properties').granted && <>
+                                    can(user, "properties", "read:any") && <>
                                         <Dropdown.Divider />
 
                                         <Link href="/properties">
@@ -189,54 +188,53 @@ const Sidebar: React.FC = () => {
                                         </Link>
 
                                         {
-                                            ac.can(user.id).create('properties').granted && <>
-                                                <Link href="/properties/new">
-                                                    <a title="Criar um novo imóvel" data-title="Criar um novo imóvel">
-                                                        <Row
-                                                            className={
-                                                                selectedMenu === 'properties-new' ? styles.selectedMenuCardBodyItem :
-                                                                    styles.menuCardBodyItem
-                                                            }
-                                                        >
-                                                            <Col sm={1}>
-                                                                <FaPlus size={14} />
-                                                            </Col>
-                                                            <Col>
-                                                                <span>Novo</span>
-                                                            </Col>
-                                                        </Row>
-                                                    </a>
-                                                </Link>
+                                            can(user, "customers", "create") && <Link href="/properties/new">
+                                                <a title="Criar um novo imóvel" data-title="Criar um novo imóvel">
+                                                    <Row
+                                                        className={
+                                                            selectedMenu === 'properties-new' ? styles.selectedMenuCardBodyItem :
+                                                                styles.menuCardBodyItem
+                                                        }
+                                                    >
+                                                        <Col sm={1}>
+                                                            <FaPlus size={14} />
+                                                        </Col>
+                                                        <Col>
+                                                            <span>Novo</span>
+                                                        </Col>
+                                                    </Row>
+                                                </a>
+                                            </Link>
+                                        }
 
-                                                <Link href="/docs/property">
-                                                    <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
-                                                        <Row
-                                                            className={
-                                                                selectedMenu === 'properties-docs' ? styles.selectedMenuCardBodyItem :
-                                                                    styles.menuCardBodyItem
-                                                            }
-                                                        >
-                                                            <Col sm={1}>
-                                                                <FaFileSignature size={14} />
-                                                            </Col>
-                                                            <Col>
-                                                                <span>Documentos</span>
-                                                            </Col>
-                                                        </Row>
-                                                    </a>
-                                                </Link>
-                                            </>
+                                        {
+                                            can(user, "properties", "update:any") && <Link href="/docs/property">
+                                                <a title="Listar os documentos para imóveis" data-title="Listar os documentos para imóveis">
+                                                    <Row
+                                                        className={
+                                                            selectedMenu === 'properties-docs' ? styles.selectedMenuCardBodyItem :
+                                                                styles.menuCardBodyItem
+                                                        }
+                                                    >
+                                                        <Col sm={1}>
+                                                            <FaFileSignature size={14} />
+                                                        </Col>
+                                                        <Col>
+                                                            <span>Documentos</span>
+                                                        </Col>
+                                                    </Row>
+                                                </a>
+                                            </Link>
                                         }
                                     </>
                                 }
-
                             </Card.Body>
                         </Accordion.Collapse>
                     </Card>
                 }
 
                 {
-                    ac.can(user.id).readAny('projects').granted && <Card className={styles.menuCard}>
+                    can(user, "projects", "read:any") && <Card className={styles.menuCard}>
                         <Accordion.Toggle
                             as={Card.Header}
                             className={styles.menuCardHeader}
@@ -269,25 +267,27 @@ const Sidebar: React.FC = () => {
                                 </Link>
 
                                 {
-                                    ac.can(user.id).create('projects').granted && <>
-                                        <Link href="/projects/new">
-                                            <a title="Criar um novo projeto" data-title="Criar um novo projeto">
-                                                <Row
-                                                    className={
-                                                        selectedMenu === 'projects-new' ? styles.selectedMenuCardBodyItem :
-                                                            styles.menuCardBodyItem
-                                                    }
-                                                >
-                                                    <Col sm={1}>
-                                                        <FaPlus size={14} />
-                                                    </Col>
-                                                    <Col>
-                                                        <span>Novo</span>
-                                                    </Col>
-                                                </Row>
-                                            </a>
-                                        </Link>
+                                    can(user, "projects", "create") && <Link href="/projects/new">
+                                        <a title="Criar um novo projeto" data-title="Criar um novo projeto">
+                                            <Row
+                                                className={
+                                                    selectedMenu === 'projects-new' ? styles.selectedMenuCardBodyItem :
+                                                        styles.menuCardBodyItem
+                                                }
+                                            >
+                                                <Col sm={1}>
+                                                    <FaPlus size={14} />
+                                                </Col>
+                                                <Col>
+                                                    <span>Novo</span>
+                                                </Col>
+                                            </Row>
+                                        </a>
+                                    </Link>
+                                }
 
+                                {
+                                    can(user, "projects", "update:any") && <>
                                         <Link href="/docs/project">
                                             <a title="Listar os documentos para projetos" data-title="Listar os documentos para projetos">
                                                 <Row
@@ -368,7 +368,7 @@ const Sidebar: React.FC = () => {
                 }
 
                 {
-                    ac.can(user.id).readAny('licensings').granted && <Card className={styles.menuCard}>
+                    can(user, "licensings", "read:any") && <Card className={styles.menuCard}>
                         <Accordion.Toggle
                             as={Card.Header}
                             className={styles.menuCardHeader}
@@ -400,25 +400,27 @@ const Sidebar: React.FC = () => {
                                 </Link>
 
                                 {
-                                    ac.can(user.id).create('licensings').granted && <>
-                                        <Link href="/licensings/new">
-                                            <a title="Criar um novo licenciamento" data-title="Criar um novo licenciamento">
-                                                <Row
-                                                    className={
-                                                        selectedMenu === 'licensings-new' ? styles.selectedMenuCardBodyItem :
-                                                            styles.menuCardBodyItem
-                                                    }
-                                                >
-                                                    <Col sm={1}>
-                                                        <FaPlus size={14} />
-                                                    </Col>
-                                                    <Col>
-                                                        <span>Novo</span>
-                                                    </Col>
-                                                </Row>
-                                            </a>
-                                        </Link>
+                                    can(user, "licensings", "create") && <Link href="/licensings/new">
+                                        <a title="Criar um novo licenciamento" data-title="Criar um novo licenciamento">
+                                            <Row
+                                                className={
+                                                    selectedMenu === 'licensings-new' ? styles.selectedMenuCardBodyItem :
+                                                        styles.menuCardBodyItem
+                                                }
+                                            >
+                                                <Col sm={1}>
+                                                    <FaPlus size={14} />
+                                                </Col>
+                                                <Col>
+                                                    <span>Novo</span>
+                                                </Col>
+                                            </Row>
+                                        </a>
+                                    </Link>
+                                }
 
+                                {
+                                    can(user, "licensings", "update:any") && <>
                                         <Dropdown.Divider />
 
                                         <Link href="/licensings/authorizations">
@@ -500,7 +502,7 @@ const Sidebar: React.FC = () => {
                 }
 
                 {
-                    ac.can(user.id).readAny('banks').granted && <Card className={styles.menuCard}>
+                    can(user, "banks", "read:any") && <Card className={styles.menuCard}>
                         <Accordion.Toggle
                             as={Card.Header}
                             className={styles.menuCardHeader}
@@ -532,7 +534,7 @@ const Sidebar: React.FC = () => {
                                 </Link>
 
                                 {
-                                    ac.can(user.id).create('banks').granted && <Link href="/banks/new">
+                                    can(user, "banks", "create") && <Link href="/banks/new">
                                         <a title="Criar um novo banco" data-title="Criar um novo banco">
                                             <Row
                                                 className={
@@ -554,7 +556,7 @@ const Sidebar: React.FC = () => {
                                 <Dropdown.Divider />
 
                                 {
-                                    ac.can(user.id).readAny('institutions').granted && <Link href="/institutions">
+                                    can(user, "institutions", "read:any") && <Link href="/institutions">
                                         <a title="Listar todas as instituições" data-title="Listar todas as instituições">
                                             <Row
                                                 className={
@@ -591,7 +593,7 @@ const Sidebar: React.FC = () => {
                     <Accordion.Collapse eventKey="reports">
                         <Card.Body className={styles.menuCardBody}>
                             {
-                                ac.can(user.id).readAny('banks').granted && <Link href="/reports/banks">
+                                can(user, "banks", "read:any") && <Link href="/reports/banks">
                                     <a title="Relatórios de bancos" data-title="Relatórios de bancos">
                                         <Row
                                             className={
@@ -611,7 +613,7 @@ const Sidebar: React.FC = () => {
                             }
 
                             {
-                                ac.can(user.id).readAny('customers').granted && <Link href="/reports/customers">
+                                can(user, "customers", "read:any") && <Link href="/reports/customers">
                                     <a title="Relatórios de clientes" data-title="Relatórios de clientes">
                                         <Row
                                             className={
@@ -631,7 +633,7 @@ const Sidebar: React.FC = () => {
                             }
 
                             {
-                                ac.can(user.id).readAny('licensings').granted && <Link href="/reports/licensings">
+                                can(user, "licensings", "read:any") && <Link href="/reports/licensings">
                                     <a title="Relatórios de licenciamentos" data-title="Relatórios de licenciamentos">
                                         <Row
                                             className={
@@ -651,7 +653,7 @@ const Sidebar: React.FC = () => {
                             }
 
                             {
-                                ac.can(user.id).readAny('projects').granted && <Link href="/reports/projects">
+                                can(user, "projects", "read:any") && <Link href="/reports/projects">
                                     <a title="Relatórios de projetos" data-title="Relatórios de projetos">
                                         <Row
                                             className={
@@ -671,7 +673,7 @@ const Sidebar: React.FC = () => {
                             }
 
                             {
-                                ac.can(user.id).readAny('properties').granted && <Link href="/reports/properties">
+                                can(user, "properties", "read:any") && <Link href="/reports/properties">
                                     <a title="Relatórios de imóveis" data-title="Relatórios de imóveis">
                                         <Row
                                             className={
@@ -694,7 +696,7 @@ const Sidebar: React.FC = () => {
                 </Card>
 
                 {
-                    ac.can(user.id).readAny('users').granted && <Card className={styles.menuCard}>
+                    can(user, "users", "read:any") && <Card className={styles.menuCard}>
                         <Accordion.Toggle
                             as={Card.Header}
                             className={styles.menuCardHeader}
@@ -726,7 +728,7 @@ const Sidebar: React.FC = () => {
                                 </Link>
 
                                 {
-                                    ac.can(user.id).create('users').granted && <Link href="/users/new">
+                                    can(user, "users", "create") && <Link href="/users/new">
                                         <a title="Criar um novo usuário" data-title="Criar um novo usuário">
                                             <Row
                                                 className={
@@ -749,7 +751,7 @@ const Sidebar: React.FC = () => {
                     </Card>
                 }
             </Accordion>
-        </div> : null
+        </div > : null
     )
 }
 

@@ -2,12 +2,12 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { Col, Container, Row } from 'react-bootstrap';
 import { addDays, startOfToday, endOfToday } from 'date-fns';
-import { AccessControl } from 'accesscontrol';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
+import { can } from '../../components/Users';
 import { Project } from '../../components/Projects';
 import { ProjectStatus } from '../../components/ProjectStatus';
 import PieChart from '../../components/Graphs/PieChart';
@@ -15,7 +15,6 @@ import { PageWaiting } from '../../components/PageWaiting';
 
 const startOfDay = startOfToday();
 const endOfDay = endOfToday();
-const ac = new AccessControl();
 
 export default function Dashboard() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
@@ -28,9 +27,7 @@ export default function Dashboard() {
             handleItemSideBar('dashboard');
             handleSelectedMenu('dashboard');
 
-            ac.setGrants(user.grants);
-
-            if (ac.can(user.id).readAny('projects').granted) {
+            if (can(user, "projects", "read:any")) {
                 api.get('projects', {
                     params: {
                         start: addDays(startOfDay, -30),
@@ -72,9 +69,9 @@ export default function Dashboard() {
         loading ? <PageWaiting status="waiting" /> :
             <section>
                 <Container className="content-page mb-4">
-                    <Row>
-                        {
-                            user && ac.hasRole(user.id) && <Col sm={6}>
+                    {
+                        user && <Row>
+                            <Col sm={6}>
                                 <Row className="mb-3">
                                     <Col>
                                         <h6 className="text-success text-center">Fases dos projetos nos últimos 30 dias</h6>
@@ -94,12 +91,12 @@ export default function Dashboard() {
                                     }
                                 </Row>
                             </Col>
-                        }
 
-                        <Col sm={6}>
+                            <Col sm={6}>
 
-                        </Col>
-                    </Row>
+                            </Col>
+                        </Row>
+                    }
                 </Container>
 
                 <Container>

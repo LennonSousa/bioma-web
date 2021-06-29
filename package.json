@@ -1,6 +1,6 @@
 {
   "name": "web-next",
-  "version": "0.3.5",
+  "version": "0.4.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,7 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "accesscontrol": "^2.2.1",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
     "chart.js": "^3.3.2",
