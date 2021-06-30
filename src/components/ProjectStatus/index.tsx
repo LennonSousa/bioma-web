@@ -33,7 +33,7 @@ const ProjectStatusItem: React.FC<ProjectStatusProps> = ({ status, listStatus, h
     const handleShowModalEditStatus = () => setShowModalEditStatus(true);
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);

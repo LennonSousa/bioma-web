@@ -11,6 +11,7 @@ import {
     FaIdCard,
     FaMapSigns,
     FaFileSignature,
+    FaFileContract,
     FaProjectDiagram,
     FaClipboardList,
     FaLayerGroup,
@@ -376,7 +377,7 @@ const Sidebar: React.FC = () => {
                             onClick={() => handleItemSideBar('licensings')}
                         >
                             <div>
-                                <FaFileAlt /> <span>Licenças</span>
+                                <FaFileContract /> <span>Licenças</span>
                             </div>
                         </Accordion.Toggle>
                         <Accordion.Collapse eventKey="licensings">

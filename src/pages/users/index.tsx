@@ -20,7 +20,7 @@ export default function Institutions() {
     const [users, setUsers] = useState<User[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
-    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
     useEffect(() => {
@@ -102,7 +102,7 @@ export default function Institutions() {
                                             <Col>
                                                 <Row>
                                                     <Col className="text-center">
-                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum usuário registrado.</p>
+                                                        <p style={{ color: 'var(--gray)' }}>Nenhum usuário registrado.</p>
                                                     </Col>
                                                 </Row>
 

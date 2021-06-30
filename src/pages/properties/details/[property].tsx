@@ -27,6 +27,7 @@ import { DocsProperty } from '../../../components/DocsProperty';
 import PropertyAttachments from '../../../components/PropertyAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
+import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 
@@ -121,6 +122,18 @@ export default function PropertyDetails() {
                                                         <Col>
                                                             <PageBack href="/properties" subTitle="Voltar para a lista de imóveis" />
                                                         </Col>
+
+                                                        <Col className="col-row">
+                                                            <ButtonGroup className="col-12">
+                                                                <Button
+                                                                    title="Editar imóvel."
+                                                                    variant="success"
+                                                                    onClick={() => handleRoute(`/properties/edit/${propertyData.id}`)}
+                                                                >
+                                                                    <FaPencilAlt />
+                                                                </Button>
+                                                            </ButtonGroup>
+                                                        </Col>
                                                     </Row>
 
                                                     <Row className="mb-3">
@@ -150,18 +163,31 @@ export default function PropertyDetails() {
                                                                 <Col className="col-row">
                                                                     <h3 className="form-control-plaintext text-success">{propertyData.name}</h3>
                                                                 </Col>
+                                                            </Row>
+                                                        </Col>
+
+                                                        <Col sm={6} >
+                                                            <Row>
+                                                                <Col className="col-row">
+                                                                    <Row>
+                                                                        <Col>
+                                                                            <span className="text-success">Cliente</span>
+                                                                        </Col>
+                                                                    </Row>
+
+                                                                    <Row>
+                                                                        <Col>
+                                                                            <Link href={`/customers/details/${propertyData.customer.id}`}>
+                                                                                <a title="Ir para detalhes do cliente." data-title="Ir para detalhes do cliente.">
+                                                                                    <h6 className="text-secondary">{propertyData.customer.name}</h6>
+                                                                                </a>
+                                                                            </Link>
+                                                                        </Col>
+                                                                    </Row>
+                                                                </Col>
 
                                                                 <Col className="col-row">
                                                                     <ButtonGroup size="sm" className="col-12">
-
-                                                                        <Button
-                                                                            title="Editar imóvel."
-                                                                            variant="success"
-                                                                            onClick={() => handleRoute(`/properties/edit/${propertyData.id}`)}
-                                                                        >
-                                                                            <FaPencilAlt />
-                                                                        </Button>
-
                                                                         <Button
                                                                             variant="success"
                                                                             title="Criar um novo imóvel para este cliente."
@@ -170,20 +196,6 @@ export default function PropertyDetails() {
                                                                             <FaPlus /><FaMapSigns />
                                                                         </Button>
                                                                     </ButtonGroup>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={6} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Cliente</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{propertyData.customer.name}</h6>
                                                                 </Col>
                                                             </Row>
                                                         </Col>
@@ -344,7 +356,7 @@ export default function PropertyDetails() {
                                                                             propertyData.docs.map((doc, index) => {
                                                                                 return <ListGroup.Item key={index} action as="div" variant="light">
                                                                                     <Row>
-                                                                                        <Col sm={8}>
+                                                                                        <Col className={`${doc.checked ? 'text-success' : ''}`} sm={8}>
                                                                                             {
                                                                                                 doc.checked ? <FaCheck /> :
                                                                                                     <FaRegFile />} <label>{doc.doc.name} </label>
@@ -378,19 +390,27 @@ export default function PropertyDetails() {
                                                             </Row>
 
                                                             <Row>
-                                                                <Col>
-                                                                    <ListGroup>
-                                                                        {
-                                                                            propertyData.attachments.map((attachment, index) => {
-                                                                                return <PropertyAttachments
-                                                                                    key={index}
-                                                                                    attachment={attachment}
-                                                                                    canEdit={false}
-                                                                                />
-                                                                            })
-                                                                        }
-                                                                    </ListGroup>
-                                                                </Col>
+                                                                {
+                                                                    !!propertyData.attachments.length ? <Col>
+                                                                        <ListGroup>
+                                                                            {
+                                                                                propertyData.attachments.map((attachment, index) => {
+                                                                                    return <PropertyAttachments
+                                                                                        key={index}
+                                                                                        attachment={attachment}
+                                                                                        canEdit={false}
+                                                                                    />
+                                                                                })
+                                                                            }
+                                                                        </ListGroup>
+                                                                    </Col> :
+                                                                        <Col>
+                                                                            <AlertMessage
+                                                                                status="warning"
+                                                                                message="Nenhum anexo enviado para esse imóvel."
+                                                                            />
+                                                                        </Col>
+                                                                }
                                                             </Row>
                                                         </Col>
                                                     </Row>

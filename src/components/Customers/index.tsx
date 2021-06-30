@@ -2,6 +2,7 @@ import { CustomerType } from '../CustomerTypes';
 import { CustomerDocs } from '../CustomerDocs';
 import { Property } from '../Properties';
 import { Project } from '../Projects';
+import { Licensing } from '../Licensings';
 import { CustomerAttachment } from '../CustomerAttachments';
 import { Member } from '../CustomerMembers';
 
@@ -26,6 +27,7 @@ export interface Customer {
     docs: CustomerDocs[];
     properties: Property[];
     projects: Project[];
+    licensings: Licensing[];
     attachments: CustomerAttachment[];
     members: Member[];
 }

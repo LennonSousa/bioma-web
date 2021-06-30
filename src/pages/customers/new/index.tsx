@@ -50,7 +50,7 @@ export default function NewCustomer() {
     const [customerTypes, setCustomerTypes] = useState<CustomerType[]>([]);
     const [docsCustomer, setDocsCustomer] = useState<DocsCustomer[]>([]);
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
     const [documentType, setDocumentType] = useState("CPF");
     const [cities, setCities] = useState<string[]>([]);
 

@@ -61,7 +61,7 @@ export default function Banks() {
                                                 !!banks.length ? banks.map((bank, index) => {
                                                     return <BankListItem key={index} bank={bank} />
                                                 }) :
-                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum banco registrado." />
+                                                    <PageWaiting status="empty" message="Nenhum banco registrado." />
                                             }
                                         </>
                                 }

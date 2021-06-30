@@ -1,10 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button, ButtonGroup, Col, Container, ListGroup, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
     FaFileAlt,
+    FaFileContract,
     FaIdCard,
     FaHistory,
     FaPencilAlt,
@@ -84,6 +86,18 @@ export default function LicensingDetails() {
                                                         <Col>
                                                             <PageBack href="/licensings" subTitle="Voltar para a lista de licenciamentos" />
                                                         </Col>
+
+                                                        <Col className="col-row">
+                                                            <ButtonGroup className="col-12">
+                                                                <Button
+                                                                    title="Editar licenciamento."
+                                                                    variant="success"
+                                                                    onClick={() => handleRoute(`/licensings/edit/${licensingData.id}`)}
+                                                                >
+                                                                    <FaPencilAlt />
+                                                                </Button>
+                                                            </ButtonGroup>
+                                                        </Col>
                                                     </Row>
 
                                                     <Row className="mb-3">
@@ -111,33 +125,21 @@ export default function LicensingDetails() {
                                                         <Col sm={6}>
                                                             <Row className="align-items-center">
                                                                 <Col className="col-row">
-                                                                    <h3 className="form-control-plaintext text-success">{licensingData.customer.name}</h3>
+                                                                    <Link href={`/customers/details/${licensingData.customer.id}`}>
+                                                                        <a title="Ir para detalhes do cliente." data-title="Ir para detalhes do cliente.">
+                                                                            <h3 className="form-control-plaintext text-success">{licensingData.customer.name}</h3>
+                                                                        </a>
+                                                                    </Link>
                                                                 </Col>
 
                                                                 <Col className="col-row">
                                                                     <ButtonGroup size="sm" className="col-12">
                                                                         <Button
-                                                                            title="Editar cliente."
-                                                                            variant="success"
-                                                                            onClick={() => handleRoute(`/custimers/edit/${licensingData.customer.id}`)}
-                                                                        >
-                                                                            <FaPencilAlt /><FaIdCard />
-                                                                        </Button>
-
-                                                                        <Button
                                                                             variant="success"
                                                                             title="Criar um novo licenciamento para este cliente."
                                                                             onClick={() => handleRoute(`/licensings/new?customer=${licensingData.customer.id}`)}
                                                                         >
-                                                                            <FaPlus /><FaFileAlt />
-                                                                        </Button>
-
-                                                                        <Button
-                                                                            title="Editar licensiamento."
-                                                                            variant="success"
-                                                                            onClick={() => handleRoute(`/licensings/edit/${licensingData.id}`)}
-                                                                        >
-                                                                            <FaPencilAlt />
+                                                                            <FaPlus /><FaFileContract />
                                                                         </Button>
                                                                     </ButtonGroup>
                                                                 </Col>
@@ -261,7 +263,13 @@ export default function LicensingDetails() {
 
                                                             <Row>
                                                                 <Col>
-                                                                    <h6 className="text-secondary">{licensingData.property ? licensingData.property.name : ''}</h6>
+                                                                    {
+                                                                        licensingData.property && <Link href={`/properties/details/${licensingData.property.id}`}>
+                                                                            <a title="Ir para detalhes do imóvel." data-title="Ir para detalhes do imóvel.">
+                                                                                <h6 className="text-secondary">{licensingData.property.name}</h6>
+                                                                            </a>
+                                                                        </Link>
+                                                                    }
                                                                 </Col>
                                                             </Row>
                                                         </Col>

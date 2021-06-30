@@ -11,7 +11,7 @@ import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
 import Members, { Member } from '../../../components/LicensingMembers';
-import { User } from '../../../components/Users';
+import { User, can } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
 import { LicensingAgency } from '../../../components/LicensingAgencies';
 import { LicensingAuthorization } from '../../../components/LicensingAuthorizations';
@@ -28,7 +28,6 @@ const validationSchema = Yup.object().shape({
     renovation: Yup.string().notRequired().nullable(),
     deadline: Yup.string().notRequired().nullable(),
     process_number: Yup.string().notRequired().nullable(),
-    customer: Yup.string().required('Obrigatório!'),
     property: Yup.string().notRequired().nullable(),
     infringement: Yup.string().notRequired().nullable(),
     authorization: Yup.string().required('Obrigatório!'),
@@ -38,6 +37,7 @@ const validationSchema = Yup.object().shape({
 
 export default function NewLicensing() {
     const router = useRouter();
+    const { customer } = router.query;
 
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
@@ -45,8 +45,12 @@ export default function NewLicensing() {
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
     const [membersAdded, setMembersAdded] = useState<Member[]>([]);
+
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
+    const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+
     const [licensingAgencies, setLicensingAgencies] = useState<LicensingAgency[]>([]);
     const [licensingAuthorizations, setLicensingAuthorizations] = useState<LicensingAuthorization[]>([]);
     const [licensingInfringements, setLicensingInfringements] = useState<LicensingInfringement[]>([]);
@@ -58,7 +62,7 @@ export default function NewLicensing() {
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showUsers, setShowUsers] = useState(false);
 
@@ -115,7 +119,23 @@ export default function NewLicensing() {
                 });
 
                 api.get('customers').then(res => {
-                    setCustomers(res.data);
+                    const customersRes: Customer[] = res.data;
+
+                    if (customer) {
+                        customersRes.forEach(customerItem => {
+                            if (customerItem.id === customer) {
+                                setSelectedCustomer(customerItem);
+
+                                api.get(`customers/${customerItem.id}/properties`).then(res => {
+                                    setProperties(res.data);
+                                }).catch(err => {
+                                    console.log('Error to get customer properties ', err);
+                                });
+                            }
+                        });
+                    }
+
+                    setCustomers(customersRes);
                 }).catch(err => {
                     console.log('Error to get licensings customers, ', err);
 
@@ -309,8 +329,6 @@ export default function NewLicensing() {
                                         renovation: '',
                                         deadline: '',
                                         process_number: '',
-                                        customer: '',
-                                        customerName: '',
                                         property: '0',
                                         infringement: '0',
                                         authorization: '',
@@ -318,6 +336,11 @@ export default function NewLicensing() {
                                         status: '',
                                     }}
                                     onSubmit={async values => {
+                                        if (!selectedCustomer) {
+                                            setErrorSelectedCustomer(true);
+                                            return;
+                                        }
+
                                         setTypeMessage("waiting");
                                         setMessageShow(true);
 
@@ -332,7 +355,7 @@ export default function NewLicensing() {
                                                 renovation: values.renovation,
                                                 deadline: values.deadline,
                                                 process_number: values.process_number,
-                                                customer: values.customer,
+                                                customer: selectedCustomer.id,
                                                 property: values.property,
                                                 infringement: values.infringement,
                                                 authorization: values.authorization,
@@ -357,7 +380,7 @@ export default function NewLicensing() {
                                     }}
                                     validationSchema={validationSchema}
                                 >
-                                    {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                                    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                                         <Form onSubmit={handleSubmit}>
                                             <Row className="mb-3">
                                                 <Col sm={6}>
@@ -366,13 +389,11 @@ export default function NewLicensing() {
                                                         <FormControl
                                                             placeholder="Escolha um cliente"
                                                             type="name"
-                                                            onChange={handleChange}
-                                                            onBlur={handleBlur}
-                                                            value={values.customerName}
-                                                            name="customerName"
+                                                            value={selectedCustomer ? selectedCustomer.name : ''}
+                                                            name="customer"
                                                             aria-label="Nome do cliente"
                                                             aria-describedby="btnGroupAddon"
-                                                            isInvalid={!!errors.customerName}
+                                                            isInvalid={errorSelectedCustomer}
                                                             readOnly
                                                         />
                                                         <InputGroup.Prepend>
@@ -385,7 +406,7 @@ export default function NewLicensing() {
                                                             </Button>
                                                         </InputGroup.Prepend>
                                                     </InputGroup>
-                                                    <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
+                                                    <Form.Text className="text-danger">{errorSelectedCustomer && 'Obrigatório!'}</Form.Text>
                                                 </Col>
 
                                                 <Form.Group as={Col} sm={6} controlId="formGridAuthorizatioin">
@@ -514,7 +535,7 @@ export default function NewLicensing() {
                                                         onBlur={handleBlur}
                                                         value={values.property}
                                                         name="property"
-                                                        disabled={!!!values.customer}
+                                                        disabled={!selectedCustomer}
                                                         isInvalid={!!errors.property && touched.property}
                                                     >
                                                         <option value="0">Nenhuma</option>
@@ -588,8 +609,8 @@ export default function NewLicensing() {
                                                                                 action
                                                                                 variant="light"
                                                                                 onClick={() => {
-                                                                                    setFieldValue('customer', customer.id);
-                                                                                    setFieldValue('customerName', customer.name);
+                                                                                    setSelectedCustomer(customer);
+                                                                                    setErrorSelectedCustomer(false);
 
                                                                                     api.get(`customers/${customer.id}/properties`).then(res => {
                                                                                         setProperties(res.data);

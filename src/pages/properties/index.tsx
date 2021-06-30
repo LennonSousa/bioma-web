@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
 import { Container, Row } from 'react-bootstrap';
 
 import api from '../../api/api';
@@ -12,6 +13,9 @@ import { SideBarContext } from '../../contexts/SideBarContext';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
 
 export default function Customers() {
+    const router = useRouter();
+    const { customer } = router.query;
+
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
@@ -27,7 +31,11 @@ export default function Customers() {
 
         if (user) {
             if (can(user, "properties", "read:any")) {
-                api.get('properties').then(res => {
+                let query = '';
+
+                if (customer) query = `?customer=${customer}`;
+
+                api.get(`properties/${!!query ? query : ''}`).then(res => {
                     setProperties(res.data);
 
                     setLoadingData(false);
@@ -40,7 +48,7 @@ export default function Customers() {
                 });
             }
         }
-    }, [user]);
+    }, [user, customer]);
 
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
@@ -59,7 +67,7 @@ export default function Customers() {
                                                 !!properties.length ? properties.map((property, index) => {
                                                     return <PropertyListItem key={index} property={property} />
                                                 }) :
-                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum imóvel registrado." />
+                                                    <PageWaiting status="empty" message="Nenhum imóvel registrado." />
                                             }
                                         </>
                                 }

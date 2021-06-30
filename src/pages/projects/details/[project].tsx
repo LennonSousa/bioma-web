@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { Col, Container, Button, ButtonGroup, ListGroup, Row } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
@@ -12,6 +13,7 @@ import {
     FaPencilAlt,
     FaPlus,
     FaRegFile,
+    FaUserTie,
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
@@ -119,6 +121,18 @@ export default function PropertyDetails() {
                                                         <Col>
                                                             <PageBack href="/projects" subTitle="Voltar para a lista de projetos" />
                                                         </Col>
+
+                                                        <Col className="col-row">
+                                                            <ButtonGroup className="col-12">
+                                                                <Button
+                                                                    title="Editar projeto."
+                                                                    variant="success"
+                                                                    onClick={() => handleRoute(`/projects/edit/${projectData.id}`)}
+                                                                >
+                                                                    <FaPencilAlt />
+                                                                </Button>
+                                                            </ButtonGroup>
+                                                        </Col>
                                                     </Row>
 
                                                     <Row className="mb-3">
@@ -146,19 +160,15 @@ export default function PropertyDetails() {
                                                         <Col sm={6}>
                                                             <Row className="align-items-center">
                                                                 <Col className="col-row">
-                                                                    <h3 className="form-control-plaintext text-success">{projectData.customer.name}</h3>
+                                                                    <Link href={`/customers/details/${projectData.customer.id}`}>
+                                                                        <a title="Ir para detalhes do cliente." data-title="Ir para detalhes do cliente.">
+                                                                            <h3 className="form-control-plaintext text-success">{projectData.customer.name}</h3>
+                                                                        </a>
+                                                                    </Link>
                                                                 </Col>
 
                                                                 <Col className="col-row">
                                                                     <ButtonGroup size="sm" className="col-12">
-                                                                        <Button
-                                                                            title="Editar projeto."
-                                                                            variant="success"
-                                                                            onClick={() => handleRoute(`/projects/edit/${projectData.id}`)}
-                                                                        >
-                                                                            <FaPencilAlt />
-                                                                        </Button>
-
                                                                         <Button
                                                                             variant="success"
                                                                             title="Criar um novo projeto para este cliente."
@@ -210,7 +220,11 @@ export default function PropertyDetails() {
 
                                                             <Row>
                                                                 <Col>
-                                                                    <h6 className="text-secondary">{projectData.property.name}</h6>
+                                                                    <Link href={`/properties/details/${projectData.property.id}`}>
+                                                                        <a title="Ir para detalhes do imóvel." data-title="Ir para detalhes do imóvel.">
+                                                                            <h6 className="text-secondary">{projectData.property.name}</h6>
+                                                                        </a>
+                                                                    </Link>
                                                                 </Col>
                                                             </Row>
                                                         </Col>
@@ -226,7 +240,11 @@ export default function PropertyDetails() {
 
                                                             <Row>
                                                                 <Col>
-                                                                    <h6 className="text-secondary">{`${projectData.bank.institution.name} - ${projectData.bank.sector}`}</h6>
+                                                                    <Link href={`/banks/details/${projectData.bank.id}`}>
+                                                                        <a title="Ir para detalhes do banco." data-title="Ir para detalhes do banco.">
+                                                                            <h6 className="text-secondary">{`${projectData.bank.institution.name} - ${projectData.bank.sector}`}</h6>
+                                                                        </a>
+                                                                    </Link>
                                                                 </Col>
                                                             </Row>
                                                         </Col>
@@ -449,7 +467,7 @@ export default function PropertyDetails() {
                                                                             projectData.docs.map((doc, index) => {
                                                                                 return <ListGroup.Item key={index} action as="div" variant="light">
                                                                                     <Row>
-                                                                                        <Col sm={8}>
+                                                                                        <Col className={`${doc.checked ? 'text-success' : ''}`} sm={8}>
                                                                                             {
                                                                                                 doc.checked ? <FaCheck /> :
                                                                                                     <FaRegFile />} <label>{doc.doc.name} </label>
@@ -483,19 +501,27 @@ export default function PropertyDetails() {
                                                             </Row>
 
                                                             <Row>
-                                                                <Col>
-                                                                    <ListGroup>
-                                                                        {
-                                                                            projectData.attachments.map((attachment, index) => {
-                                                                                return <ProjectAttachments
-                                                                                    key={index}
-                                                                                    attachment={attachment}
-                                                                                    canEdit={false}
-                                                                                />
-                                                                            })
-                                                                        }
-                                                                    </ListGroup>
-                                                                </Col>
+                                                                {
+                                                                    !!projectData.attachments.length ? <Col>
+                                                                        <ListGroup>
+                                                                            {
+                                                                                projectData.attachments.map((attachment, index) => {
+                                                                                    return <ProjectAttachments
+                                                                                        key={index}
+                                                                                        attachment={attachment}
+                                                                                        canEdit={false}
+                                                                                    />
+                                                                                })
+                                                                            }
+                                                                        </ListGroup>
+                                                                    </Col> :
+                                                                        <Col>
+                                                                            <AlertMessage
+                                                                                status="warning"
+                                                                                message="Nenhum anexo enviado para esse projeto."
+                                                                            />
+                                                                        </Col>
+                                                                }
                                                             </Row>
                                                         </Col>
                                                     </Row>

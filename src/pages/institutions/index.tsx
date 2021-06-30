@@ -25,11 +25,11 @@ export default function Institutions() {
     const [institutions, setInstitutions] = useState<Institution[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
-    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showModalNewInstitution, setShowModalNewInstitution] = useState(false);
 
@@ -110,7 +110,7 @@ export default function Institutions() {
                                             <Col>
                                                 <Row>
                                                     <Col className="text-center">
-                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhuma institutição registrada.</p>
+                                                        <p style={{ color: 'var(--gray)' }}>Nenhuma institutição registrada.</p>
                                                     </Col>
                                                 </Row>
 

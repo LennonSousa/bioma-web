@@ -29,16 +29,19 @@ const validationSchema = Yup.object().shape({
     coordinates: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
-    customer: Yup.string().required('Obrigatório!'),
-    customerName: Yup.string().required('Obrigatório!'),
 });
 
 export default function NewProperty() {
     const router = useRouter();
+    const { customer } = router.query;
+
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
+    const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
+
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
     const [membersAdded, setMembersAdded] = useState<Member[]>([]);
@@ -50,7 +53,7 @@ export default function NewProperty() {
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
     const [cities, setCities] = useState<string[]>([]);
 
     const [showUsers, setShowUsers] = useState(false);
@@ -108,7 +111,16 @@ export default function NewProperty() {
                 });
 
                 api.get('customers').then(res => {
-                    setCustomers(res.data);
+                    const customersRes: Customer[] = res.data;
+
+                    if (customer) {
+                        customersRes.forEach(customerItem => {
+                            if (customerItem.id === customer)
+                                setSelectedCustomer(customerItem)
+                        })
+                    }
+
+                    setCustomers(customersRes);
                 }).catch(err => {
                     console.log('Error to get customers, ', err);
 
@@ -132,7 +144,7 @@ export default function NewProperty() {
                 });
             }
         }
-    }, [user]);
+    }, [user, customer]);
 
     function handleSearch(event: ChangeEvent<HTMLInputElement>) {
         if (customers) {
@@ -280,10 +292,13 @@ export default function NewProperty() {
                                         coordinates: '',
                                         notes: '',
                                         warnings: false,
-                                        customer: '',
-                                        customerName: '',
                                     }}
                                     onSubmit={async values => {
+                                        if (!selectedCustomer) {
+                                            setErrorSelectedCustomer(true);
+                                            return;
+                                        }
+
                                         setTypeMessage("waiting");
                                         setMessageShow(true);
 
@@ -306,7 +321,7 @@ export default function NewProperty() {
                                                 coordinates: values.coordinates,
                                                 notes: values.notes,
                                                 warnings: values.warnings,
-                                                customer: values.customer,
+                                                customer: selectedCustomer.id,
                                                 docs,
                                                 members,
                                             });
@@ -349,13 +364,11 @@ export default function NewProperty() {
                                                         <FormControl
                                                             placeholder="Escolha um cliente"
                                                             type="name"
-                                                            onChange={handleChange}
-                                                            onBlur={handleBlur}
-                                                            value={values.customerName}
-                                                            name="customerName"
+                                                            value={selectedCustomer ? selectedCustomer.name : ''}
+                                                            name="customer"
                                                             aria-label="Nome do cliente"
                                                             aria-describedby="btnGroupAddon"
-                                                            isInvalid={!!errors.customerName}
+                                                            isInvalid={errorSelectedCustomer}
                                                             readOnly
                                                         />
                                                         <InputGroup.Prepend>
@@ -368,7 +381,7 @@ export default function NewProperty() {
                                                             </Button>
                                                         </InputGroup.Prepend>
                                                     </InputGroup>
-                                                    <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
+                                                    <Form.Text className="text-danger">{errorSelectedCustomer && 'Obrigatório!'}</Form.Text>
                                                 </Col>
                                             </Row>
 
@@ -542,8 +555,8 @@ export default function NewProperty() {
                                                                                 action
                                                                                 variant="light"
                                                                                 onClick={() => {
-                                                                                    setFieldValue('customer', customer.id);
-                                                                                    setFieldValue('customerName', customer.name);
+                                                                                    setSelectedCustomer(customer);
+                                                                                    setErrorSelectedCustomer(false);
                                                                                     handleCloseModalChooseCustomer();
                                                                                 }}
                                                                             >

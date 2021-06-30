@@ -27,7 +27,7 @@ const Members: React.FC<MemberProps> = ({ member, canRemove = true, isNewItem = 
     const toggleShowUserDetails = () => setShowUserDetails(!showUserDetails);
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     async function deleteMember() {
         if (isNewItem) {

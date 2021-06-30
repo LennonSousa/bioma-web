@@ -28,11 +28,11 @@ export default function Types() {
     const [infringements, setInfringements] = useState<LicensingInfringement[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
-    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showModalNewInfringement, setShowModalNewInfringement] = useState(false);
 
@@ -174,7 +174,7 @@ export default function Types() {
                                             <Col>
                                                 <Row>
                                                     <Col className="text-center">
-                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhuma infração registrado.</p>
+                                                        <p style={{ color: 'var(--gray)' }}>Nenhuma infração registrado.</p>
                                                     </Col>
                                                 </Row>
 

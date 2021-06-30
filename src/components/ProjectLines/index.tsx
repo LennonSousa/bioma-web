@@ -33,7 +33,7 @@ const ProjectLines: React.FC<DocsPropertyProps> = ({ line, listLines, handleList
     const handleShowModalEditLine = () => setShowModalEditLine(true);
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);

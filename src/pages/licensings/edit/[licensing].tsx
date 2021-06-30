@@ -69,7 +69,7 @@ export default function NewCustomer() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
-    const [licensingData, setLicensingData] = useState<Licensing>();
+    const [data, setData] = useState<Licensing>();
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
     const [customers, setCustomers] = useState<Customer[]>([]);
@@ -89,7 +89,7 @@ export default function NewCustomer() {
     const [messageShow, setMessageShow] = useState(false);
     const [eventMessageShow, setEventMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showUsers, setShowUsers] = useState(false);
 
@@ -192,7 +192,7 @@ export default function NewCustomer() {
                     api.get(`customers/${licensingRes.customer.id}/properties`).then(res => {
                         setProperties(res.data);
 
-                        setLicensingData(licensingRes);
+                        setData(licensingRes);
                     }).catch(err => {
                         console.log('Error to get customer properties ', err);
 
@@ -218,7 +218,7 @@ export default function NewCustomer() {
     async function handleListEvents() {
         const res = await api.get(`licensings/${licensing}`);
 
-        setLicensingData(res.data);
+        setData(res.data);
     }
 
     function handleSearch(event: ChangeEvent<HTMLInputElement>) {
@@ -246,7 +246,7 @@ export default function NewCustomer() {
         const res = await api.get(`licensings/${licensing}`);
 
         const updatedCustomer: Licensing = res.data;
-        setLicensingData({ ...licensingData, members: updatedCustomer.members });
+        setData({ ...data, members: updatedCustomer.members });
 
         handleUsersToAdd(users, updatedCustomer);
     }
@@ -254,7 +254,7 @@ export default function NewCustomer() {
     async function createMember(userId: string) {
         try {
             await api.post('members/licensing', {
-                licensing: licensingData.id,
+                licensing: data.id,
                 user: userId,
             });
 
@@ -283,7 +283,7 @@ export default function NewCustomer() {
 
         const updatedCustomer: Licensing = res.data;
 
-        setLicensingData({ ...licensingData, attachments: updatedCustomer.attachments });
+        setData({ ...data, attachments: updatedCustomer.attachments });
     }
 
     function handleImages(event: ChangeEvent<HTMLInputElement>) {
@@ -309,11 +309,11 @@ export default function NewCustomer() {
                         /> :
                             <>
                                 {
-                                    !customerData ? <PageWaiting status="waiting" /> :
+                                    !data ? <PageWaiting status="waiting" /> :
                                         <Container className="content-page">
                                             <Row className="mb-3">
                                                 <Col>
-                                                    <PageBack href={`/licensings/details/${licensingData.id}`} subTitle="Voltar para detalhes do projeto" />
+                                                    <PageBack href={`/licensings/details/${data.id}`} subTitle="Voltar para detalhes do projeto" />
                                                 </Col>
                                             </Row>
 
@@ -326,11 +326,11 @@ export default function NewCustomer() {
                                                     </Row>
                                                     <Row>
                                                         {
-                                                            licensingData.members.map(member => {
+                                                            data.members.map(member => {
                                                                 return <Members
                                                                     key={member.id}
                                                                     member={member}
-                                                                    canRemove={licensingData.members.length > 1}
+                                                                    canRemove={data.members.length > 1}
                                                                     handleListMembers={handleListMembers}
                                                                 />
                                                             })
@@ -378,25 +378,25 @@ export default function NewCustomer() {
 
                                             <Formik
                                                 initialValues={{
-                                                    licensing_number: licensingData.licensing_number,
-                                                    expire: licensingData.expire,
-                                                    renovation: licensingData.renovation,
-                                                    deadline: licensingData.deadline,
-                                                    process_number: licensingData.process_number,
-                                                    customer: licensingData.customer.id,
-                                                    customerName: licensingData.customer.name,
-                                                    property: licensingData.property ? licensingData.property.id : '0',
-                                                    infringement: licensingData.infringement ? licensingData.infringement.id : '0',
-                                                    authorization: licensingData.authorization.id,
-                                                    agency: licensingData.agency.id,
-                                                    status: licensingData.status.id,
+                                                    licensing_number: data.licensing_number,
+                                                    expire: data.expire,
+                                                    renovation: data.renovation,
+                                                    deadline: data.deadline,
+                                                    process_number: data.process_number,
+                                                    customer: data.customer.id,
+                                                    customerName: data.customer.name,
+                                                    property: data.property ? data.property.id : '0',
+                                                    infringement: data.infringement ? data.infringement.id : '0',
+                                                    authorization: data.authorization.id,
+                                                    agency: data.agency.id,
+                                                    status: data.status.id,
                                                 }}
                                                 onSubmit={async values => {
                                                     setTypeMessage("waiting");
                                                     setMessageShow(true);
 
                                                     try {
-                                                        await api.put(`licensings/${licensingData.id}`, {
+                                                        await api.put(`licensings/${data.id}`, {
                                                             licensing_number: values.licensing_number,
                                                             expire: values.expire,
                                                             renovation: values.renovation,
@@ -413,7 +413,7 @@ export default function NewCustomer() {
                                                         setTypeMessage("success");
 
                                                         setTimeout(() => {
-                                                            router.push(`/licensings/details/${licensingData.id}`);
+                                                            router.push(`/licensings/details/${data.id}`);
                                                         }, 1000);
                                                     }
                                                     catch {
@@ -724,7 +724,7 @@ export default function NewCustomer() {
 
                                                     <Row className="mt-2">
                                                         {
-                                                            !!licensingData.events.length ? <Col>
+                                                            !!data.events.length ? <Col>
                                                                 <Row className="mb-2" style={{ padding: '0 1rem' }}>
                                                                     <Col sm={10}>
                                                                         <h6>Descrição</h6>
@@ -739,7 +739,7 @@ export default function NewCustomer() {
                                                                     <Col>
                                                                         <ListGroup>
                                                                             {
-                                                                                licensingData.events.map((event, index) => {
+                                                                                data.events.map((event, index) => {
                                                                                     return <EventsLicensing
                                                                                         key={index}
                                                                                         event={event}
@@ -783,19 +783,27 @@ export default function NewCustomer() {
                                                     </Row>
 
                                                     <Row className="mt-2">
-                                                        <Col>
-                                                            <ListGroup>
-                                                                {
-                                                                    licensingData.attachments.map(attachment => {
-                                                                        return <LicensingAttachments
-                                                                            key={attachment.id}
-                                                                            attachment={attachment}
-                                                                            handleListAttachments={handleListAttachments}
-                                                                        />
-                                                                    })
-                                                                }
-                                                            </ListGroup>
-                                                        </Col>
+                                                        {
+                                                            !!data.attachments.length ? <Col>
+                                                                <ListGroup>
+                                                                    {
+                                                                        data.attachments.map(attachment => {
+                                                                            return <LicensingAttachments
+                                                                                key={attachment.id}
+                                                                                attachment={attachment}
+                                                                                handleListAttachments={handleListAttachments}
+                                                                            />
+                                                                        })
+                                                                    }
+                                                                </ListGroup>
+                                                            </Col> :
+                                                                <Col>
+                                                                    <AlertMessage
+                                                                        status="warning"
+                                                                        message="Nenhum anexo enviado para esse licenciamento."
+                                                                    />
+                                                                </Col>
+                                                        }
                                                     </Row>
                                                 </Form.Group>
                                             </Form.Row>
@@ -808,7 +816,7 @@ export default function NewCustomer() {
                                                     initialValues={
                                                         {
                                                             description: '',
-                                                            licensing: licensingData.id,
+                                                            licensing: data.id,
                                                         }
                                                     }
                                                     onSubmit={async values => {
@@ -892,7 +900,7 @@ export default function NewCustomer() {
                                                             expire_at: format(new Date(), 'yyyy-MM-dd'),
                                                             schedule: false,
                                                             schedule_at: 0,
-                                                            customer: licensingData.id,
+                                                            customer: data.id,
                                                         }
                                                     }
                                                     onSubmit={async values => {
@@ -904,20 +912,20 @@ export default function NewCustomer() {
                                                         const scheduleAt = format(subDays(new Date(`${values.expire_at} 12:00:00`), values.schedule_at), 'yyyy-MM-dd');
 
                                                         try {
-                                                            const data = new FormData();
+                                                            const formData = new FormData();
 
-                                                            data.append('name', values.name);
+                                                            formData.append('name', values.name);
 
-                                                            data.append('file', fileToSave);
+                                                            formData.append('file', fileToSave);
 
-                                                            data.append('received_at', `${values.received_at} 12:00:00`);
-                                                            data.append('expire', String(values.expire));
-                                                            data.append('expire_at', `${values.expire_at} 12:00:00`);
-                                                            data.append('schedule', String(values.schedule));
-                                                            data.append('schedule_at', `${scheduleAt} 12:00:00`);
-                                                            data.append('licensing', values.customer);
+                                                            formData.append('received_at', `${values.received_at} 12:00:00`);
+                                                            formData.append('expire', String(values.expire));
+                                                            formData.append('expire_at', `${values.expire_at} 12:00:00`);
+                                                            formData.append('schedule', String(values.schedule));
+                                                            formData.append('schedule_at', `${scheduleAt} 12:00:00`);
+                                                            formData.append('licensing', values.customer);
 
-                                                            await api.post(`licensings/${licensingData.id}/attachments`, data, {
+                                                            await api.post(`licensings/${data.id}/attachments`, formData, {
                                                                 onUploadProgress: e => {
                                                                     const progress = Math.round((e.loaded * 100) / e.total);
 

@@ -35,7 +35,7 @@ const DocsProject: React.FC<DocsProjectProps> = ({ doc, listDocs, handleListDocs
     const [categoryPausing, setCategoryPausing] = useState(false);
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);

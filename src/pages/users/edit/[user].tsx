@@ -73,7 +73,7 @@ export default function UserEdit() {
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
     const [messageShow, setMessageShow] = useState(false);
     const [deletingMessageShow, setDeletingMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showUserDelete, setShowUserDelete] = useState(false);
 

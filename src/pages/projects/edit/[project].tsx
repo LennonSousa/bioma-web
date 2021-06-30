@@ -105,7 +105,7 @@ export default function NewCustomer() {
     const [messageShow, setMessageShow] = useState(false);
     const [eventMessageShow, setEventMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showUsers, setShowUsers] = useState(false);
 
@@ -981,19 +981,27 @@ export default function NewCustomer() {
                                                         </Row>
 
                                                         <Row className="mt-2">
-                                                            <Col>
-                                                                <ListGroup>
-                                                                    {
-                                                                        projectData.attachments.map(attachment => {
-                                                                            return <ProjectAttachments
-                                                                                key={attachment.id}
-                                                                                attachment={attachment}
-                                                                                handleListAttachments={handleListAttachments}
-                                                                            />
-                                                                        })
-                                                                    }
-                                                                </ListGroup>
-                                                            </Col>
+                                                            {
+                                                                !!projectData.attachments.length ? <Col>
+                                                                    <ListGroup>
+                                                                        {
+                                                                            projectData.attachments.map(attachment => {
+                                                                                return <ProjectAttachments
+                                                                                    key={attachment.id}
+                                                                                    attachment={attachment}
+                                                                                    handleListAttachments={handleListAttachments}
+                                                                                />
+                                                                            })
+                                                                        }
+                                                                    </ListGroup>
+                                                                </Col> :
+                                                                    <Col>
+                                                                        <AlertMessage
+                                                                            status="warning"
+                                                                            message="Nenhum anexo enviado para esse projeto."
+                                                                        />
+                                                                    </Col>
+                                                            }
                                                         </Row>
                                                     </Form.Group>
                                                 </Form.Row>

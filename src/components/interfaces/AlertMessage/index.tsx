@@ -4,7 +4,7 @@ import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 import styles from './styles.module.css';
 
-export let statusModal: 'waiting' | 'success' | 'warning' | 'error';
+export type statusModal = 'waiting' | 'success' | 'warning' | 'error';
 
 interface WaitingModalProps {
     status: 'waiting' | 'success' | 'warning' | 'error',
@@ -22,7 +22,7 @@ const AlertMessage: React.FC<WaitingModalProps> = ({ status, message = "" }) => 
         handleAlert(status);
     }, [status, message]);
 
-    function handleAlert(status: 'waiting' | 'success' | 'warning' | 'error') {
+    function handleAlert(status: statusModal) {
         if (status === 'waiting') {
             setVariantColor("info");
             setCircleWaiting(true);

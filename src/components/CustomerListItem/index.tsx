@@ -18,6 +18,10 @@ const CustomerItem: React.FC<CustomerItemProps> = ({ customer }) => {
         router.push(`/customers/edit/${customer.id}`);
     }
 
+    function handleRoute(route: string) {
+        router.push(route);
+    }
+
     return (
         <Col sm={4}>
             <div className={styles.itemContainer}>
@@ -54,10 +58,34 @@ const CustomerItem: React.FC<CustomerItemProps> = ({ customer }) => {
 
                 <Row>
                     <ButtonGroup size="sm" className="col-12">
-                        <Button variant="success"><FaFileAlt /></Button>
-                        <Button variant="success"><FaMapSigns /></Button>
-                        <Button variant="success"><FaFileContract /></Button>
-                        <Button variant="success" onClick={goToEdit} ><FaPencilAlt /></Button>
+                        <Button
+                            variant="success"
+                            title="Lista todos os projetos desse cliente."
+                            onClick={() => handleRoute(`/projects?customer=${customer.id}`)}
+                        >
+                            <FaFileAlt />
+                        </Button>
+                        <Button
+                            variant="success"
+                            title="Lista todos os imóveis desse cliente."
+                            onClick={() => handleRoute(`/properties?customer=${customer.id}`)}
+                        >
+                            <FaMapSigns />
+                        </Button>
+                        <Button
+                            variant="success"
+                            title="Lista todos os licenciamentos desse cliente."
+                            onClick={() => handleRoute(`/licensings?customer=${customer.id}`)}
+                        >
+                            <FaFileContract />
+                        </Button>
+                        <Button
+                            variant="success"
+                            title="Editar cliente."
+                            onClick={goToEdit}
+                        >
+                            <FaPencilAlt />
+                        </Button>
                     </ButtonGroup>
                 </Row>
             </div>

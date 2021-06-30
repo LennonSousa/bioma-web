@@ -76,7 +76,7 @@ export default function NewCustomer() {
     const [uploadingPercentage, setUploadingPercentage] = useState(0);
     const [messageShow, setMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
     const [documentType, setDocumentType] = useState("CPF");
     const [cities, setCities] = useState<string[]>([]);
 
@@ -163,6 +163,8 @@ export default function NewCustomer() {
                         }
 
                         setCustomerData(customerRes);
+
+                        setLoadingData(false);
                     }).catch(err => {
                         console.log('Error to get docs customer to edit, ', err);
 
@@ -170,8 +172,6 @@ export default function NewCustomer() {
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
                         setLoadingData(false);
                     });
-
-                    setLoadingData(false);
                 }).catch(err => {
                     console.log('Error to get customer to edit, ', err);
 
@@ -717,19 +717,27 @@ export default function NewCustomer() {
                                                                     </Row>
 
                                                                     <Row className="mt-2">
-                                                                        <Col>
-                                                                            <ListGroup>
-                                                                                {
-                                                                                    customerData.attachments.map(attachment => {
-                                                                                        return <CustomerAttachments
-                                                                                            key={attachment.id}
-                                                                                            attachment={attachment}
-                                                                                            handleListAttachments={handleListAttachments}
-                                                                                        />
-                                                                                    })
-                                                                                }
-                                                                            </ListGroup>
-                                                                        </Col>
+                                                                        {
+                                                                            !!customerData.attachments.length ? <Col>
+                                                                                <ListGroup>
+                                                                                    {
+                                                                                        customerData.attachments.map(attachment => {
+                                                                                            return <CustomerAttachments
+                                                                                                key={attachment.id}
+                                                                                                attachment={attachment}
+                                                                                                handleListAttachments={handleListAttachments}
+                                                                                            />
+                                                                                        })
+                                                                                    }
+                                                                                </ListGroup>
+                                                                            </Col> :
+                                                                                <Col>
+                                                                                    <AlertMessage
+                                                                                        status="warning"
+                                                                                        message="Nenhum anexo enviado para esse cliente."
+                                                                                    />
+                                                                                </Col>
+                                                                        }
                                                                     </Row>
                                                                 </Form.Group>
                                                             </Form.Row>

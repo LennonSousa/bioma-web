@@ -27,7 +27,7 @@ export default function NewCustomer({ authenticated, user, token }) {
     const [authenticatedUser, setAuthenticatedUser] = useState<User>(undefined);
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
     const [isEqualPassword, setIsEqualPassword] = useState(false);
 
     const [showModal, setShowModal] = useState(false);

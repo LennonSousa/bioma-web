@@ -58,7 +58,13 @@ const PropertyListItem: React.FC<LicensingListItemProps> = ({ licensing }) => {
 
                 <Row>
                     <ButtonGroup size="sm" className="col-12">
-                        <Button variant="success" onClick={goToEdit} ><FaPencilAlt /> Editar</Button>
+                        <Button
+                            variant="success"
+                            title="Editar licenciamento."
+                            onClick={goToEdit}
+                        >
+                            <FaPencilAlt /> Editar
+                        </Button>
                     </ButtonGroup>
                 </Row>
             </div>

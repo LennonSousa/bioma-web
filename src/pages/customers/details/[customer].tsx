@@ -23,9 +23,12 @@ import { Customer } from '../../../components/Customers';
 import Members from '../../../components/CustomerMembers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
 import PropertyListItem from '../../../components/PropertyListItem';
+import ProjectListItem from '../../../components/ProjectListItem';
+import LicensingListItem from '../../../components/LicensingListItem';
 import CustomerAttachments from '../../../components/CustomerAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
+import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 
@@ -124,6 +127,18 @@ export default function CustomerDetails() {
                                                         <Col>
                                                             <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
                                                         </Col>
+
+                                                        <Col className="col-row">
+                                                            <ButtonGroup className="col-12">
+                                                                <Button
+                                                                    title="Editar cliente."
+                                                                    variant="success"
+                                                                    onClick={() => handleRoute(`/customers/edit/${customerData.id}`)}
+                                                                >
+                                                                    <FaPencilAlt />
+                                                                </Button>
+                                                            </ButtonGroup>
+                                                        </Col>
                                                     </Row>
 
                                                     <Row className="mb-3">
@@ -152,30 +167,6 @@ export default function CustomerDetails() {
                                                             <Row className="align-items-center">
                                                                 <Col className="col-row">
                                                                     <h3 className="form-control-plaintext text-success">{customerData.name}</h3>
-                                                                </Col>
-                                                                <Col className="col-row">
-                                                                    <ButtonGroup size="sm" className="col-12">
-                                                                        {/* <Button
-                                                title="Editar cliente."
-                                                variant="success">
-                                                <FaPencilAlt /><FaUserTie />
-                                            </Button>
-
-                                            <Button
-                                                variant="success"
-                                                title="Criar um novo projeto para este cliente."
-                                            >
-                                                <FaPlus /><FaFileAlt />
-                                            </Button> */}
-
-                                                                        <Button
-                                                                            title="Editar cliente."
-                                                                            variant="success"
-                                                                            onClick={() => handleRoute(`/customers/edit/${customerData.id}`)}
-                                                                        >
-                                                                            <FaPencilAlt />
-                                                                        </Button>
-                                                                    </ButtonGroup>
                                                                 </Col>
                                                             </Row>
                                                         </Col>
@@ -408,7 +399,7 @@ export default function CustomerDetails() {
                                                                             customerData.docs.map((doc, index) => {
                                                                                 return <ListGroup.Item key={index} action as="div" variant="light">
                                                                                     <Row>
-                                                                                        <Col sm={8}>
+                                                                                        <Col className={`${doc.checked ? 'text-success' : ''}`} sm={8}>
                                                                                             {
                                                                                                 doc.checked ? <FaCheck /> :
                                                                                                     <FaRegFile />} <label>{doc.doc.name} </label>
@@ -442,19 +433,27 @@ export default function CustomerDetails() {
                                                             </Row>
 
                                                             <Row>
-                                                                <Col>
-                                                                    <ListGroup>
-                                                                        {
-                                                                            customerData.attachments.map((attachment, index) => {
-                                                                                return <CustomerAttachments
-                                                                                    key={index}
-                                                                                    attachment={attachment}
-                                                                                    canEdit={false}
-                                                                                />
-                                                                            })
-                                                                        }
-                                                                    </ListGroup>
-                                                                </Col>
+                                                                {
+                                                                    !!customerData.attachments.length ? <Col>
+                                                                        <ListGroup>
+                                                                            {
+                                                                                customerData.attachments.map((attachment, index) => {
+                                                                                    return <CustomerAttachments
+                                                                                        key={index}
+                                                                                        attachment={attachment}
+                                                                                        canEdit={false}
+                                                                                    />
+                                                                                })
+                                                                            }
+                                                                        </ListGroup>
+                                                                    </Col> :
+                                                                        <Col>
+                                                                            <AlertMessage
+                                                                                status="warning"
+                                                                                message="Nenhum anexo enviado para esse cliente."
+                                                                            />
+                                                                        </Col>
+                                                                }
                                                             </Row>
                                                         </Col>
                                                     </Row>
@@ -515,9 +514,17 @@ export default function CustomerDetails() {
                                                                     </Row>
 
                                                                     <Row className={styles.relationsContent}>
-                                                                        <Col>
-                                                                            <span className="text-success">Nenhum projeto registrado.</span>
-                                                                        </Col>
+                                                                        {
+                                                                            !!customerData.projects.length ? customerData.projects.map((project, index) => {
+                                                                                return <ProjectListItem
+                                                                                    key={index}
+                                                                                    project={project}
+                                                                                />
+                                                                            }) :
+                                                                                <Col>
+                                                                                    <span className="text-success">Nenhum projeto registrado.</span>
+                                                                                </Col>
+                                                                        }
                                                                     </Row>
                                                                 </Col>
                                                             </Row>
@@ -541,9 +548,17 @@ export default function CustomerDetails() {
                                                                     </Row>
 
                                                                     <Row className={styles.relationsContent}>
-                                                                        <Col>
-                                                                            <span className="text-success">Nenhum licenciamento registrado.</span>
-                                                                        </Col>
+                                                                        {
+                                                                            !!customerData.licensings.length ? customerData.licensings.map((licensing, index) => {
+                                                                                return <LicensingListItem
+                                                                                    key={index}
+                                                                                    licensing={licensing}
+                                                                                />
+                                                                            }) :
+                                                                                <Col>
+                                                                                    <span className="text-success">Nenhum licenciamento registrado.</span>
+                                                                                </Col>
+                                                                        }
                                                                     </Row>
                                                                 </Col>
                                                             </Row>

@@ -28,11 +28,11 @@ export default function Status() {
     const [projectStatus, setProjectStatus] = useState<ProjectStatus[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
-    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showModalNewLine, setShowModalNewLine] = useState(false);
 
@@ -173,7 +173,7 @@ export default function Status() {
                                         <Col>
                                             <Row>
                                                 <Col className="text-center">
-                                                    <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhuma fase registrada.</p>
+                                                    <p style={{ color: 'var(--gray)' }}>Nenhuma fase registrada.</p>
                                                 </Col>
                                             </Row>
 

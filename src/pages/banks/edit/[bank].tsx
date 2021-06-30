@@ -45,7 +45,7 @@ export default function EditBank() {
     const [institutions, setInstitutions] = useState<Institution[]>([]);
     const [cities, setCities] = useState<string[]>([]);
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     useEffect(() => {
         handleItemSideBar('banks');

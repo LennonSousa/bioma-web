@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Col, Container, Row, Tabs, Tab } from 'react-bootstrap';
-import { FaPencilAlt } from 'react-icons/fa';
+import { FaPencilAlt, FaPlus } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
@@ -214,6 +214,20 @@ export default function BankDetails() {
                                                         <Tab eventKey="projects" title="Projetos">
                                                             <Row className={styles.relationsContainer}>
                                                                 <Col>
+                                                                    <Row className={styles.relationsButtonsContent}>
+                                                                        <Col>
+                                                                            <Link href={'/projects/new'}>
+                                                                                <a
+                                                                                    className="btn btn-outline-success"
+                                                                                    title="Criar um novo imóvel para esse cliente"
+                                                                                    data-title="Criar um novo imóvel para esse cliente"
+                                                                                >
+                                                                                    <FaPlus /> Criar um projeto
+                                                                                </a>
+                                                                            </Link>
+                                                                        </Col>
+                                                                    </Row>
+
                                                                     <Row className={styles.relationsContent}>
                                                                         {
                                                                             !!bankData.projects.length ? bankData.projects.map((project, index) => {

@@ -74,7 +74,7 @@ export default function NewProperty() {
     const [uploadingPercentage, setUploadingPercentage] = useState(0);
     const [messageShow, setMessageShow] = useState(false);
     const [messageShowNewAttachment, setMessageShowNewAttachment] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
     const [cities, setCities] = useState<string[]>([]);
 
     const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
@@ -658,19 +658,27 @@ export default function NewProperty() {
                                                                     </Row>
 
                                                                     <Row className="mt-2">
-                                                                        <Col>
-                                                                            <ListGroup>
-                                                                                {
-                                                                                    propertyData.attachments.map(attachment => {
-                                                                                        return <PropertyAttachments
-                                                                                            key={attachment.id}
-                                                                                            attachment={attachment}
-                                                                                            handleListAttachments={handleListAttachments}
-                                                                                        />
-                                                                                    })
-                                                                                }
-                                                                            </ListGroup>
-                                                                        </Col>
+                                                                        {
+                                                                            !!propertyData.attachments.length ? <Col>
+                                                                                <ListGroup>
+                                                                                    {
+                                                                                        propertyData.attachments.map(attachment => {
+                                                                                            return <PropertyAttachments
+                                                                                                key={attachment.id}
+                                                                                                attachment={attachment}
+                                                                                                handleListAttachments={handleListAttachments}
+                                                                                            />
+                                                                                        })
+                                                                                    }
+                                                                                </ListGroup>
+                                                                            </Col> :
+                                                                                <Col>
+                                                                                    <AlertMessage
+                                                                                        status="warning"
+                                                                                        message="Nenhum anexo enviado para esse imóvel."
+                                                                                    />
+                                                                                </Col>
+                                                                        }
                                                                     </Row>
                                                                 </Form.Group>
                                                             </Form.Row>

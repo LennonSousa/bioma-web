@@ -28,11 +28,11 @@ export default function Lines() {
     const [projectLines, setProjectLines] = useState<ProjectLine[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
-    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showModalNewLine, setShowModalNewLine] = useState(false);
 
@@ -173,7 +173,7 @@ export default function Lines() {
                                             <Col>
                                                 <Row>
                                                     <Col className="text-center">
-                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhuma linha de crédito registrada.</p>
+                                                        <p style={{ color: 'var(--gray)' }}>Nenhuma linha de crédito registrada.</p>
                                                     </Col>
                                                 </Row>
 

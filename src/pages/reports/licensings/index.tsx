@@ -40,7 +40,7 @@ export default function Reports() {
     const [tableData, setTableData] = useState([]);
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     useEffect(() => {
         handleItemSideBar('reports');

@@ -59,7 +59,7 @@ export default function Customers() {
                                                 !!customers.length ? customers.map((customer, index) => {
                                                     return <CustomerItem key={index} customer={customer} />
                                                 }) :
-                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum cliente registrado." />
+                                                    <PageWaiting status="empty" message="Nenhum cliente registrado." />
                                             }
                                         </>
                                 }

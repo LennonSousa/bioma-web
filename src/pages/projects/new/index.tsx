@@ -35,7 +35,6 @@ const validationSchema = Yup.object().shape({
     analyst_contact: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
-    customer: Yup.string().required('Obrigatório!'),
     type: Yup.string().required('Obrigatório!'),
     line: Yup.string().required('Obrigatório!'),
     status: Yup.string().required('Obrigatório!'),
@@ -45,13 +44,19 @@ const validationSchema = Yup.object().shape({
 
 export default function NewProject() {
     const router = useRouter();
+    const { customer } = router.query;
+
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
     const [membersAdded, setMembersAdded] = useState<Member[]>([]);
+
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
+    const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
     const [customers, setCustomers] = useState<Customer[]>([]);
+
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
     const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
     const [projectLines, setProjectLines] = useState<ProjectLine[]>([]);
@@ -65,7 +70,7 @@ export default function NewProject() {
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showUsers, setShowUsers] = useState(false);
 
@@ -120,7 +125,23 @@ export default function NewProject() {
                 });
 
                 api.get('customers').then(res => {
-                    setCustomers(res.data);
+                    const customersRes: Customer[] = res.data;
+
+                    if (customer) {
+                        customersRes.forEach(customerItem => {
+                            if (customerItem.id === customer) {
+                                setSelectedCustomer(customerItem);
+
+                                api.get(`customers/${customerItem.id}/properties`).then(res => {
+                                    setProperties(res.data);
+                                }).catch(err => {
+                                    console.log('Error to get customer properties ', err);
+                                });
+                            }
+                        });
+                    }
+
+                    setCustomers(customersRes);
                 }).catch(err => {
                     console.log('Error to get project status, ', err);
 
@@ -332,8 +353,6 @@ export default function NewProject() {
                                         analyst_contact: '',
                                         notes: '',
                                         warnings: false,
-                                        customer: '',
-                                        customerName: '',
                                         type: '',
                                         line: '',
                                         status: '',
@@ -341,6 +360,11 @@ export default function NewProject() {
                                         property: '',
                                     }}
                                     onSubmit={async values => {
+                                        if (!selectedCustomer) {
+                                            setErrorSelectedCustomer(true);
+                                            return;
+                                        }
+
                                         setTypeMessage("waiting");
                                         setMessageShow(true);
 
@@ -363,7 +387,7 @@ export default function NewProject() {
                                                 analyst_contact: values.analyst_contact,
                                                 notes: values.notes,
                                                 warnings: values.warnings,
-                                                customer: values.customer,
+                                                customer: selectedCustomer.id,
                                                 type: values.type,
                                                 line: values.line,
                                                 status: values.status,
@@ -389,7 +413,7 @@ export default function NewProject() {
                                     }}
                                     validationSchema={validationSchema}
                                 >
-                                    {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                                    {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
                                         <Form onSubmit={handleSubmit}>
                                             <Row className="mb-3">
                                                 <Col sm={6}>
@@ -398,13 +422,11 @@ export default function NewProject() {
                                                         <FormControl
                                                             placeholder="Escolha um cliente"
                                                             type="name"
-                                                            onChange={handleChange}
-                                                            onBlur={handleBlur}
-                                                            value={values.customerName}
-                                                            name="customerName"
+                                                            value={selectedCustomer ? selectedCustomer.name : ''}
+                                                            name="customer"
                                                             aria-label="Nome do cliente"
                                                             aria-describedby="btnGroupAddon"
-                                                            isInvalid={!!errors.customerName}
+                                                            isInvalid={errorSelectedCustomer}
                                                             readOnly
                                                         />
                                                         <InputGroup.Prepend>
@@ -417,7 +439,7 @@ export default function NewProject() {
                                                             </Button>
                                                         </InputGroup.Prepend>
                                                     </InputGroup>
-                                                    <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
+                                                    <Form.Control.Feedback type="invalid">{errorSelectedCustomer && 'Obrigatório!'}</Form.Control.Feedback>
                                                 </Col>
 
                                                 <Form.Group as={Col} sm={6} controlId="formGridProperty">
@@ -428,7 +450,7 @@ export default function NewProject() {
                                                         onBlur={handleBlur}
                                                         value={values.property}
                                                         name="property"
-                                                        disabled={!!!values.customer}
+                                                        disabled={!selectedCustomer}
                                                         isInvalid={!!errors.property && touched.property}
                                                     >
                                                         <option hidden>...</option>
@@ -710,8 +732,8 @@ export default function NewProject() {
                                                                                 action
                                                                                 variant="light"
                                                                                 onClick={() => {
-                                                                                    setFieldValue('customer', customer.id);
-                                                                                    setFieldValue('customerName', customer.name);
+                                                                                    setSelectedCustomer(customer);
+                                                                                    setErrorSelectedCustomer(false);
 
                                                                                     api.get(`customers/${customer.id}/properties`).then(res => {
                                                                                         setProperties(res.data);

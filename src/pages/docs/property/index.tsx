@@ -29,11 +29,11 @@ export default function DocsPropertyPage() {
     const [docsProperty, setDocsProperty] = useState<DocsProperty[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
-    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showModalNewDoc, setShowModalNewDoc] = useState(false);
 
@@ -174,7 +174,7 @@ export default function DocsPropertyPage() {
                                             <Col>
                                                 <Row>
                                                     <Col className="text-center">
-                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhum documento registrado.</p>
+                                                        <p style={{ color: 'var(--gray)' }}>Nenhum documento registrado.</p>
                                                     </Col>
                                                 </Row>
 

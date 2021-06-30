@@ -41,7 +41,7 @@ const LicensingAuthorizations: React.FC<LicensingAuthorizationProps> = ({ author
     const handleShowModalEditAuthorization = () => setShowModalEditAuthorization(true);
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);

@@ -18,6 +18,10 @@ const BankItem: React.FC<BankItemProps> = ({ bank }) => {
         router.push(`/banks/edit/${bank.id}`);
     }
 
+    function handleRoute(route: string) {
+        router.push(route);
+    }
+
     return (
         <Col sm={4}>
             <div className={styles.itemContainer}>
@@ -53,8 +57,20 @@ const BankItem: React.FC<BankItemProps> = ({ bank }) => {
 
                 <Row>
                     <ButtonGroup size="sm" className="col-12">
-                        <Button variant="success"><FaFileAlt /></Button>
-                        <Button variant="success" onClick={goToEdit} ><FaPencilAlt /></Button>
+                        <Button
+                            variant="success"
+                            title="Lista todos os projetos desse banco."
+                            onClick={() => handleRoute(`/projects?bank=${bank.id}`)}
+                        >
+                            <FaFileAlt />
+                        </Button>
+                        <Button
+                            variant="success"
+                            title="Editar banco."
+                            onClick={goToEdit}
+                        >
+                            <FaPencilAlt />
+                        </Button>
                     </ButtonGroup>
                 </Row>
             </div>

@@ -50,7 +50,7 @@ const LicensingAttachments: React.FC<LicensingAttachmentsProps> = ({ attachment,
     const [attachmentExpireTime, setAttachmentExpireTime] = useState('');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
     const [downloadingAttachment, setDownloadingAttachment] = useState(false);
 
     const [iconDelete, setIconDelete] = useState(true);

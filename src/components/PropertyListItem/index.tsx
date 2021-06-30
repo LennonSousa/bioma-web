@@ -19,6 +19,10 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property, showCusto
         router.push(`/properties/edit/${property.id}`);
     }
 
+    function handleRoute(route: string) {
+        router.push(route);
+    }
+
     return (
         <Col sm={4}>
             <div className={styles.itemContainer}>
@@ -53,9 +57,27 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property, showCusto
 
                 <Row>
                     <ButtonGroup size="sm" className="col-12">
-                        <Button variant="success"><FaFileAlt /></Button>
-                        <Button variant="success"><FaFileContract /></Button>
-                        <Button variant="success" onClick={goToEdit} ><FaPencilAlt /></Button>
+                        <Button
+                            variant="success"
+                            title="Lista todos os projetos com esse imóvel."
+                            onClick={() => handleRoute(`/projects?property=${property.id}`)}
+                        >
+                            <FaFileAlt />
+                        </Button>
+                        <Button
+                            variant="success"
+                            title="Lista todos os licenciamentos com esse imóvel."
+                            onClick={() => handleRoute(`/licensings?property=${property.id}`)}
+                        >
+                            <FaFileContract />
+                        </Button>
+                        <Button
+                            variant="success"
+                            title="Editar imóvel."
+                            onClick={goToEdit}
+                        >
+                            <FaPencilAlt />
+                        </Button>
                     </ButtonGroup>
                 </Row>
             </div>

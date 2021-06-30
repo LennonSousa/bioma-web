@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
 import { Container, Row } from 'react-bootstrap';
 
 import { SideBarContext } from '../../contexts/SideBarContext';
@@ -13,6 +14,9 @@ import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 
 export default function Projects() {
+    const router = useRouter();
+    const { customer, property, bank } = router.query;
+
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
@@ -27,7 +31,15 @@ export default function Projects() {
 
         if (user) {
             if (can(user, "projects", "read:any")) {
-                api.get('projects').then(res => {
+                let query = '';
+
+                if (customer) query = `?customer=${customer}`;
+
+                if (property) query = `?property=${property}`;
+
+                if (bank) query = `?bank=${bank}`;
+
+                api.get(`projects${!!query ? query : ''}`).then(res => {
                     setProjects(res.data);
 
                     setLoadingData(false);
@@ -40,7 +52,7 @@ export default function Projects() {
                 });
             }
         }
-    }, [user]);
+    }, [user, customer, property, bank]);
 
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
@@ -60,7 +72,7 @@ export default function Projects() {
                                                 !!projects.length ? projects.map((project, index) => {
                                                     return <ProjectListItem key={index} project={project} />
                                                 }) :
-                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum projeto registrado." />
+                                                    <PageWaiting status="empty" message="Nenhum projeto registrado." />
                                             }
                                         </>
 

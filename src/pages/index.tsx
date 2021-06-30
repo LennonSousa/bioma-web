@@ -23,7 +23,7 @@ export default function Login() {
   const { handleLogin } = useContext(AuthContext);
 
   const [messageShow, setMessageShow] = useState(false);
-  const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+  const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
   const [textMessage, setTextMessage] = useState('entrando...');
 
   return (

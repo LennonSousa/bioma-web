@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
 import { Container, Row } from 'react-bootstrap';
 
 import { SideBarContext } from '../../contexts/SideBarContext';
@@ -13,6 +14,9 @@ import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 
 export default function Licensings() {
+    const router = useRouter();
+    const { customer, property } = router.query;
+
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
@@ -28,7 +32,13 @@ export default function Licensings() {
 
         if (user) {
             if (can(user, "licensings", "read:any")) {
-                api.get('licensings').then(res => {
+                let query = '';
+
+                if (customer) query = `?customer=${customer}`;
+
+                if (property) query = `?property=${property}`;
+
+                api.get(`licensings${!!query ? query : ''}`).then(res => {
                     setLicensings(res.data);
 
                     setLoadingData(false);
@@ -41,7 +51,7 @@ export default function Licensings() {
                 });
             }
         }
-    }, [user]);
+    }, [user, customer, property]);
 
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
@@ -60,7 +70,7 @@ export default function Licensings() {
                                                 !!licensings.length ? licensings.map((licensing, index) => {
                                                     return <LicensingListItem key={index} licensing={licensing} />
                                                 }) :
-                                                    <PageWaiting status="empty" message="Você ainda não tem nenhum licenciamento registrado." />
+                                                    <PageWaiting status="empty" message="Nenhum licenciamento registrado." />
                                             }
                                         </>
                                 }

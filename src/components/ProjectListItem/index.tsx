@@ -54,9 +54,13 @@ const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, showBank = t
 
                 <Row>
                     <ButtonGroup size="sm" className="col-12">
-                        <Button variant="success"><FaFileAlt /></Button>
-                        <Button variant="success"><FaFileContract /></Button>
-                        <Button variant="success" onClick={goToEdit} ><FaPencilAlt /></Button>
+                        <Button
+                            variant="success"
+                            title="Editar projeto."
+                            onClick={goToEdit}
+                        >
+                            <FaPencilAlt /> Editar
+                        </Button>
                     </ButtonGroup>
                 </Row>
             </div>

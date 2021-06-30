@@ -28,11 +28,11 @@ export default function Status() {
     const [licensingStatus, setLicensingStatus] = useState<LicensingStatus[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
-    const [typeLoadingMessage, setTypeLoadingMessage] = useState<typeof statusModal>("waiting");
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<statusModal>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Carregando...');
 
     const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<typeof statusModal>("waiting");
+    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [showModalNewLine, setShowModalNewStatus] = useState(false);
 
@@ -174,7 +174,7 @@ export default function Status() {
                                             <Col>
                                                 <Row>
                                                     <Col className="text-center">
-                                                        <p style={{ color: 'var(--gray)' }}>Você ainda não tem nenhuma situação registrada.</p>
+                                                        <p style={{ color: 'var(--gray)' }}>Nenhuma situação registrada.</p>
                                                     </Col>
                                                 </Row>
 
