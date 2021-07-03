@@ -43,6 +43,7 @@ export default function CustomerDetails() {
     const [documentType, setDocumentType] = useState("CPF");
 
     const [loadingData, setLoadingData] = useState(true);
+    const [hasErrors, setHasErrors] = useState(false);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
@@ -83,21 +84,19 @@ export default function CustomerDetails() {
                             }
 
                             setCustomerData(customerRes);
-
-                            setLoadingData(false);
                         }).catch(err => {
                             console.log('Error to get docs customer to edit, ', err);
 
                             setTypeLoadingMessage("error");
                             setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                            setLoadingData(false);
+                            setHasErrors(true);
                         });
                     }).catch(err => {
                         console.log('Error to get customer: ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
                 }
             }
@@ -113,7 +112,7 @@ export default function CustomerDetails() {
             {
                 can(user, "customers", "read:any") ? <>
                     {
-                        loadingData ? <PageWaiting
+                        loadingData || hasErrors ? <PageWaiting
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :

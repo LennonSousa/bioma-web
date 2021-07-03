@@ -59,7 +59,6 @@ export default function NewBank() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
             }
         }

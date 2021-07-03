@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { Container, Row } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
@@ -11,6 +11,9 @@ import { Property } from '../../components/Properties';
 import PropertyListItem from '../../components/PropertyListItem';
 import { SideBarContext } from '../../contexts/SideBarContext';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
+import { Paginations } from '../../components/interfaces/Pagination';
+
+const limit = 15;
 
 export default function Customers() {
     const router = useRouter();
@@ -20,6 +23,8 @@ export default function Customers() {
     const { loading, user } = useContext(AuthContext);
 
     const [properties, setProperties] = useState<Property[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [activePage, setActivePage] = useState(1);
 
     const [loadingData, setLoadingData] = useState(true);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
@@ -33,10 +38,15 @@ export default function Customers() {
             if (can(user, "properties", "read:any")) {
                 let query = '';
 
-                if (customer) query = `?customer=${customer}`;
+                if (customer) query = `&customer=${customer}`;
 
-                api.get(`properties/${!!query ? query : ''}`).then(res => {
+                api.get(`properties?limit=${limit}&page=${activePage}${!!query ? query : ''}`).then(res => {
                     setProperties(res.data);
+
+                    try {
+                        setTotalPages(Number(res.headers['x-total-pages']));
+                    }
+                    catch { }
 
                     setLoadingData(false);
                 }).catch(err => {
@@ -44,18 +54,40 @@ export default function Customers() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
             }
         }
     }, [user, customer]);
+
+    async function handleActivePage(page: number) {
+        setLoadingData(true);
+        setActivePage(page);
+
+        try {
+            let query = '';
+
+            if (customer) query = `&customer=${customer}`;
+
+            const res = await api.get(`properties?limit=${limit}&page=${activePage}${!!query ? query : ''}`);
+
+            setProperties(res.data);
+
+            setTotalPages(Number(res.headers['x-total-pages']));
+        }
+        catch (err) {
+            setTypeLoadingMessage("error");
+            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+        }
+
+        setLoadingData(false);
+    }
 
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
             <>
                 {
                     can(user, "properties", "read:any") ? <>
-                        <Container>
+                        <Container className="page-container">
                             <Row>
                                 {
                                     loadingData ? <PageWaiting
@@ -71,6 +103,22 @@ export default function Customers() {
                                             }
                                         </>
                                 }
+                            </Row>
+
+                            <Row className="row-grow align-items-end">
+                                <Col>
+                                    {
+                                        !!properties.length && <Row className="justify-content-center align-items-center">
+                                            <Col className="col-row">
+                                                <Paginations
+                                                    pages={totalPages}
+                                                    active={activePage}
+                                                    handleActivePage={handleActivePage}
+                                                />
+                                            </Col>
+                                        </Row>
+                                    }
+                                </Col>
                             </Row>
                         </Container>
                     </> :

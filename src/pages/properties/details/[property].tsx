@@ -41,6 +41,7 @@ export default function PropertyDetails() {
     const [propertyData, setPropertyData] = useState<Property>();
 
     const [loadingData, setLoadingData] = useState(true);
+    const [hasErrors, setHasErrors] = useState(false);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
@@ -51,6 +52,7 @@ export default function PropertyDetails() {
         if (user) {
             if (can(user, "properties", "read:any")) {
                 if (property) {
+
                     api.get(`properties/${property}`).then(res => {
                         let propertyRes: Property = res.data;
 
@@ -78,21 +80,20 @@ export default function PropertyDetails() {
                             }
 
                             setPropertyData(propertyRes);
-
                             setLoadingData(false);
                         }).catch(err => {
                             console.log('Error to get docs property to edit, ', err);
 
                             setTypeLoadingMessage("error");
                             setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                            setLoadingData(false);
+                            setHasErrors(true);
                         });
                     }).catch(err => {
                         console.log('Error to get property: ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
                 }
             }
@@ -108,7 +109,7 @@ export default function PropertyDetails() {
             {
                 can(user, "properties", "read:any") ? <>
                     {
-                        loadingData ? <PageWaiting
+                        loadingData || hasErrors ? <PageWaiting
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :

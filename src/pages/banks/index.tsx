@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import { Container, Row } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 
 import { Bank } from '../../components/Banks';
 import BankListItem from '../../components/BankListItem';
@@ -11,12 +11,17 @@ import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import { can } from '../../components/Users';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
+import { Paginations } from '../../components/interfaces/Pagination';
+
+const limit = 15;
 
 export default function Banks() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
     const [banks, setBanks] = useState<Bank[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [activePage, setActivePage] = useState(1);
 
     const [loadingData, setLoadingData] = useState(true);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
@@ -28,8 +33,13 @@ export default function Banks() {
 
         if (user) {
             if (can(user, "banks", "read:any")) {
-                api.get('banks').then(res => {
+                api.get(`banks?limit=${limit}&page=${activePage}`).then(res => {
                     setBanks(res.data);
+
+                    try {
+                        setTotalPages(Number(res.headers['x-total-pages']));
+                    }
+                    catch { }
 
                     setLoadingData(false);
                 }).catch(err => {
@@ -37,19 +47,36 @@ export default function Banks() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
             }
         }
 
     }, [user]);
 
+    async function handleActivePage(page: number) {
+        setLoadingData(true);
+        setActivePage(page);
+
+        try {
+            const res = await api.get(`banks?limit=${limit}&page=${page}`)
+            setBanks(res.data);
+
+            setTotalPages(Number(res.headers['x-total-pages']));
+        }
+        catch (err) {
+            setTypeLoadingMessage("error");
+            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+        }
+
+        setLoadingData(false);
+    }
+
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
             <>
                 {
                     can(user, "banks", "read:any") ? <>
-                        <Container>
+                        <Container className="page-container">
                             <Row>
                                 {
                                     loadingData ? <PageWaiting
@@ -65,6 +92,22 @@ export default function Banks() {
                                             }
                                         </>
                                 }
+                            </Row>
+
+                            <Row className="row-grow align-items-end">
+                                <Col>
+                                    {
+                                        !!banks.length && <Row className="justify-content-center align-items-center">
+                                            <Col className="col-row">
+                                                <Paginations
+                                                    pages={totalPages}
+                                                    active={activePage}
+                                                    handleActivePage={handleActivePage}
+                                                />
+                                            </Col>
+                                        </Row>
+                                    }
+                                </Col>
                             </Row>
                         </Container>
                     </> :

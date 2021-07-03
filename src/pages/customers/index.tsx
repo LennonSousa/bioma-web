@@ -67,7 +67,6 @@ export default function Customers() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
             }
         }
@@ -101,50 +100,53 @@ export default function Customers() {
                 {
                     can(user, "customers", "read:any") ? <>
                         <Container className="page-container">
-                            {
-                                loadingData ? <><PageWaiting
-                                    status={typeLoadingMessage}
-                                    message={textLoadingMessage}
-                                />
-                                    <Row className="row-grow"></Row>
-                                </> :
-                                    <>
-                                        {
-                                            !!customers.length && <Row className="justify-content-end mt-3">
-                                                <Col className="col-row">
-                                                    <Button
-                                                        variant="success"
-                                                        title="Procurar um cliente."
-                                                        onClick={handleShowSearchModal}
-                                                    >
-                                                        <FaSearch />
-                                                    </Button>
-                                                </Col>
-                                            </Row>
-                                        }
-
-                                        <Row className="row-grow">
+                            <Row>
+                                {
+                                    loadingData ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <Col>
                                             {
-                                                !!customers.length ? customers.map((customer, index) => {
-                                                    return <CustomerItem key={index} customer={customer} />
-                                                }) :
-                                                    <PageWaiting status="empty" message="Nenhum cliente registrado." />
+                                                !!customers.length && <Row className="mt-3">
+                                                    <Col className="col-row">
+                                                        <Button
+                                                            variant="success"
+                                                            title="Procurar um cliente."
+                                                            onClick={handleShowSearchModal}
+                                                        >
+                                                            <FaSearch />
+                                                        </Button>
+                                                    </Col>
+                                                </Row>
                                             }
-                                        </Row>
-                                    </>
-                            }
+                                            <Row>
+                                                {
+                                                    !!customers.length ? customers.map((customer, index) => {
+                                                        return <CustomerItem key={index} customer={customer} />
+                                                    }) :
+                                                        <PageWaiting status="empty" message="Nenhum cliente registrado." />
+                                                }
+                                            </Row>
+                                        </Col>
+                                }
+                            </Row>
 
-                            {
-                                !!customers.length && <Row className="justify-content-center align-items-center">
-                                    <Col className="col-row">
-                                        <Paginations
-                                            pages={totalPages}
-                                            active={activePage}
-                                            handleActivePage={handleActivePage}
-                                        />
-                                    </Col>
-                                </Row>
-                            }
+                            <Row className="row-grow align-items-end">
+                                <Col>
+                                    {
+                                        !!customers.length && <Row className="justify-content-center align-items-center">
+                                            <Col className="col-row">
+                                                <Paginations
+                                                    pages={totalPages}
+                                                    active={activePage}
+                                                    handleActivePage={handleActivePage}
+                                                />
+                                            </Col>
+                                        </Row>
+                                    }
+                                </Col>
+                            </Row>
 
                             <Modal show={showSearchModal} onHide={handleCloseSearchModal}>
                                 <Modal.Header closeButton>
@@ -199,7 +201,7 @@ export default function Customers() {
 
                                                     <Row style={{ minHeight: '40px' }}>
                                                         <Col>
-                                                            {messageShow && <AlertMessage status="waiting" />}
+                                                            {messageShow && <AlertMessage status={typeMessage} />}
                                                         </Col>
                                                     </Row>
                                                 </Form>

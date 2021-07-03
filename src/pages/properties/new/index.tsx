@@ -107,7 +107,6 @@ export default function NewProperty() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
 
                 api.get('customers').then(res => {
@@ -126,7 +125,6 @@ export default function NewProperty() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
 
                 api.get('docs/property').then(res => {
@@ -140,7 +138,6 @@ export default function NewProperty() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
             }
         }

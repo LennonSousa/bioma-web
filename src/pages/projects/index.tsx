@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { Container, Row } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 
 import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -9,9 +9,12 @@ import { can } from '../../components/Users';
 import { Project } from '../../components/Projects';
 import ProjectListItem from '../../components/ProjectListItem';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
+import { Paginations } from '../../components/interfaces/Pagination';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
+
+const limit = 15;
 
 export default function Projects() {
     const router = useRouter();
@@ -21,6 +24,9 @@ export default function Projects() {
     const { loading, user } = useContext(AuthContext);
 
     const [projects, setProjects] = useState<Project[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [activePage, setActivePage] = useState(1);
+
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
     const [loadingData, setLoadingData] = useState(true);
@@ -33,14 +39,19 @@ export default function Projects() {
             if (can(user, "projects", "read:any")) {
                 let query = '';
 
-                if (customer) query = `?customer=${customer}`;
+                if (customer) query = `&customer=${customer}`;
 
-                if (property) query = `?property=${property}`;
+                if (property) query = `&property=${property}`;
 
-                if (bank) query = `?bank=${bank}`;
+                if (bank) query = `&bank=${bank}`;
 
-                api.get(`projects${!!query ? query : ''}`).then(res => {
+                api.get(`projects?limit=${limit}&page=${activePage}${!!query ? query : ''}`).then(res => {
                     setProjects(res.data);
+
+                    try {
+                        setTotalPages(Number(res.headers['x-total-pages']));
+                    }
+                    catch { }
 
                     setLoadingData(false);
                 }).catch(err => {
@@ -48,20 +59,44 @@ export default function Projects() {
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 });
             }
         }
     }, [user, customer, property, bank]);
+
+    async function handleActivePage(page: number) {
+        setLoadingData(true);
+        setActivePage(page);
+
+        try {
+            let query = '';
+
+            if (customer) query = `&customer=${customer}`;
+
+            if (property) query = `&property=${property}`;
+
+            if (bank) query = `&bank=${bank}`;
+
+            const res = await api.get(`projects?limit=${limit}&page=${activePage}${!!query ? query : ''}`)
+            setProjects(res.data);
+
+            setTotalPages(Number(res.headers['x-total-pages']));
+        }
+        catch (err) {
+            setTypeLoadingMessage("error");
+            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+        }
+
+        setLoadingData(false);
+    }
 
     return (
         !user || loading ? <PageWaiting status="waiting" /> :
             <>
                 {
                     can(user, "projects", "read:any") ? <>
-                        <Container>
+                        <Container className="page-container">
                             <Row>
-
                                 {
                                     loadingData ? <PageWaiting
                                         status={typeLoadingMessage}
@@ -77,6 +112,22 @@ export default function Projects() {
                                         </>
 
                                 }
+                            </Row>
+
+                            <Row className="row-grow align-items-end">
+                                <Col>
+                                    {
+                                        !!projects.length && <Row className="justify-content-center align-items-center">
+                                            <Col className="col-row">
+                                                <Paginations
+                                                    pages={totalPages}
+                                                    active={activePage}
+                                                    handleActivePage={handleActivePage}
+                                                />
+                                            </Col>
+                                        </Row>
+                                    }
+                                </Col>
                             </Row>
                         </Container>
                     </> :

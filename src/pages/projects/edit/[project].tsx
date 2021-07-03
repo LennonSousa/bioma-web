@@ -97,6 +97,7 @@ export default function NewCustomer() {
     const [properties, setProperties] = useState<Property[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
+    const [hasErrors, setHasErrors] = useState(false);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
@@ -140,6 +141,7 @@ export default function NewCustomer() {
         if (user) {
             if (can(user, "projects", "update:any")) {
                 if (project) {
+
                     api.get(`projects/${project}`).then(res => {
                         let projectRes: Project = res.data;
 
@@ -147,6 +149,10 @@ export default function NewCustomer() {
                             setCustomers(res.data);
                         }).catch(err => {
                             console.log('Error to get project status, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get('users').then(res => {
@@ -156,30 +162,50 @@ export default function NewCustomer() {
                             handleUsersToAdd(usersRes, projectRes);
                         }).catch(err => {
                             console.log('Error to get users on project edit, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get('projects/types').then(res => {
                             setProjectTypes(res.data);
                         }).catch(err => {
                             console.log('Error to get project types, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get('projects/lines').then(res => {
                             setProjectLines(res.data);
                         }).catch(err => {
                             console.log('Error to get project lines, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get('projects/status').then(res => {
                             setProjectStatus(res.data);
                         }).catch(err => {
                             console.log('Error to get project status, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get('banks').then(res => {
                             setBanks(res.data);
                         }).catch(err => {
                             console.log('Error to get banks, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get('docs/project').then(res => {
@@ -206,8 +232,13 @@ export default function NewCustomer() {
                             }
 
                             setProjectData(projectRes);
+                            setLoadingData(false);
                         }).catch(err => {
                             console.log('Error to get docs project to edit, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get(`customers/${projectRes.customer.id}/properties`).then(res => {
@@ -219,16 +250,14 @@ export default function NewCustomer() {
 
                             setTypeLoadingMessage("error");
                             setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                            setLoadingData(false);
+                            setHasErrors(true);
                         });
-
-                        setLoadingData(false);
                     }).catch(err => {
                         console.log('Error to get project, ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
                 }
             }
@@ -346,7 +375,7 @@ export default function NewCustomer() {
             {
                 can(user, "projects", "update:any") ? <>
                     {
-                        loadingData ? <PageWaiting
+                        loadingData || hasErrors ? <PageWaiting
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :

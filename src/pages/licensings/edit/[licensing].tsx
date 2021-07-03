@@ -81,6 +81,7 @@ export default function NewCustomer() {
     const [properties, setProperties] = useState<Property[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
+    const [hasErrors, setHasErrors] = useState(false);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
@@ -123,6 +124,7 @@ export default function NewCustomer() {
 
         if (user && licensing) {
             if (can(user, "licensings", "update:any")) {
+
                 api.get(`licensings/${licensing}`).then(res => {
                     const licensingRes: Licensing = res.data;
 
@@ -136,7 +138,7 @@ export default function NewCustomer() {
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
 
                     api.get('customers').then(res => {
@@ -146,7 +148,7 @@ export default function NewCustomer() {
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
 
                     api.get('licensings/agencies').then(res => {
@@ -156,7 +158,7 @@ export default function NewCustomer() {
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
 
                     api.get('licensings/authorizations').then(res => {
@@ -166,7 +168,7 @@ export default function NewCustomer() {
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
 
                     api.get('licensings/infringements').then(res => {
@@ -176,7 +178,7 @@ export default function NewCustomer() {
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
 
                     api.get('licensings/status').then(res => {
@@ -186,30 +188,27 @@ export default function NewCustomer() {
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
 
                     api.get(`customers/${licensingRes.customer.id}/properties`).then(res => {
                         setProperties(res.data);
 
                         setData(licensingRes);
+                        setLoadingData(false);
                     }).catch(err => {
                         console.log('Error to get customer properties ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
-
-                    setTypeLoadingMessage("error");
-                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
                 }).catch(err => {
                     console.log('Error to get licensing, ', err);
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
+                    setHasErrors(true);
                 });
             }
         }
@@ -303,7 +302,7 @@ export default function NewCustomer() {
             {
                 can(user, "licensings", "update:any") ? <>
                     {
-                        loadingData ? <PageWaiting
+                        loadingData || hasErrors ? <PageWaiting
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :

@@ -36,6 +36,7 @@ export default function EditBank() {
 
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const [loadingData, setLoadingData] = useState(true);
+    const [hasErrors, setHasErrors] = useState(false);
     const { loading, user } = useContext(AuthContext);
 
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
@@ -53,6 +54,7 @@ export default function EditBank() {
 
         if (user && bank) {
             if (can(user, "banks", "update:any")) {
+
                 api.get(`banks/${bank}`).then(res => {
                     setBankData(res.data);
 
@@ -66,21 +68,20 @@ export default function EditBank() {
 
                     api.get('institutions').then(res => {
                         setInstitutions(res.data);
-
                         setLoadingData(false);
                     }).catch(err => {
                         console.log('Error to get institutions to edit, ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
                 }).catch(err => {
                     console.log('Error to get bank to edit, ', err);
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
+                    setHasErrors(true);
                 });
             }
         }
@@ -91,7 +92,7 @@ export default function EditBank() {
             {
                 can(user, "banks", "update:any") ? <>
                     {
-                        loadingData ? <PageWaiting
+                        loadingData || hasErrors ? <PageWaiting
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :

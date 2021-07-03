@@ -67,6 +67,7 @@ export default function NewProperty() {
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
+    const [hasErrors, setHasErrors] = useState(false);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
@@ -104,6 +105,7 @@ export default function NewProperty() {
 
         if (user && property) {
             if (can(user, "properties", "update:any")) {
+
                 api.get('customers').then(res => {
                     setCustomers(res.data);
 
@@ -125,6 +127,10 @@ export default function NewProperty() {
                             handleUsersToAdd(usersRes, propertyRes);
                         }).catch(err => {
                             console.log('Error to get users on property edit, ', err);
+
+                            setTypeLoadingMessage("error");
+                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                            setHasErrors(true);
                         });
 
                         api.get('docs/property').then(res => {
@@ -151,28 +157,27 @@ export default function NewProperty() {
                             }
 
                             setPropertyData(propertyRes);
-
                             setLoadingData(false);
                         }).catch(err => {
                             console.log('Error to get docs property to edit, ', err);
 
                             setTypeLoadingMessage("error");
                             setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                            setLoadingData(false);
+                            setHasErrors(true);
                         });
                     }).catch(err => {
                         console.log('Error to get property to edit, ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setLoadingData(false);
+                        setHasErrors(true);
                     });
                 }).catch(err => {
                     console.log('Error to get customers, ', err);
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setLoadingData(false);
+                    setHasErrors(true);
                 });
             }
         }
@@ -282,7 +287,7 @@ export default function NewProperty() {
             {
                 can(user, "properties", "update:any") ? <>
                     {
-                        loadingData ? <PageWaiting
+                        loadingData || hasErrors ? <PageWaiting
                             status={typeLoadingMessage}
                             message={textLoadingMessage}
                         /> :
