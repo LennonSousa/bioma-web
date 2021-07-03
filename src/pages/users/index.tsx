@@ -12,7 +12,7 @@ import Users, { User, can } from '../../components/Users';
 import { PageWaiting } from '../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';
 
-export default function Institutions() {
+export default function UsersPage() {
     const router = useRouter();
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);

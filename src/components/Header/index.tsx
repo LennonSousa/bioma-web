@@ -1,10 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import { Badge, Button, Col, Container, Form, Navbar, Row, Toast } from 'react-bootstrap';
 import { FaBell, FaSignOutAlt, FaRegBell, FaRegUserCircle, FaUserTie, FaUserCog } from 'react-icons/fa';
 
 import { AuthContext } from '../../contexts/AuthContext';
 import { NotificationsContext } from '../../contexts/NotificationsContext';
+import { SideNavBar } from '../Sidebar';
 
 import styles from './styles.module.css';
 
@@ -47,17 +49,25 @@ export function Header() {
         router.push(route);
     }
 
-    return showPageHeader ? <Navbar bg="dark" variant="dark">
+    return showPageHeader ? <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
         <Container>
             <Navbar.Brand href="#home">
-                <img
+                <Image
                     alt=""
                     src="/assets/images/logo-bioma.svg"
                     width="30"
                     height="30"
                     className="d-inline-block align-top"
-                />{' '}Plataforma de gerenciamento
+                />{' '}Bioma
             </Navbar.Brand>
+
+            <div className={styles.sideNavBarContainer}>
+                <Navbar.Toggle aria-controls="side-navbar-nav" />
+
+                <Navbar.Collapse id="side-navbar-nav">
+                    <SideNavBar />
+                </Navbar.Collapse>
+            </div>
 
             <Form inline>
                 <Row>

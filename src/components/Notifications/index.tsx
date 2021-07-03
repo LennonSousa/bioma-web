@@ -77,7 +77,7 @@ const Notifications: React.FC<NotificationProps> = ({ notification, filtered = f
                     {!notification.read && <FaEnvelope />}
                 </Col>
 
-                <Col><span>{notification.title}</span></Col>
+                <Col><span className="text-wrap">{notification.title}</span></Col>
 
                 <Col className="col-row">
                     {format(new Date(notification.created_at), 'dd/MM/yyyy')}

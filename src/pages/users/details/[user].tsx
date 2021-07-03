@@ -111,7 +111,6 @@ export default function UserDetails() {
                                 {
                                     !userData ? <PageWaiting status="waiting" /> :
                                         <Container className="content-page">
-                                            <PageWaiting status="waiting" /> :
                                             <Row>
                                                 <Col>
                                                     {

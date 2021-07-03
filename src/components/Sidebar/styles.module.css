@@ -77,3 +77,9 @@
 .menuCardBody span {
     font: 200 13px Nunito, sans-serif;
 }
+
+@media (max-width: 992px) {
+    .sideBarContainer {
+        display: none;
+    }
+}

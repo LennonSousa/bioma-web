@@ -6,3 +6,13 @@
 .buttonNotificationsContainerBadge {
     margin-left: .5rem;
 }
+
+.sideNavBarContainer {
+    display: inline-table;
+}
+
+@media (min-width: 993px) {
+    .sideNavBarContainer {
+        display: none;
+    }
+}

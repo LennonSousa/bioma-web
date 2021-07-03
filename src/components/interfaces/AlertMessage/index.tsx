@@ -58,16 +58,16 @@ const AlertMessage: React.FC<WaitingModalProps> = ({ status, message = "" }) => 
     return (
         <Alert className={styles.alertMessage} variant={variantColor}>
             {
-                circleWaiting && <><Spinner animation="border" variant="info" size="sm" /> {!!message ? message : "aguarde..."} </>
+                circleWaiting && <><Spinner animation="border" variant="info" size="sm" /> <span className="text-wrap">{!!message ? message : "aguarde..."}</span></>
             }
             {
-                successWaiting && <><FaCheckCircle /> {!!message ? message : "sucesso!"}</>
+                successWaiting && <><FaCheckCircle /> <span className="text-wrap">{!!message ? message : "sucesso!"}</span></>
             }
             {
-                warningWaiting && <><FaTimesCircle /> {!!message ? message : "aviso!"}</>
+                warningWaiting && <><FaTimesCircle /> <span className="text-wrap">{!!message ? message : "aviso!"}</span></>
             }
             {
-                errorWaiting && <><FaTimesCircle /> {!!message ? message : "algo deu errado!"}</>
+                errorWaiting && <><FaTimesCircle /> <span className="text-wrap">{!!message ? message : "algo deu errado!"}</span></>
             }
         </Alert>
     )

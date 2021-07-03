@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Accordion, Card, Dropdown, Row, Col } from 'react-bootstrap';
+import { Accordion, Card, Dropdown, Nav, NavDropdown, Row, Col } from 'react-bootstrap';
 import {
     FaColumns,
     FaUserTie,
@@ -443,7 +443,7 @@ const Sidebar: React.FC = () => {
                                         </Link>
 
                                         <Link href="/licensings/agencies">
-                                            <a title="Listar as orgãos" data-title="Listar os orgãos">
+                                            <a title="Listar as órgãos" data-title="Listar os órgãos">
                                                 <Row
                                                     className={
                                                         selectedMenu === 'licensings-agencies' ? styles.selectedMenuCardBodyItem :
@@ -454,7 +454,7 @@ const Sidebar: React.FC = () => {
                                                         <FaBalanceScaleLeft size={14} />
                                                     </Col>
                                                     <Col>
-                                                        <span>Orgãos</span>
+                                                        <span>Órgãos</span>
                                                     </Col>
                                                 </Row>
                                             </a>
@@ -643,7 +643,7 @@ const Sidebar: React.FC = () => {
                                             }
                                         >
                                             <Col sm={1}>
-                                                <FaFileAlt size={14} />
+                                                <FaFileContract />
                                             </Col>
                                             <Col>
                                                 <span>Licenças</span>
@@ -753,6 +753,213 @@ const Sidebar: React.FC = () => {
                 }
             </Accordion>
         </div > : null
+    )
+}
+
+export function SideNavBar() {
+    const { user } = useContext(AuthContext);
+
+    return (
+        user ? <Nav className="me-auto mb-3">
+            <Link href="/dashboard" passHref>
+                <Nav.Link><FaColumns /> <span>Painel</span></Nav.Link>
+            </Link>
+
+            {
+                can(user, "customers", "read:any") && <NavDropdown title="Clientes" id="customers-dropdown">
+                    <Link href="/customers" passHref>
+                        <NavDropdown.Item ><FaList size={14} /> Lista</NavDropdown.Item>
+                    </Link>
+
+                    {
+                        can(user, "customers", "create") && <Link href="/customers/new" passHref>
+                            <NavDropdown.Item ><FaPlus size={14} /> Novo</NavDropdown.Item>
+                        </Link>
+                    }
+
+                    {
+                        can(user, "customers", "update:any") && <>
+                            <NavDropdown.Divider />
+
+                            <Link href="/docs/customer" passHref>
+                                <NavDropdown.Item ><FaIdCard size={14} /> Documentos</NavDropdown.Item>
+                            </Link>
+
+                            <Link href="/customers/types" passHref>
+                                <NavDropdown.Item ><FaUsersCog size={14} /> Tipos</NavDropdown.Item>
+                            </Link>
+                        </>
+                    }
+
+                    {
+                        can(user, "properties", "read:any") && <>
+                            <NavDropdown.Divider />
+
+                            <Link href="/properties" passHref>
+                                <NavDropdown.Item ><FaMapSigns size={14} /> Imóveis</NavDropdown.Item>
+                            </Link>
+
+                            {
+                                can(user, "properties", "create") && <Link href="/properties/new" passHref>
+                                    <NavDropdown.Item ><FaPlus size={14} /> Novo</NavDropdown.Item>
+                                </Link>
+                            }
+
+                            {
+                                can(user, "properties", "update:any") &&
+                                <Link href="/docs/property" passHref>
+                                    <NavDropdown.Item ><FaFileSignature size={14} /> Documentos</NavDropdown.Item>
+                                </Link>
+                            }
+                        </>
+                    }
+                </NavDropdown>
+            }
+
+            {
+                can(user, "projects", "read:any") && <NavDropdown title="Projetos" id="projects-dropdown">
+                    <Link href="/projects" passHref>
+                        <NavDropdown.Item ><FaList size={14} /> Lista</NavDropdown.Item>
+                    </Link>
+
+                    {
+                        can(user, "projects", "create") && <Link href="/projects/new" passHref>
+                            <NavDropdown.Item ><FaPlus size={14} /> Novo</NavDropdown.Item>
+                        </Link>
+                    }
+
+                    {
+                        can(user, "projects", "update:any") && <>
+                            <Link href="/docs/project" passHref>
+                                <NavDropdown.Item ><FaIdCard size={14} /> Documentos</NavDropdown.Item>
+                            </Link>
+
+                            <NavDropdown.Divider />
+
+                            <Link href="/projects/types" passHref>
+                                <NavDropdown.Item ><FaProjectDiagram size={14} /> Tipos</NavDropdown.Item>
+                            </Link>
+
+                            <Link href="/projects/status" passHref>
+                                <NavDropdown.Item ><FaClipboardList size={14} /> Fases</NavDropdown.Item>
+                            </Link>
+
+                            <Link href="/projects/lines" passHref>
+                                <NavDropdown.Item ><FaLayerGroup size={14} /> Linhas</NavDropdown.Item>
+                            </Link>
+                        </>
+                    }
+                </NavDropdown>
+            }
+
+            {
+                can(user, "licensings", "read:any") && <NavDropdown title="Licenciamentos" id="licensings-dropdown">
+                    <Link href="/licensings" passHref>
+                        <NavDropdown.Item ><FaList size={14} /> Lista</NavDropdown.Item>
+                    </Link>
+
+                    {
+                        can(user, "licensings", "create") && <Link href="/licensings/new" passHref>
+                            <NavDropdown.Item ><FaPlus size={14} /> Novo</NavDropdown.Item>
+                        </Link>
+                    }
+
+                    {
+                        can(user, "licensings", "update:any") && <>
+                            <Link href="/licensings/authorizations" passHref>
+                                <NavDropdown.Item ><FaAward size={14} /> Licenças</NavDropdown.Item>
+                            </Link>
+
+                            <NavDropdown.Divider />
+
+                            <Link href="/licensings/agencies" passHref>
+                                <NavDropdown.Item ><FaBalanceScaleLeft size={14} /> Órgãos</NavDropdown.Item>
+                            </Link>
+
+                            <Link href="/licensings/status" passHref>
+                                <NavDropdown.Item ><FaClipboardList size={14} /> Fases</NavDropdown.Item>
+                            </Link>
+
+                            <Link href="/licensings/infringements" passHref>
+                                <NavDropdown.Item ><FaFileExcel size={14} /> Infrações</NavDropdown.Item>
+                            </Link>
+                        </>
+                    }
+                </NavDropdown>
+            }
+
+            {
+                can(user, "banks", "read:any") && <NavDropdown title="Bancos" id="banks-dropdown">
+                    <Link href="/banks" passHref>
+                        <NavDropdown.Item ><FaList size={14} /> Lista</NavDropdown.Item>
+                    </Link>
+
+                    {
+                        can(user, "banks", "create") && <Link href="/banks/new" passHref>
+                            <NavDropdown.Item ><FaPlus size={14} /> Novo</NavDropdown.Item>
+                        </Link>
+                    }
+
+                    <NavDropdown.Divider />
+
+                    {
+                        can(user, "institutions", "read:any") && <Link href="/institutions" passHref>
+                            <NavDropdown.Item ><FaCity size={14} /> Instituições</NavDropdown.Item>
+                        </Link>
+                    }
+                </NavDropdown>
+            }
+
+            <NavDropdown title="Relatórios" id="reports-dropdown">
+                {
+                    can(user, "banks", "read:any") && <Link href="/reports/banks" passHref>
+                        <NavDropdown.Item ><FaUniversity size={14} /> Bancos</NavDropdown.Item>
+                    </Link>
+                }
+
+                {
+                    can(user, "customers", "read:any") && <Link href="/reports/customers" passHref>
+                        <NavDropdown.Item ><FaUserTie size={14} /> Clientes</NavDropdown.Item>
+                    </Link>
+                }
+
+                {
+                    can(user, "licensings", "read:any") && <Link href="/reports/licensings" passHref>
+                        <NavDropdown.Item ><FaFileContract /> Licenças</NavDropdown.Item>
+                    </Link>
+                }
+
+                {
+                    can(user, "projects", "read:any") && <Link href="/reports/projects" passHref>
+                        <NavDropdown.Item ><FaFileAlt size={14} /> Projetos</NavDropdown.Item>
+                    </Link>
+                }
+
+                {
+                    can(user, "properties", "read:any") && <Link href="/reports/properties" passHref>
+                        <NavDropdown.Item ><FaMapSigns size={14} /> Imóveis</NavDropdown.Item>
+                    </Link>
+                }
+            </NavDropdown>
+
+            {
+                can(user, "users", "read:any") && <NavDropdown title="Usuários" id="users-dropdown">
+                    {
+                        can(user, "users", "create") && <Link href="/users" passHref>
+                            <NavDropdown.Item ><FaList size={14} /> Lista</NavDropdown.Item>
+                        </Link>
+                    }
+
+                    <NavDropdown.Divider />
+
+                    {
+                        can(user, "users", "read:any") && <Link href="/users/new" passHref>
+                            <NavDropdown.Item ><FaPlus size={14} /> Novo</NavDropdown.Item>
+                        </Link>
+                    }
+                </NavDropdown>
+            }
+        </Nav> : <></>
     )
 }
 
