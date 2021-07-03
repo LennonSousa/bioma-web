@@ -7,7 +7,6 @@ import { format } from 'date-fns';
 import {
     FaFileAlt,
     FaFileContract,
-    FaIdCard,
     FaHistory,
     FaPencilAlt,
     FaPlus,

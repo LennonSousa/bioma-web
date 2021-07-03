@@ -17,6 +17,8 @@ import { PageWaiting, PageType } from '../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';
 import { Paginations } from '../../components/interfaces/Pagination';
 
+import { Member } from '../../components/CustomerMembers';
+
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
 });
@@ -25,6 +27,7 @@ const limit = 15;
 
 export default function Customers() {
     const router = useRouter();
+    const userId = router.query['user'];
 
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
@@ -53,8 +56,20 @@ export default function Customers() {
 
         if (user) {
             if (can(user, "customers", "read:any")) {
-                api.get(`customers?limit=${limit}&page=${activePage}`).then(res => {
-                    setCustomers(res.data);
+                let requestUrl = `customers?limit=${limit}&page=${activePage}`;
+
+                if (userId) requestUrl = `members/customers/user/${userId}?limit=${limit}&page=${activePage}`;
+
+                api.get(requestUrl).then(res => {
+                    if (userId) {
+                        const members: Member[] = res.data;
+
+                        setCustomers(members.map(member => {
+                            return member.customer
+                        }));
+                    }
+                    else
+                        setCustomers(res.data);
 
                     try {
                         setTotalPages(Number(res.headers['x-total-pages']));
@@ -77,8 +92,21 @@ export default function Customers() {
         setActivePage(page);
 
         try {
-            const res = await api.get(`customers?limit=${limit}&page=${page}`)
-            setCustomers(res.data);
+            let requestUrl = `customers?limit=${limit}&page=${activePage}`;
+
+            if (userId) requestUrl = `members/customers/user/${userId}?limit=${limit}&page=${activePage}`;
+
+            const res = await api.get(requestUrl);
+
+            if (userId) {
+                const members: Member[] = res.data;
+
+                setCustomers(members.map(member => {
+                    return member.customer
+                }));
+            }
+            else
+                setCustomers(res.data);
 
             setTotalPages(Number(res.headers['x-total-pages']));
         }

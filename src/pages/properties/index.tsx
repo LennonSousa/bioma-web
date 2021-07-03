@@ -13,11 +13,14 @@ import { SideBarContext } from '../../contexts/SideBarContext';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
 import { Paginations } from '../../components/interfaces/Pagination';
 
+import { Member } from '../../components/PropertyMembers';
+
 const limit = 15;
 
-export default function Customers() {
+export default function Properties() {
     const router = useRouter();
     const { customer } = router.query;
+    const userId = router.query['user'];
 
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
@@ -40,8 +43,20 @@ export default function Customers() {
 
                 if (customer) query = `&customer=${customer}`;
 
-                api.get(`properties?limit=${limit}&page=${activePage}${!!query ? query : ''}`).then(res => {
-                    setProperties(res.data);
+                let requestUrl = `properties?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+                if (userId) requestUrl = `members/properties/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+                api.get(requestUrl).then(res => {
+                    if (userId) {
+                        const members: Member[] = res.data;
+
+                        setProperties(members.map(member => {
+                            return member.property
+                        }));
+                    }
+                    else
+                        setProperties(res.data);
 
                     try {
                         setTotalPages(Number(res.headers['x-total-pages']));
@@ -68,9 +83,21 @@ export default function Customers() {
 
             if (customer) query = `&customer=${customer}`;
 
-            const res = await api.get(`properties?limit=${limit}&page=${activePage}${!!query ? query : ''}`);
+            let requestUrl = `properties?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
 
-            setProperties(res.data);
+            if (userId) requestUrl = `members/properties/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+            const res = await api.get(requestUrl);
+
+            if (userId) {
+                const members: Member[] = res.data;
+
+                setProperties(members.map(member => {
+                    return member.property
+                }));
+            }
+            else
+                setProperties(res.data);
 
             setTotalPages(Number(res.headers['x-total-pages']));
         }

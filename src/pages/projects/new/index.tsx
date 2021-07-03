@@ -116,8 +116,6 @@ export default function NewProject() {
                     handleUsersToAdd(usersRes, newMembersAddedList);
 
                     setMembersAdded(newMembersAddedList);
-
-                    setLoadingData(false);
                 }).catch(err => {
                     console.log('Error to get users on new project, ', err);
 

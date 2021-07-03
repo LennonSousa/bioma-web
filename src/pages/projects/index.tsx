@@ -11,6 +11,8 @@ import ProjectListItem from '../../components/ProjectListItem';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
 import { Paginations } from '../../components/interfaces/Pagination';
 
+import { Member } from '../../components/ProjectMembers';
+
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 
@@ -19,6 +21,7 @@ const limit = 15;
 export default function Projects() {
     const router = useRouter();
     const { customer, property, bank } = router.query;
+    const userId = router.query['user'];
 
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
@@ -45,8 +48,20 @@ export default function Projects() {
 
                 if (bank) query = `&bank=${bank}`;
 
-                api.get(`projects?limit=${limit}&page=${activePage}${!!query ? query : ''}`).then(res => {
-                    setProjects(res.data);
+                let requestUrl = `projects?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+                if (userId) requestUrl = `members/projects/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+                api.get(requestUrl).then(res => {
+                    if (userId) {
+                        const members: Member[] = res.data;
+
+                        setProjects(members.map(member => {
+                            return member.project
+                        }));
+                    }
+                    else
+                        setProjects(res.data);
 
                     try {
                         setTotalPages(Number(res.headers['x-total-pages']));
@@ -77,8 +92,20 @@ export default function Projects() {
 
             if (bank) query = `&bank=${bank}`;
 
-            const res = await api.get(`projects?limit=${limit}&page=${activePage}${!!query ? query : ''}`)
-            setProjects(res.data);
+            let requestUrl = `projects?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+            if (userId) requestUrl = `members/projects/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+            const res = await api.get(requestUrl)
+            if (userId) {
+                const members: Member[] = res.data;
+
+                setProjects(members.map(member => {
+                    return member.project
+                }));
+            }
+            else
+                setProjects(res.data);
 
             setTotalPages(Number(res.headers['x-total-pages']));
         }

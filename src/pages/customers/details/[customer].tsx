@@ -84,6 +84,7 @@ export default function CustomerDetails() {
                             }
 
                             setCustomerData(customerRes);
+                            setLoadingData(false);
                         }).catch(err => {
                             console.log('Error to get docs customer to edit, ', err);
 

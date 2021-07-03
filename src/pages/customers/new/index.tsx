@@ -120,6 +120,8 @@ export default function NewCustomer() {
                     docsCustomerRes = docsCustomerRes.filter(docCustomer => { return docCustomer.active });
 
                     setDocsCustomer(docsCustomerRes);
+
+                    setLoadingData(false);
                 }).catch(err => {
                     console.log('Error to get docs customer, ', err);
 

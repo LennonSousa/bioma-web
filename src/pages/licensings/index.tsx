@@ -11,6 +11,8 @@ import LicensingListItem from '../../components/LicensingListItem';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
 import { Paginations } from '../../components/interfaces/Pagination';
 
+import { Member } from '../../components/LicensingMembers';
+
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 
@@ -19,6 +21,7 @@ const limit = 15;
 export default function Licensings() {
     const router = useRouter();
     const { customer, property } = router.query;
+    const userId = router.query['user'];
 
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
@@ -43,8 +46,20 @@ export default function Licensings() {
 
                 if (property) query = `&property=${property}`;
 
-                api.get(`licensings?limit=${limit}&page=${activePage}${!!query ? query : ''}`).then(res => {
-                    setLicensings(res.data);
+                let requestUrl = `licensings?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+                if (userId) requestUrl = `members/licensings/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+                api.get(requestUrl).then(res => {
+                    if (userId) {
+                        const members: Member[] = res.data;
+
+                        setLicensings(members.map(member => {
+                            return member.licensing
+                        }));
+                    }
+                    else
+                        setLicensings(res.data);
 
                     try {
                         setTotalPages(Number(res.headers['x-total-pages']));
@@ -73,9 +88,21 @@ export default function Licensings() {
 
             if (property) query = `&property=${property}`;
 
-            const res = await api.get(`licensings?limit=${limit}&page=${activePage}${!!query ? query : ''}`);
+            let requestUrl = `licensings?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
 
-            setLicensings(res.data);
+            if (userId) requestUrl = `members/licensings/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+
+            const res = await api.get(requestUrl);
+
+            if (userId) {
+                const members: Member[] = res.data;
+
+                setLicensings(members.map(member => {
+                    return member.licensing
+                }));
+            }
+            else
+                setLicensings(res.data);
 
             setTotalPages(Number(res.headers['x-total-pages']));
         }
