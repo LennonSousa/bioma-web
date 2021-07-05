@@ -14,6 +14,7 @@ import {
     FaPlus,
     FaRegFile,
     FaUserTie,
+    FaStickyNote,
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
@@ -373,18 +374,34 @@ export default function PropertyDetails() {
                                                         </Col>
                                                     </Row>
 
+                                                    <Row className="mb-3">
+                                                        <Col >
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-success">Observação {projectData.warnings && <FaStickyNote />}</h6>
+                                                                </Col>
+                                                            </Row>
+
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-secondary text-wrap">{projectData.notes}</span>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
+
                                                     {
                                                         projectData.warnings && <Row className="mb-3">
                                                             <Col >
                                                                 <Row>
                                                                     <Col>
-                                                                        <h6 className="text-success">Observação {projectData.warnings && <FaExclamationCircle />}</h6>
+                                                                        <h6 className="text-success">Pendências {projectData.warnings && <FaExclamationCircle />}</h6>
                                                                     </Col>
                                                                 </Row>
 
                                                                 <Row>
                                                                     <Col>
-                                                                        <span className="text-secondary text-wrap">{projectData.notes}</span>
+                                                                        <span className="text-secondary text-wrap">{projectData.warnings_text}</span>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
@@ -594,7 +611,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }

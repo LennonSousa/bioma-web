@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Col, Container, Image, Form, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
@@ -20,6 +21,9 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function Login() {
+  const router = useRouter();
+  const { returnto } = router.query;
+
   const { handleLogin } = useContext(AuthContext);
 
   const [messageShow, setMessageShow] = useState(false);
@@ -52,7 +56,7 @@ export default function Login() {
                     setMessageShow(true);
 
                     try {
-                      const resLogin = await handleLogin(values.email, values.password);
+                      const resLogin = await handleLogin(values.email, values.password, returnto && String(returnto));
 
                       if (!resLogin) {
                         setTypeMessage("error");

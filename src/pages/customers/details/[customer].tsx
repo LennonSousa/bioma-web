@@ -1,16 +1,16 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
+    FaAngleRight,
     FaFileAlt,
     FaIdCard,
     FaExclamationCircle,
+    FaStickyNote,
     FaCheck,
     FaPencilAlt,
-    FaPlus,
     FaRegFile,
 } from 'react-icons/fa';
 
@@ -22,6 +22,9 @@ import { can } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
 import Members from '../../../components/CustomerMembers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
+import { Property } from '../../../components/Properties';
+import { Project } from '../../../components/Projects';
+import { Licensing } from '../../../components/Licensings';
 import PropertyListItem from '../../../components/PropertyListItem';
 import ProjectListItem from '../../../components/ProjectListItem';
 import LicensingListItem from '../../../components/LicensingListItem';
@@ -46,6 +49,21 @@ export default function CustomerDetails() {
     const [hasErrors, setHasErrors] = useState(false);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
+
+    // Relations tabs.
+    const [tabKey, setTabKey] = useState('properties');
+
+    const [loadingProperties, setLoadingProperties] = useState(false);
+    const [propertiesData, setPropertiesData] = useState<Property[]>([]);
+    const [propertiesErrorShow, setPropertiesErrorShow] = useState(false);
+
+    const [loadingProjects, setLoadingProjects] = useState(false);
+    const [projectsData, setProjectsData] = useState<Project[]>([]);
+    const [projectsErrorShow, setProjectsErrorShow] = useState(false);
+
+    const [loadingLicensings, setLoadingLicensings] = useState(false);
+    const [licensingsData, setLicensingsData] = useState<Licensing[]>([]);
+    const [licensingsErrorShow, setLicensingsErrorShow] = useState(false);
 
     useEffect(() => {
         handleItemSideBar('customers');
@@ -103,6 +121,64 @@ export default function CustomerDetails() {
             }
         }
     }, [user, customer]);
+
+    useEffect(() => {
+        if (customer) {
+            if (tabKey === "properties") {
+                setPropertiesErrorShow(false);
+                setLoadingProperties(true);
+
+                api.get(`properties?customer=${customer}`).then(res => {
+                    setPropertiesData(res.data);
+
+                    setLoadingProperties(false);
+                }).catch(err => {
+                    console.log('Error to get properties on customer, ', err);
+                    setPropertiesErrorShow(true);
+
+                    setLoadingProperties(false);
+                });
+
+                return;
+            }
+
+            if (tabKey === "projects") {
+                setProjectsErrorShow(false);
+                setLoadingProjects(true);
+
+                api.get(`projects?customer=${customer}`).then(res => {
+                    setProjectsData(res.data);
+
+                    setLoadingProjects(false);
+                }).catch(err => {
+                    console.log('Error to get projects on customer, ', err);
+                    setProjectsErrorShow(true);
+
+                    setLoadingProjects(false);
+                });
+
+                return;
+            }
+
+            if (tabKey === "licensings") {
+                setLicensingsErrorShow(false);
+                setLoadingLicensings(true);
+
+                api.get(`licensings?customer=${customer}`).then(res => {
+                    setLicensingsData(res.data);
+
+                    setLoadingLicensings(false);
+                }).catch(err => {
+                    console.log('Error to get licensings on customer, ', err);
+                    setLicensingsErrorShow(true);
+
+                    setLoadingLicensings(false);
+                });
+
+                return;
+            }
+        }
+    }, [customer, tabKey]);
 
     function handleRoute(route: string) {
         router.push(route);
@@ -318,18 +394,34 @@ export default function CustomerDetails() {
                                                         </Col>
                                                     </Row>
 
+                                                    <Row className="mb-3">
+                                                        <Col >
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-success">Observação {customerData.warnings && <FaStickyNote />}</h6>
+                                                                </Col>
+                                                            </Row>
+
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-secondary text-wrap">{customerData.notes}</span>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
+
                                                     {
                                                         customerData.warnings && <Row className="mb-3">
                                                             <Col >
                                                                 <Row>
                                                                     <Col>
-                                                                        <h6 className="text-success">Observação {customerData.warnings && <FaExclamationCircle />}</h6>
+                                                                        <h6 className="text-success">Pendências {customerData.warnings && <FaExclamationCircle />}</h6>
                                                                     </Col>
                                                                 </Row>
 
                                                                 <Row>
                                                                     <Col>
-                                                                        <span className="text-secondary text-wrap">{customerData.notes}</span>
+                                                                        <span className="text-secondary text-wrap">{customerData.warnings_text}</span>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
@@ -460,36 +552,60 @@ export default function CustomerDetails() {
 
                                                     <Col className="border-top mb-3"></Col>
 
-                                                    <Tabs defaultActiveKey="properties" id="relations-customer">
+                                                    <Tabs
+                                                        id="relations-tabs"
+                                                        defaultActiveKey="properties"
+                                                        onSelect={(k) => setTabKey(k)}
+                                                    >
                                                         <Tab eventKey="properties" title="Imóveis">
                                                             <Row className={styles.relationsContainer}>
                                                                 <Col>
-                                                                    <Row className={styles.relationsButtonsContent}>
-                                                                        <Col>
-                                                                            <Link href={`/properties/new/customer/${customerData.id}`}>
-                                                                                <a
-                                                                                    className="btn btn-outline-success"
-                                                                                    title="Criar um novo imóvel para esse cliente"
-                                                                                    data-title="Criar um novo imóvel para esse cliente"
-                                                                                >
-                                                                                    <FaPlus /> Criar um imóvel
-                                                                                </a>
-                                                                            </Link>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row className={styles.relationsContent}>
+                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                         {
-                                                                            !!customerData.properties.length ? customerData.properties.map((property, index) => {
-                                                                                return <PropertyListItem
-                                                                                    key={index}
-                                                                                    property={property}
-                                                                                    showCustomer={false}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum imóvel registrado.</span>
-                                                                                </Col>
+                                                                            loadingProperties ? <Col sm={4}>
+                                                                                <AlertMessage status="waiting" />
+                                                                            </Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        !propertiesErrorShow ? <>
+                                                                                            {
+                                                                                                !!propertiesData.length ? <>
+                                                                                                    {
+                                                                                                        propertiesData.map((property, index) => {
+                                                                                                            return <PropertyListItem
+                                                                                                                key={index}
+                                                                                                                property={property}
+                                                                                                            />
+                                                                                                        })
+                                                                                                    }
+
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-end">
+                                                                                                            <Col className="col-row">
+                                                                                                                <Button
+                                                                                                                    title="Ver todos os imóveis para esse cliente."
+                                                                                                                    variant="success"
+                                                                                                                    onClick={() => handleRoute(`/properties?customer=${customerData.id}`)}
+                                                                                                                >
+                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                </Button>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                                </> :
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-center">
+                                                                                                            <Col className="col-row">
+                                                                                                                <span className="text-success">Nenhum imóvel encontrado.</span>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                            }
+                                                                                        </> : <Col sm={4}>
+                                                                                            <AlertMessage status="error" />
+                                                                                        </Col>
+                                                                                    }
+                                                                                </>
                                                                         }
                                                                     </Row>
                                                                 </Col>
@@ -499,31 +615,52 @@ export default function CustomerDetails() {
                                                         <Tab eventKey="projects" title="Projetos">
                                                             <Row className={styles.relationsContainer}>
                                                                 <Col>
-                                                                    <Row className={styles.relationsButtonsContent}>
-                                                                        <Col>
-                                                                            <Link href={`/projects/new/customer/${customerData.id}`}>
-                                                                                <a
-                                                                                    className="btn btn-outline-success"
-                                                                                    title="Criar um novo projeto para esse cliente"
-                                                                                    data-title="Criar um novo projeto para esse cliente"
-                                                                                >
-                                                                                    <FaPlus /> Criar um projeto
-                                                                                </a>
-                                                                            </Link>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row className={styles.relationsContent}>
+                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                         {
-                                                                            !!customerData.projects.length ? customerData.projects.map((project, index) => {
-                                                                                return <ProjectListItem
-                                                                                    key={index}
-                                                                                    project={project}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum projeto registrado.</span>
-                                                                                </Col>
+                                                                            loadingProjects ? <Col sm={4}>
+                                                                                <AlertMessage status="waiting" />
+                                                                            </Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        !projectsErrorShow ? <>
+                                                                                            {
+                                                                                                !!projectsData.length ? <>
+                                                                                                    {
+                                                                                                        projectsData.map((project, index) => {
+                                                                                                            return <ProjectListItem
+                                                                                                                key={index}
+                                                                                                                project={project}
+                                                                                                            />
+                                                                                                        })
+                                                                                                    }
+
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-end">
+                                                                                                            <Col className="col-row">
+                                                                                                                <Button
+                                                                                                                    title="Ver todos os projetos para esse cliente."
+                                                                                                                    variant="success"
+                                                                                                                    onClick={() => handleRoute(`/projects?customer=${customerData.id}`)}
+                                                                                                                >
+                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                </Button>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                                </> :
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-center">
+                                                                                                            <Col className="col-row">
+                                                                                                                <span className="text-success">Nenhum projeto encontrado.</span>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                            }
+                                                                                        </> : <Col sm={4}>
+                                                                                            <AlertMessage status="error" />
+                                                                                        </Col>
+                                                                                    }
+                                                                                </>
                                                                         }
                                                                     </Row>
                                                                 </Col>
@@ -533,31 +670,52 @@ export default function CustomerDetails() {
                                                         <Tab eventKey="licensings" title="Licenciamentos">
                                                             <Row className={styles.relationsContainer}>
                                                                 <Col>
-                                                                    <Row className={styles.relationsButtonsContent}>
-                                                                        <Col>
-                                                                            <Link href={`/licensings/new/customer/${customerData.id}`}>
-                                                                                <a
-                                                                                    className="btn btn-outline-success"
-                                                                                    title="Criar um novo licenciamento para esse cliente"
-                                                                                    data-title="Criar um novo licenciamento para esse cliente"
-                                                                                >
-                                                                                    <FaPlus /> Criar um licenciamento
-                                                                                </a>
-                                                                            </Link>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row className={styles.relationsContent}>
+                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                         {
-                                                                            !!customerData.licensings.length ? customerData.licensings.map((licensing, index) => {
-                                                                                return <LicensingListItem
-                                                                                    key={index}
-                                                                                    licensing={licensing}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum licenciamento registrado.</span>
-                                                                                </Col>
+                                                                            loadingLicensings ? <Col sm={4}>
+                                                                                <AlertMessage status="waiting" />
+                                                                            </Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        !licensingsErrorShow ? <>
+                                                                                            {
+                                                                                                !!licensingsData.length ? <>
+                                                                                                    {
+                                                                                                        licensingsData.map((licensing, index) => {
+                                                                                                            return <LicensingListItem
+                                                                                                                key={index}
+                                                                                                                licensing={licensing}
+                                                                                                            />
+                                                                                                        })
+                                                                                                    }
+
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-end">
+                                                                                                            <Col className="col-row">
+                                                                                                                <Button
+                                                                                                                    title="Ver todos os licenciamentos para esse cliente."
+                                                                                                                    variant="success"
+                                                                                                                    onClick={() => handleRoute(`/licensings?customer=${customerData.id}`)}
+                                                                                                                >
+                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                </Button>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                                </> :
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-center">
+                                                                                                            <Col className="col-row">
+                                                                                                                <span className="text-success">Nenhum licenciamentol encontrado.</span>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                            }
+                                                                                        </> : <Col sm={4}>
+                                                                                            <AlertMessage status="error" />
+                                                                                        </Col>
+                                                                                    }
+                                                                                </>
                                                                         }
                                                                     </Row>
                                                                 </Col>
@@ -584,7 +742,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }

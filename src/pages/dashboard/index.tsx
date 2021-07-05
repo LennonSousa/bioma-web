@@ -2,19 +2,24 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { Col, Container, Row } from 'react-bootstrap';
 import { addDays, startOfToday, endOfToday } from 'date-fns';
+import { FaFileAlt } from 'react-icons/fa';
 
 import api from '../../api/api';
 import { TokenVerify } from '../../utils/tokenVerify';
 import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import { can } from '../../components/Users';
+import { Customer } from '../../components/Customers';
 import { Project } from '../../components/Projects';
+import { Property } from '../../components/Properties';
 import { ProjectStatus } from '../../components/ProjectStatus';
 import { Licensing } from '../../components/Licensings';
 import { LicensingStatus } from '../../components/LicensingStatus';
 import PieChart from '../../components/Graphs/PieChart';
 import { PageWaiting } from '../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';
+
+import styles from './styles.module.css';
 
 const startOfDay = startOfToday();
 const endOfDay = endOfToday();
@@ -37,13 +42,27 @@ export default function Dashboard() {
     const [typeLicensingMessage, setTypeLicensingMessage] = useState<statusModal>("waiting");
     const [textLicensingMessage, setTextLicensingMessage] = useState('Carregando...');
 
+    const [amountCustomerWarnings, setAmountCustomerWarnings] = useState(0);
+    const [amountPropertyWarnings, setAmountPropertyWarnings] = useState(0);
+    const [amountProjectWarnings, setAmountProjectWarnings] = useState(0);
+
     useEffect(() => {
         if (signed && user) {
             handleItemSideBar('dashboard');
             handleSelectedMenu('dashboard');
 
+            if (can(user, "customers", "read:any")) {
+                handleCustomersWarnings();
+            }
+
             if (can(user, "projects", "read:any")) {
                 handleProjectsMonth();
+
+                handleProjectsWarnings();
+            }
+
+            if (can(user, "properties", "read:any")) {
+                handlePropertiesWarnings();
             }
 
             if (can(user, "licensings", "read:any")) {
@@ -51,6 +70,21 @@ export default function Dashboard() {
             }
         }
     }, [signed, user]);
+
+    async function handleCustomersWarnings() {
+        try {
+            const res = await api.get('reports/customers?warnings=true');
+
+            const customers: Customer[] = res.data;
+
+            const warnings = customers.filter(customer => { return customer.warnings });
+
+            setAmountCustomerWarnings(warnings.length);
+        }
+        catch (err) {
+            console.log('Error to get customers warnings, ', err);
+        }
+    }
 
     async function handleProjectsMonth() {
         try {
@@ -78,6 +112,10 @@ export default function Dashboard() {
                 }
             });
 
+            const warnings = projects.filter(project => { return project.warnings });
+
+            setAmountProjectWarnings(warnings.length);
+
             setStatusList(tempStatusList);
 
             setAmountStatusProjects(tempAmountStatusList);
@@ -90,6 +128,36 @@ export default function Dashboard() {
             setTypeProjectMessage("error");
             setTextProjectMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
             setLoadingProjectsData(false);
+        }
+    }
+
+    async function handleProjectsWarnings() {
+        try {
+            const res = await api.get('reports/projects?warnings=true');
+
+            const projects: Project[] = res.data;
+
+            const warnings = projects.filter(project => { return project.warnings });
+
+            setAmountProjectWarnings(warnings.length);
+        }
+        catch (err) {
+            console.log('Error to get projects warnings, ', err);
+        }
+    }
+
+    async function handlePropertiesWarnings() {
+        try {
+            const res = await api.get('reports/properties?warnings=true');
+
+            const properties: Property[] = res.data;
+
+            const warnings = properties.filter(property => { return property.warnings });
+
+            setAmountPropertyWarnings(warnings.length);
+        }
+        catch (err) {
+            console.log('Error to get properties warnings, ', err);
         }
     }
 
@@ -205,12 +273,87 @@ export default function Dashboard() {
                 </Container>
 
                 <Container>
-                    <Row>
-                        <Col className="content-page" sm={4}>
-                            <Row>
+                    <Row className={styles.rowWarnings}>
+                        {
+                            can(user, "customers", "read:any") && <Col className="content-page" sm={3}>
+                                <Row>
+                                    <Col sm={9}>
+                                        <Row>
+                                            <Col>
+                                                <h3 className={styles.customersText}>{amountCustomerWarnings}</h3>
+                                            </Col>
+                                        </Row>
 
-                            </Row>
-                        </Col>
+                                        <Row>
+                                            <Col>
+                                                <span>{amountCustomerWarnings === 1 ?
+                                                    'cliente com pendência' : 'clientes com pendências'}</span>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+
+                                    <Col className={styles.containerWarnings}>
+                                        <div className={`${styles.containerIconAmount} ${styles.customersBackground}`}>
+                                            <FaFileAlt />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        }
+
+                        {
+                            can(user, "projects", "read:any") && <Col className="content-page" sm={3}>
+                                <Row>
+                                    <Col sm={9}>
+                                        <Row>
+                                            <Col>
+                                                <h3 className={styles.projectsText}>{amountProjectWarnings}</h3>
+                                            </Col>
+                                        </Row>
+
+                                        <Row>
+                                            <Col>
+                                                <span>{amountProjectWarnings === 1 ?
+                                                    'projeto com pendência' : 'projetos com pendências'}</span>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+
+                                    <Col className={styles.containerWarnings}>
+                                        <div className={`${styles.containerIconAmount} ${styles.projectsBackground}`}>
+                                            <FaFileAlt />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        }
+
+                        {
+                            can(user, "properties", "read:any") && <Col className="content-page" sm={3}>
+                                <Row>
+                                    <Col sm={9}>
+                                        <Row>
+                                            <Col>
+                                                <h3 className={styles.propertiesText}>{amountPropertyWarnings}</h3>
+                                            </Col>
+                                        </Row>
+
+                                        <Row>
+                                            <Col>
+                                                <span>{amountPropertyWarnings === 1 ?
+                                                    'imóvel com pendência' : 'imóveis com pendências'}</span>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+
+                                    <Col className={styles.containerWarnings}>
+                                        <div className={`${styles.containerIconAmount} ${styles.propertiesBackground}`}>
+                                            <FaFileAlt />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        }
                     </Row>
                 </Container>
             </section>

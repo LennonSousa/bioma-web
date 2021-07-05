@@ -33,7 +33,8 @@ const validationSchema = Yup.object().shape({
     state: Yup.string().required('Obrigatório!'),
     owner: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired().nullable(),
-    warnings: Yup.boolean().notRequired().nullable(),
+    warnings: Yup.boolean().notRequired(),
+    warnings_text: Yup.string().notRequired().nullable(),
     birth: Yup.date().required('Obrigatório!'),
     type: Yup.string().required('Obrigatório!'),
 });
@@ -262,6 +263,7 @@ export default function NewCustomer() {
                                         owner: '',
                                         notes: '',
                                         warnings: false,
+                                        warnings_text: '',
                                         birth: format(new Date(), 'yyyy-MM-dd'),
                                         type: '',
                                     }}
@@ -291,6 +293,7 @@ export default function NewCustomer() {
                                                 owner: values.owner,
                                                 notes: values.notes,
                                                 warnings: values.warnings,
+                                                warnings_text: values.warnings_text,
                                                 birth: new Date(`${values.birth} 12:00:00`),
                                                 type: values.type,
                                                 docs,
@@ -534,17 +537,32 @@ export default function NewCustomer() {
                                                 </Form.Group>
                                             </Row>
 
+                                            <Form.Row className="mb-3">
+                                                <Form.Group as={Col} controlId="formGridNotes">
+                                                    <Form.Label>Observações</Form.Label>
+                                                    <Form.Control
+                                                        as="textarea"
+                                                        rows={4}
+                                                        style={{ resize: 'none' }}
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.notes}
+                                                        name="notes"
+                                                    />
+                                                </Form.Group>
+                                            </Form.Row>
+
                                             <Form.Row className="mb-2">
                                                 <Form.Switch
                                                     id="warnings"
-                                                    label="Observações"
+                                                    label="Pendências"
                                                     checked={values.warnings}
                                                     onChange={() => { setFieldValue('warnings', !values.warnings) }}
                                                 />
                                             </Form.Row>
 
                                             <Form.Row className="mb-3">
-                                                <Form.Group as={Col} controlId="formGridNotes">
+                                                <Form.Group as={Col} controlId="formGridWarningsText">
                                                     <Form.Control
                                                         as="textarea"
                                                         rows={4}
@@ -552,8 +570,8 @@ export default function NewCustomer() {
                                                         style={{ resize: 'none' }}
                                                         onChange={handleChange}
                                                         onBlur={handleBlur}
-                                                        value={values.notes}
-                                                        name="notes"
+                                                        value={values.warnings_text}
+                                                        name="warnings_text"
                                                     />
                                                 </Form.Group>
                                             </Form.Row>
@@ -588,7 +606,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }

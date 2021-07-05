@@ -14,6 +14,7 @@ export interface Property {
     coordinates: string;
     notes: string;
     warnings: boolean;
+    warnings_text: string,
     created_by: string;
     created_at: Date;
     customer: Customer;

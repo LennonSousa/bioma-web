@@ -12,7 +12,7 @@ interface AuthContextData {
     signed: boolean;
     loading: boolean;
     handleAuthenticated(): Promise<void>;
-    handleLogin(email: string, password: string): Promise<boolean | "error">;
+    handleLogin(email: string, password: string, returnTo?: string): Promise<boolean | "error">;
     handleLogout(): Promise<void>;
 }
 
@@ -55,7 +55,7 @@ const AuthProvider: React.FC = ({ children }) => {
         }
     }
 
-    async function handleLogin(emailLogin: string, password: string) {
+    async function handleLogin(emailLogin: string, password: string, returnTo?: string) {
         try {
             const res = await api.post('users/authenticate', {
                 email: emailLogin,
@@ -85,7 +85,7 @@ const AuthProvider: React.FC = ({ children }) => {
                 setSigned(true);
                 setLoading(false);
 
-                router.push('/dashboard');
+                router.push(`${returnTo ? returnTo : '/dashboard'}`);
 
                 return true;
             }

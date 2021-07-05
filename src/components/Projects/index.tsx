@@ -20,6 +20,7 @@ export interface Project {
     analyst_contact: string,
     notes: string;
     warnings: boolean;
+    warnings_text: string,
     created_by: string;
     created_at: Date;
     updated_by: string;

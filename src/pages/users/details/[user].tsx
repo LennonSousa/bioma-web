@@ -622,7 +622,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }

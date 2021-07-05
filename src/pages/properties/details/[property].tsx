@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
+    FaAngleRight,
     FaIdCard,
     FaExclamationCircle,
     FaCheck,
@@ -12,7 +13,8 @@ import {
     FaPencilAlt,
     FaPlus,
     FaFileAlt,
-    FaRegFile
+    FaRegFile,
+    FaStickyNote,
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
@@ -21,8 +23,10 @@ import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { can } from '../../../components/Users';
 import { Property } from '../../../components/Properties';
+import { Project } from '../../../components/Projects';
 import Members from '../../../components/PropertyMembers';
 import PropertyListItem from '../../../components/PropertyListItem';
+import ProjectListItem from '../../../components/ProjectListItem';
 import { DocsProperty } from '../../../components/DocsProperty';
 import PropertyAttachments from '../../../components/PropertyAttachments';
 import PageBack from '../../../components/PageBack';
@@ -44,6 +48,17 @@ export default function PropertyDetails() {
     const [hasErrors, setHasErrors] = useState(false);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
+
+    // Relations tabs.
+    const [tabKey, setTabKey] = useState('projects');
+
+    const [loadingProperties, setLoadingProperties] = useState(false);
+    const [propertiesData, setPropertiesData] = useState<Property[]>([]);
+    const [propertiesErrorShow, setPropertiesErrorShow] = useState(false);
+
+    const [loadingProjects, setLoadingProjects] = useState(false);
+    const [projectsData, setProjectsData] = useState<Project[]>([]);
+    const [projectsErrorShow, setProjectsErrorShow] = useState(false);
 
     useEffect(() => {
         handleItemSideBar('customers');
@@ -99,6 +114,46 @@ export default function PropertyDetails() {
             }
         }
     }, [user, property]);
+
+    useEffect(() => {
+        if (propertyData) {
+            if (tabKey === "properties") {
+                setPropertiesErrorShow(false);
+                setLoadingProperties(true);
+
+                api.get(`properties?customer=${propertyData.customer.id}`).then(res => {
+                    setPropertiesData(res.data);
+
+                    setLoadingProperties(false);
+                }).catch(err => {
+                    console.log('Error to get properties on property, ', err);
+                    setPropertiesErrorShow(true);
+
+                    setLoadingProperties(false);
+                });
+
+                return;
+            }
+
+            if (tabKey === "projects") {
+                setProjectsErrorShow(false);
+                setLoadingProjects(true);
+
+                api.get(`projects?property=${propertyData.id}`).then(res => {
+                    setProjectsData(res.data);
+
+                    setLoadingProjects(false);
+                }).catch(err => {
+                    console.log('Error to get projects on property, ', err);
+                    setProjectsErrorShow(true);
+
+                    setLoadingProjects(false);
+                });
+
+                return;
+            }
+        }
+    }, [propertyData, tabKey]);
 
     function handleRoute(route: string) {
         router.push(route);
@@ -292,18 +347,34 @@ export default function PropertyDetails() {
                                                         </Col>
                                                     </Row>
 
+                                                    <Row className="mb-3">
+                                                        <Col >
+                                                            <Row>
+                                                                <Col>
+                                                                    <h6 className="text-success">Observação {propertyData.warnings && <FaStickyNote />}</h6>
+                                                                </Col>
+                                                            </Row>
+
+                                                            <Row>
+                                                                <Col>
+                                                                    <span className="text-secondary text-wrap">{propertyData.notes}</span>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
+
                                                     {
                                                         propertyData.warnings && <Row className="mb-3">
                                                             <Col >
                                                                 <Row>
                                                                     <Col>
-                                                                        <h6 className="text-success">Observação {propertyData.warnings && <FaExclamationCircle />}</h6>
+                                                                        <h6 className="text-success">Pendências {propertyData.warnings && <FaExclamationCircle />}</h6>
                                                                     </Col>
                                                                 </Row>
 
                                                                 <Row>
                                                                     <Col>
-                                                                        <span className="text-secondary text-wrap">{propertyData.notes}</span>
+                                                                        <span className="text-secondary text-wrap">{propertyData.warnings_text}</span>
                                                                     </Col>
                                                                 </Row>
                                                             </Col>
@@ -418,28 +489,61 @@ export default function PropertyDetails() {
 
                                                     <Col className="border-top mb-3"></Col>
 
-                                                    <Tabs defaultActiveKey="projects" id="relations-customer">
+                                                    <Tabs
+                                                        id="relations-tabs"
+                                                        defaultActiveKey="projects"
+                                                        onSelect={(k) => setTabKey(k)}
+                                                    >
                                                         <Tab eventKey="projects" title="Projetos">
                                                             <Row className={styles.relationsContainer}>
                                                                 <Col>
-                                                                    <Row className={styles.relationsButtonsContent}>
-                                                                        <Col>
-                                                                            <Link href={`/projects/new/customer/${propertyData.id}`}>
-                                                                                <a
-                                                                                    className="btn btn-outline-success"
-                                                                                    title="Criar um novo projeto para esse cliente"
-                                                                                    data-title="Criar um novo projeto para esse cliente"
-                                                                                >
-                                                                                    <FaPlus /> Criar um projeto
-                                                                                </a>
-                                                                            </Link>
-                                                                        </Col>
-                                                                    </Row>
+                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
+                                                                        {
+                                                                            loadingProjects ? <Col sm={4}>
+                                                                                <AlertMessage status="waiting" />
+                                                                            </Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        !projectsErrorShow ? <>
+                                                                                            {
+                                                                                                !!projectsData.length ? <>
+                                                                                                    {
+                                                                                                        projectsData.map((project, index) => {
+                                                                                                            return <ProjectListItem
+                                                                                                                key={index}
+                                                                                                                project={project}
+                                                                                                            />
+                                                                                                        })
+                                                                                                    }
 
-                                                                    <Row className={styles.relationsContent}>
-                                                                        <Col>
-                                                                            <span className="text-success">Nenhum projeto registrado.</span>
-                                                                        </Col>
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-end">
+                                                                                                            <Col className="col-row">
+                                                                                                                <Button
+                                                                                                                    title="Ver todos os projetos para esse imóvel."
+                                                                                                                    variant="success"
+                                                                                                                    onClick={() => handleRoute(`/projects?property=${propertyData.id}`)}
+                                                                                                                >
+                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                </Button>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                                </> :
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-center">
+                                                                                                            <Col className="col-row">
+                                                                                                                <span className="text-success">Nenhum projeto encontrado.</span>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                            }
+                                                                                        </> : <Col sm={4}>
+                                                                                            <AlertMessage status="error" />
+                                                                                        </Col>
+                                                                                    }
+                                                                                </>
+                                                                        }
                                                                     </Row>
                                                                 </Col>
                                                             </Row>
@@ -448,32 +552,52 @@ export default function PropertyDetails() {
                                                         <Tab eventKey="properties" title="Outros imóveis">
                                                             <Row className={styles.relationsContainer}>
                                                                 <Col>
-                                                                    <Row className={styles.relationsButtonsContent}>
-                                                                        <Col>
-                                                                            <Link href={`/properties/new?customer=${propertyData.customer.id}`}>
-                                                                                <a
-                                                                                    className="btn btn-outline-success"
-                                                                                    title="Criar um novo imóvel para este cliente."
-                                                                                    data-title="Criar um novo imóvel para este cliente."
-                                                                                >
-                                                                                    <FaPlus /> Criar um imóvel
-                                                                                </a>
-                                                                            </Link>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row className={styles.relationsContent}>
+                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                         {
-                                                                            !!propertyData.customer.properties.length ? propertyData.customer.properties.map((property, index) => {
-                                                                                return <PropertyListItem
-                                                                                    key={index}
-                                                                                    property={property}
-                                                                                    showCustomer={false}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum imóvel registrado.</span>
-                                                                                </Col>
+                                                                            loadingProperties ? <Col sm={4}>
+                                                                                <AlertMessage status="waiting" />
+                                                                            </Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        !propertiesErrorShow ? <>
+                                                                                            {
+                                                                                                !!propertiesData.length ? <>
+                                                                                                    {
+                                                                                                        propertiesData.map((property, index) => {
+                                                                                                            return <PropertyListItem
+                                                                                                                key={index}
+                                                                                                                property={property}
+                                                                                                            />
+                                                                                                        })
+                                                                                                    }
+
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-end">
+                                                                                                            <Col className="col-row">
+                                                                                                                <Button
+                                                                                                                    title="Ver todos os imóveis para esse cliente."
+                                                                                                                    variant="success"
+                                                                                                                    onClick={() => handleRoute(`/properties?customer=${propertyData.customer.id}`)}
+                                                                                                                >
+                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                </Button>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                                </> :
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-center">
+                                                                                                            <Col className="col-row">
+                                                                                                                <span className="text-success">Nenhum imóvel encontrado.</span>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                            }
+                                                                                        </> : <Col sm={4}>
+                                                                                            <AlertMessage status="error" />
+                                                                                        </Col>
+                                                                                    }
+                                                                                </>
                                                                         }
                                                                     </Row>
                                                                 </Col>
@@ -500,7 +624,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }

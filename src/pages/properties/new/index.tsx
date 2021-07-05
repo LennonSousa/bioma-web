@@ -29,6 +29,7 @@ const validationSchema = Yup.object().shape({
     coordinates: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
+    warnings_text: Yup.string().notRequired().nullable(),
 });
 
 export default function NewProperty() {
@@ -289,6 +290,7 @@ export default function NewProperty() {
                                         coordinates: '',
                                         notes: '',
                                         warnings: false,
+                                        warnings_text: '',
                                     }}
                                     onSubmit={async values => {
                                         if (!selectedCustomer) {
@@ -318,6 +320,7 @@ export default function NewProperty() {
                                                 coordinates: values.coordinates,
                                                 notes: values.notes,
                                                 warnings: values.warnings,
+                                                warnings_text: values.warnings_text,
                                                 customer: selectedCustomer.id,
                                                 docs,
                                                 members,
@@ -488,17 +491,32 @@ export default function NewProperty() {
                                                 </Form.Group>
                                             </Form.Row>
 
+                                            <Form.Row className="mb-3">
+                                                <Form.Group as={Col} controlId="formGridNotes">
+                                                    <Form.Label>Observações</Form.Label>
+                                                    <Form.Control
+                                                        as="textarea"
+                                                        rows={4}
+                                                        style={{ resize: 'none' }}
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.notes}
+                                                        name="notes"
+                                                    />
+                                                </Form.Group>
+                                            </Form.Row>
+
                                             <Form.Row className="mb-2">
                                                 <Form.Switch
                                                     id="warnings"
-                                                    label="Observações"
+                                                    label="Pendências"
                                                     checked={values.warnings}
                                                     onChange={() => { setFieldValue('warnings', !values.warnings) }}
                                                 />
                                             </Form.Row>
 
                                             <Form.Row className="mb-3">
-                                                <Form.Group as={Col} controlId="formGridNotes">
+                                                <Form.Group as={Col} controlId="formGridWarningsText">
                                                     <Form.Control
                                                         as="textarea"
                                                         rows={4}
@@ -506,8 +524,8 @@ export default function NewProperty() {
                                                         style={{ resize: 'none' }}
                                                         onChange={handleChange}
                                                         onBlur={handleBlur}
-                                                        value={values.notes}
-                                                        name="notes"
+                                                        value={values.warnings_text}
+                                                        name="warnings_text"
                                                     />
                                                 </Form.Group>
                                             </Form.Row>
@@ -598,7 +616,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }

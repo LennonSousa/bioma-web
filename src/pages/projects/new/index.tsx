@@ -35,6 +35,7 @@ const validationSchema = Yup.object().shape({
     analyst_contact: Yup.string().notRequired().nullable(),
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
+    warnings_text: Yup.string().notRequired().nullable(),
     type: Yup.string().required('Obrigatório!'),
     line: Yup.string().required('Obrigatório!'),
     status: Yup.string().required('Obrigatório!'),
@@ -354,6 +355,7 @@ export default function NewProject() {
                                         analyst_contact: '',
                                         notes: '',
                                         warnings: false,
+                                        warnings_text: '',
                                         type: '',
                                         line: '',
                                         status: '',
@@ -388,6 +390,7 @@ export default function NewProject() {
                                                 analyst_contact: values.analyst_contact,
                                                 notes: values.notes,
                                                 warnings: values.warnings,
+                                                warnings_text: values.warnings_text,
                                                 customer: selectedCustomer.id,
                                                 type: values.type,
                                                 line: values.line,
@@ -669,17 +672,32 @@ export default function NewProject() {
                                                 </Form.Group>
                                             </Row>
 
+                                            <Form.Row className="mb-3">
+                                                <Form.Group as={Col} controlId="formGridNotes">
+                                                    <Form.Label>Observações</Form.Label>
+                                                    <Form.Control
+                                                        as="textarea"
+                                                        rows={4}
+                                                        style={{ resize: 'none' }}
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.notes}
+                                                        name="notes"
+                                                    />
+                                                </Form.Group>
+                                            </Form.Row>
+
                                             <Form.Row className="mb-2">
                                                 <Form.Switch
                                                     id="warnings"
-                                                    label="Observações"
+                                                    label="Pendências"
                                                     checked={values.warnings}
                                                     onChange={() => { setFieldValue('warnings', !values.warnings) }}
                                                 />
                                             </Form.Row>
 
                                             <Form.Row className="mb-3">
-                                                <Form.Group as={Col} controlId="formGridNotes">
+                                                <Form.Group as={Col} controlId="formGridWarningsText">
                                                     <Form.Control
                                                         as="textarea"
                                                         rows={4}
@@ -687,8 +705,8 @@ export default function NewProject() {
                                                         style={{ resize: 'none' }}
                                                         onChange={handleChange}
                                                         onBlur={handleBlur}
-                                                        value={values.notes}
-                                                        name="notes"
+                                                        value={values.warnings_text}
+                                                        name="warnings_text"
                                                     />
                                                 </Form.Group>
                                             </Form.Row>
@@ -790,7 +808,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }

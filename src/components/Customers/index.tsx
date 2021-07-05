@@ -20,6 +20,7 @@ export interface Customer {
     owner: string;
     notes: string;
     warnings: boolean;
+    warnings_text: string,
     birth: Date;
     created_by: string;
     created_at: Date;

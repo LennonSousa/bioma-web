@@ -2,8 +2,8 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Col, Container, Row, Tabs, Tab } from 'react-bootstrap';
-import { FaPencilAlt, FaPlus } from 'react-icons/fa';
+import { Button, ButtonGroup, Col, Container, Row, Tabs, Tab } from 'react-bootstrap';
+import { FaAngleRight, FaPencilAlt, FaPlus } from 'react-icons/fa';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
@@ -11,9 +11,11 @@ import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { can } from '../../../components/Users';
 import { Bank } from '../../../components/Banks';
+import { Project } from '../../../components/Projects';
 import ProjectListItem from '../../../components/ProjectListItem';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
+import { AlertMessage } from '../../../components/interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 
@@ -29,6 +31,13 @@ export default function BankDetails() {
     const [loadingData, setLoadingData] = useState(true);
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
+
+    // Relations tabs.
+    const [tabKey, setTabKey] = useState('properties');
+
+    const [loadingProjects, setLoadingProjects] = useState(false);
+    const [projectsData, setProjectsData] = useState<Project[]>([]);
+    const [projectsErrorShow, setProjectsErrorShow] = useState(false);
 
     useEffect(() => {
         handleItemSideBar('banks');
@@ -52,6 +61,30 @@ export default function BankDetails() {
         }
     }, [user, bank]);
 
+    useEffect(() => {
+        if (tabKey === "projects") {
+            setProjectsErrorShow(false);
+            setLoadingProjects(true);
+
+            api.get(`projects?bank=${bank}`).then(res => {
+                setProjectsData(res.data);
+
+                setLoadingProjects(false);
+            }).catch(err => {
+                console.log('Error to get projects on bank, ', err);
+                setProjectsErrorShow(true);
+
+                setLoadingProjects(false);
+            });
+
+            return;
+        }
+    }, [bank, tabKey]);
+
+    function handleRoute(route: string) {
+        router.push(route);
+    }
+
     return !user || loading ? <PageWaiting status="waiting" /> :
         <>
             {
@@ -71,6 +104,18 @@ export default function BankDetails() {
                                                         <Col>
                                                             <PageBack href="/banks" subTitle="Voltar para a lista de bancos" />
                                                         </Col>
+
+                                                        <Col className="col-row">
+                                                            <ButtonGroup className="col-12">
+                                                                <Button
+                                                                    title="Editar banco."
+                                                                    variant="success"
+                                                                    onClick={() => handleRoute(`/customers/edit/${bankData.id}`)}
+                                                                >
+                                                                    <FaPencilAlt />
+                                                                </Button>
+                                                            </ButtonGroup>
+                                                        </Col>
                                                     </Row>
 
                                                     <Row className="mb-3">
@@ -78,12 +123,6 @@ export default function BankDetails() {
                                                             <Row className="align-items-center">
                                                                 <Col>
                                                                     <h3 className="form-control-plaintext text-success">{bankData.institution.name}</h3>
-                                                                </Col>
-
-                                                                <Col>
-                                                                    <Link href={`/banks/edit/${bankData.id}`}>
-                                                                        <a title="Editar" data-title="Editar"><FaPencilAlt /></a>
-                                                                    </Link>
                                                                 </Col>
                                                             </Row>
                                                         </Col>
@@ -209,36 +248,60 @@ export default function BankDetails() {
 
                                                     <Col className="border-top mb-3"></Col>
 
-                                                    <Tabs defaultActiveKey="projects" id="relations-projects">
+                                                    <Tabs
+                                                        id="relations-tabs"
+                                                        defaultActiveKey="projects"
+                                                        onSelect={(k) => setTabKey(k)}
+                                                    >
                                                         <Tab eventKey="projects" title="Projetos">
                                                             <Row className={styles.relationsContainer}>
                                                                 <Col>
-                                                                    <Row className={styles.relationsButtonsContent}>
-                                                                        <Col>
-                                                                            <Link href={'/projects/new'}>
-                                                                                <a
-                                                                                    className="btn btn-outline-success"
-                                                                                    title="Criar um novo imóvel para esse cliente"
-                                                                                    data-title="Criar um novo imóvel para esse cliente"
-                                                                                >
-                                                                                    <FaPlus /> Criar um projeto
-                                                                                </a>
-                                                                            </Link>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row className={styles.relationsContent}>
+                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                         {
-                                                                            !!bankData.projects.length ? bankData.projects.map((project, index) => {
-                                                                                return <ProjectListItem
-                                                                                    key={index}
-                                                                                    project={project}
-                                                                                    showBank={false}
-                                                                                />
-                                                                            }) :
-                                                                                <Col>
-                                                                                    <span className="text-success">Nenhum projeto registrado.</span>
-                                                                                </Col>
+                                                                            loadingProjects ? <Col sm={4}>
+                                                                                <AlertMessage status="waiting" />
+                                                                            </Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        !projectsErrorShow ? <>
+                                                                                            {
+                                                                                                !!projectsData.length ? <>
+                                                                                                    {
+                                                                                                        projectsData.map((project, index) => {
+                                                                                                            return <ProjectListItem
+                                                                                                                key={index}
+                                                                                                                project={project}
+                                                                                                            />
+                                                                                                        })
+                                                                                                    }
+
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-end">
+                                                                                                            <Col className="col-row">
+                                                                                                                <Button
+                                                                                                                    title="Ver todos os projetos para esse banco."
+                                                                                                                    variant="success"
+                                                                                                                    onClick={() => handleRoute(`/projects?bank=${bankData.id}`)}
+                                                                                                                >
+                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                </Button>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                                </> :
+                                                                                                    <Col>
+                                                                                                        <Row className="justify-content-center">
+                                                                                                            <Col className="col-row">
+                                                                                                                <span className="text-success">Nenhum projeto encontrado.</span>
+                                                                                                            </Col>
+                                                                                                        </Row>
+                                                                                                    </Col>
+                                                                                            }
+                                                                                        </> : <Col sm={4}>
+                                                                                            <AlertMessage status="error" />
+                                                                                        </Col>
+                                                                                    }
+                                                                                </>
                                                                         }
                                                                     </Row>
                                                                 </Col>
@@ -265,7 +328,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
         return {
             redirect: {
-                destination: '/',
+                destination: `/?returnto=${context.req.url}`,
                 permanent: false,
             },
         }
