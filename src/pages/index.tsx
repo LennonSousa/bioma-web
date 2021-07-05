@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { NextSeo } from 'next-seo';
 import { Button, Col, Container, Image, Form, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -31,138 +32,157 @@ export default function Login() {
   const [textMessage, setTextMessage] = useState('entrando...');
 
   return (
-    <div className={styles.pageContainer}>
-      <Container>
-        <Row className="justify-content-center align-items-center">
-          <Col sm={12} className={`${styles.formContainer} col-11`}>
-            <Row className="justify-content-center align-items-center">
-              <Col md={6} className="mt-1 mb-4">
-                <Row className="justify-content-center align-items-center">
-                  <Col sm={8}>
-                    <Image fluid src="/assets/images/logo-bioma.svg" alt="Bioma consultoria." />
-                  </Col>
-                </Row>
-              </Col>
+    <>
+      <NextSeo
+        title="Bem-vindo(a)"
+        description="Bem-vindo(a) a plataforma de gerenciamento da Bioma consultoria."
+        openGraph={{
+          url: 'https://app.biomaconsultoria.com',
+          title: 'Bem-vindo(a)',
+          description: 'Bem-vindo(a) a plataforma de gerenciamento da Bioma consultoria.',
+          images: [
+            {
+              url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+              alt: 'Bem-vindo(a) | Plataforma Bioma',
+            },
+            { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+          ],
+        }}
+      />
 
-              <Col md={4} className="mt-1 mb-1">
-                <Formik
-                  initialValues={{
-                    email: '',
-                    password: '',
-                  }}
-                  onSubmit={async values => {
-                    setTextMessage('autenticando...');
-                    setTypeMessage("waiting");
-                    setMessageShow(true);
+      <div className={styles.pageContainer}>
+        <Container>
+          <Row className="justify-content-center align-items-center">
+            <Col sm={12} className={`${styles.formContainer} col-11`}>
+              <Row className="justify-content-center align-items-center">
+                <Col md={6} className="mt-1 mb-4">
+                  <Row className="justify-content-center align-items-center">
+                    <Col sm={8}>
+                      <Image fluid src="/assets/images/logo-bioma.svg" alt="Bioma consultoria." />
+                    </Col>
+                  </Row>
+                </Col>
 
-                    try {
-                      const resLogin = await handleLogin(values.email, values.password, returnto && String(returnto));
+                <Col md={4} className="mt-1 mb-1">
+                  <Formik
+                    initialValues={{
+                      email: '',
+                      password: '',
+                    }}
+                    onSubmit={async values => {
+                      setTextMessage('autenticando...');
+                      setTypeMessage("waiting");
+                      setMessageShow(true);
 
-                      if (!resLogin) {
-                        setTypeMessage("error");
-                        setTextMessage("E-mail ou senha incorretos!");
+                      try {
+                        const resLogin = await handleLogin(values.email, values.password, returnto && String(returnto));
 
-                        setTimeout(() => {
-                          setMessageShow(false);
-                        }, 3000);
+                        if (!resLogin) {
+                          setTypeMessage("error");
+                          setTextMessage("E-mail ou senha incorretos!");
 
-                        return;
+                          setTimeout(() => {
+                            setMessageShow(false);
+                          }, 3000);
+
+                          return;
+                        }
+
+                        if (resLogin === "error") {
+                          setTypeMessage("error");
+                          setTextMessage("Erro na conexão!");
+
+                          setTimeout(() => {
+                            setMessageShow(false);
+                          }, 3000);
+
+                          return;
+                        }
+
+                        setTextMessage('');
+                        setTypeMessage("success");
                       }
-
-                      if (resLogin === "error") {
+                      catch {
                         setTypeMessage("error");
                         setTextMessage("Erro na conexão!");
 
                         setTimeout(() => {
                           setMessageShow(false);
-                        }, 3000);
-
-                        return;
+                        }, 4000);
                       }
+                    }}
+                    validationSchema={validationSchema}
+                    validateOnChange={false}
+                  >
+                    {({ handleBlur, handleChange, handleSubmit, values, errors, touched }) => (
+                      <Form onSubmit={handleSubmit}>
+                        <Row>
+                          <Col>
+                            <Form.Group className="mb-4" controlId="formLogintEmail">
+                              <Form.Label>Seu e-mail</Form.Label>
+                              <Form.Control type="email"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.email}
+                                name="email"
+                                isInvalid={!!errors.email && touched.email}
+                              />
+                              <Form.Control.Feedback type="invalid">{touched.email && errors.email}</Form.Control.Feedback>
+                            </Form.Group>
 
-                      setTextMessage('');
-                      setTypeMessage("success");
-                    }
-                    catch {
-                      setTypeMessage("error");
-                      setTextMessage("Erro na conexão!");
+                            <Form.Group className="mb-4" controlId="formLoginPassword">
+                              <Form.Label>Senha</Form.Label>
+                              <Form.Control type="password"
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.password}
+                                name="password"
+                                isInvalid={!!errors.password && touched.password}
+                              />
+                              <Form.Control.Feedback type="invalid">{touched.password && errors.password}</Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
+                        </Row>
 
-                      setTimeout(() => {
-                        setMessageShow(false);
-                      }, 4000);
-                    }
-                  }}
-                  validationSchema={validationSchema}
-                  validateOnChange={false}
-                >
-                  {({ handleBlur, handleChange, handleSubmit, values, errors, touched }) => (
-                    <Form onSubmit={handleSubmit}>
-                      <Row>
-                        <Col>
-                          <Form.Group className="mb-4" controlId="formLogintEmail">
-                            <Form.Label>Seu e-mail</Form.Label>
-                            <Form.Control type="email"
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              value={values.email}
-                              name="email"
-                              isInvalid={!!errors.email && touched.email}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.email && errors.email}</Form.Control.Feedback>
-                          </Form.Group>
+                        <Row className="justify-content-end">
+                          {
+                            messageShow ? <Col sm={12}><AlertMessage status={typeMessage} message={textMessage} /></Col> :
+                              <Col className="col-row">
+                                <Button variant="success" type="submit">Entrar</Button>
+                              </Col>
 
-                          <Form.Group className="mb-4" controlId="formLoginPassword">
-                            <Form.Label>Senha</Form.Label>
-                            <Form.Control type="password"
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              value={values.password}
-                              name="password"
-                              isInvalid={!!errors.password && touched.password}
-                            />
-                            <Form.Control.Feedback type="invalid">{touched.password && errors.password}</Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-                      </Row>
+                          }
+                        </Row>
 
-                      <Row className="justify-content-end">
-                        {
-                          messageShow ? <Col sm={12}><AlertMessage status={typeMessage} message={textMessage} /></Col> :
-                            <Col className="col-row">
-                              <Button variant="success" type="submit">Entrar</Button>
-                            </Col>
+                        <Row className="mt-4">
+                          <Col>
+                            <Link href="/users/reset">
+                              <a title="Recuperar a sua senha." data-title="Recuperar a sua senha.">
+                                <Row>
+                                  <Col sm={1}>
+                                    <FaKey size={14} /> <span>Esqueci a minha senha</span>
+                                  </Col>
+                                </Row>
+                              </a>
+                            </Link>
+                          </Col>
+                        </Row>
 
-                        }
-                      </Row>
-
-                      <Row className="mt-4">
-                        <Col>
-                          <Link href="/users/reset">
-                            <a title="Recuperar a sua senha." data-title="Recuperar a sua senha.">
-                              <Row>
-                                <Col sm={1}>
-                                  <FaKey size={14} /> <span>Esqueci a minha senha</span>
-                                </Col>
-                              </Row>
-                            </a>
-                          </Link>
-                        </Col>
-                      </Row>
-
-                      <Row className={styles.version}>
-                        <Col>
-                          <small>{`v. ${packageJson.version}`}</small>
-                        </Col>
-                      </Row>
-                    </Form>
-                  )}
-                </Formik>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+                        <Row className={styles.version}>
+                          <Col>
+                            <small>{`v. ${packageJson.version}`}</small>
+                          </Col>
+                        </Row>
+                      </Form>
+                    )}
+                  </Formik>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    </>
   )
 }
 
