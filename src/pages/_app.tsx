@@ -14,7 +14,7 @@ import styles from '../styles/app.module.css';
 
 function MyApp({ Component, pageProps }) {
   return <>
-    <NextSeo titleTemplate="Bioma | %s" defaultTitle="Plataforma de gerenciamento." />
+    <NextSeo titleTemplate="%s | Plataforma Bioma" defaultTitle="Plataforma de gerenciamento." />
 
     <Head>
       <meta charSet="utf-8" />

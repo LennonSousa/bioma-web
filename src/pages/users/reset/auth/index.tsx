@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { GetServerSideProps } from 'next';
+import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { Button, Col, Container, Form, Image, Modal, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
@@ -10,21 +10,18 @@ import Cookies from 'js-cookie';
 
 import api from '../../../../api/api';
 import { User } from '../../../../components/Users';
-import { cellphone } from '../../../../components/InputMask/masks';
 import { AlertMessage, statusModal } from '../../../../components/interfaces/AlertMessage';
 
 import styles from '../../../../styles/index.module.css';
 
 const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Obrigatório!'),
-    phone: Yup.string().notRequired().nullable(),
     password: Yup.string().required('Obrigatório!').min(8, 'Mínimo 8 caracteres.'),
     repeat: Yup.string().required('Obrigatório!').min(8, 'Mínimo 8 caracteres.'),
 });
 
-export default function NewCustomer({ authenticated, user, token }) {
+export default function NewCustomer({ authenticated, user, token }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter();
-    const [authenticatedUser, setAuthenticatedUser] = useState<User>(undefined);
+    const authenticatedUser: User = user ? user : null;
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
@@ -38,11 +35,7 @@ export default function NewCustomer({ authenticated, user, token }) {
     useEffect(() => {
         Cookies.remove('user');
         Cookies.remove('token');
-
-        if (authenticated && user) {
-            setAuthenticatedUser(user);
-        }
-    }, [authenticated, user]);
+    }, []);
 
     function handleToLogin() {
         router.push('/');
@@ -65,8 +58,6 @@ export default function NewCustomer({ authenticated, user, token }) {
                             <Col md={4} className="mt-1 mb-1">
                                 <Formik
                                     initialValues={{
-                                        name: authenticatedUser.name,
-                                        phone: authenticatedUser.phone ? authenticatedUser.phone : '',
                                         password: '',
                                         repeat: '',
                                     }}
@@ -76,9 +67,7 @@ export default function NewCustomer({ authenticated, user, token }) {
                                             setMessageShow(true);
 
                                             try {
-                                                const res = await api.put(`users/new/${authenticatedUser.id}`, {
-                                                    name: values.name,
-                                                    phone: values.phone,
+                                                const res = await api.put(`users/reset/${authenticatedUser.id}`, {
                                                     password: values.password,
                                                 }, {
                                                     headers: { 'Authorization': `Bearer ${token}` }
@@ -105,39 +94,13 @@ export default function NewCustomer({ authenticated, user, token }) {
                                     validationSchema={validationSchema}
                                     validateOnChange={false}
                                 >
-                                    {({ handleBlur, handleChange, handleSubmit, values, setFieldValue, errors, touched }) => (
+                                    {({ handleChange, handleSubmit, values, setFieldValue, errors, touched }) => (
                                         <Form onSubmit={handleSubmit}>
                                             <Row>
                                                 <Col>
-                                                    <Form.Group className="mb-4" controlId="formLoginName">
-                                                        <Form.Label>Seu nome</Form.Label>
-                                                        <Form.Control type="text"
-                                                            onChange={handleChange}
-                                                            onBlur={handleBlur}
-                                                            value={values.name}
-                                                            name="name"
-                                                            isInvalid={!!errors.name && touched.name}
-                                                        />
-                                                        <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                                    </Form.Group>
+                                                    <h3 className="text-success">{`Olá ${authenticatedUser.name}`}</h3>
 
-                                                    <Form.Group className="mb-4" controlId="formLoginPhone">
-                                                        <Form.Label>Telefone</Form.Label>
-                                                        <Form.Control
-                                                            type="phone"
-                                                            maxLength={15}
-                                                            onChange={(e) => {
-                                                                setFieldValue('phone', cellphone(e.target.value));
-                                                            }}
-                                                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                                                                setFieldValue('phone', cellphone(e.target.value));
-                                                            }}
-                                                            value={values.phone}
-                                                            name="phone"
-                                                            isInvalid={!!errors.phone && touched.phone}
-                                                        />
-                                                        <Form.Control.Feedback type="invalid">{touched.phone && errors.phone}</Form.Control.Feedback>
-                                                    </Form.Group>
+                                                    <h5 className="text-secondary">Digite a sua nova senha.</h5>
 
                                                     <Form.Group className="mb-4" controlId="formLoginPassword">
                                                         <Form.Label>Senha</Form.Label>
@@ -197,12 +160,12 @@ export default function NewCustomer({ authenticated, user, token }) {
                                                 <Col>
                                                     <Link href="/">
                                                         <a
-                                                            title="Já tem cadastro? Entrar com a sua conta."
-                                                            data-title="Já tem cadastro? Entrar com a sua conta."
+                                                            title="Lembra da senha? Entrar no sistema."
+                                                            data-title="Lembra da senha? Entrar no sistema."
                                                         >
                                                             <Row>
                                                                 <Col sm={1}>
-                                                                    <FaKey size={14} /> <span>Já tem cadastro? Entrar com a sua conta.</span>
+                                                                    <FaKey size={14} /> <span>Lembra da senha? Entrar no sistema.</span>
                                                                 </Col>
                                                             </Row>
                                                         </a>
@@ -227,7 +190,7 @@ export default function NewCustomer({ authenticated, user, token }) {
                                     <Row>
                                         <Col>
                                             <h5 className="text-danger">Código inválido!</h5>
-                                            <h6 className="text-secondary">Talvez o usuário já esteja ativado.</h6>
+                                            <h6 className="text-secondary">Talvez o código já tenha expirado, solicite novamente.</h6>
                                         </Col>
                                     </Row>
 
@@ -260,7 +223,7 @@ export default function NewCustomer({ authenticated, user, token }) {
                 keyboard={false}
             >
                 <Modal.Header closeButton>
-                    <Modal.Title>Senha alterada!</Modal.Title>
+                    <Modal.Title>Cadastro concluído!</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
@@ -271,7 +234,7 @@ export default function NewCustomer({ authenticated, user, token }) {
                     </Row>
                     <Row className="justify-content-center align-items-center text-center">
                         <Col>
-                            <h5 className="text-success">Seu cadastro foi concluído com sucesso.</h5>
+                            <h5 className="text-success">Senha alterada com sucesso!</h5>
                             <h6 className="text-secondary">Clique no botão abaixo para entrar no sistema.</h6>
                         </Col>
                     </Row>
@@ -304,7 +267,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     try {
-        const res = await api.get('users/new/auth', {
+        const res = await api.get('users/reset', {
             params: {
                 email,
                 token,

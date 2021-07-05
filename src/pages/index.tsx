@@ -101,7 +101,7 @@ export default function Login() {
                         <Col>
                           <Form.Group className="mb-4" controlId="formLogintEmail">
                             <Form.Label>Seu e-mail</Form.Label>
-                            <Form.Control type="text"
+                            <Form.Control type="email"
                               onChange={handleChange}
                               onBlur={handleBlur}
                               value={values.email}
@@ -128,7 +128,7 @@ export default function Login() {
                       <Row className="justify-content-end">
                         {
                           messageShow ? <Col sm={12}><AlertMessage status={typeMessage} message={textMessage} /></Col> :
-                            <Col style={{ flexGrow: 0 }}>
+                            <Col className="col-row">
                               <Button variant="success" type="submit">Entrar</Button>
                             </Col>
 
@@ -137,7 +137,7 @@ export default function Login() {
 
                       <Row className="mt-4">
                         <Col>
-                          <Link href="/login/reset">
+                          <Link href="/users/reset">
                             <a title="Recuperar a sua senha." data-title="Recuperar a sua senha.">
                               <Row>
                                 <Col sm={1}>

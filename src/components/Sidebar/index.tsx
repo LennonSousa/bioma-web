@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
 
     const [showPageHeader, setShowPageHeader] = useState(false);
 
-    const pathsNotShow = ['/', '/users/new/auth', '/404', '500'];
+    const pathsNotShow = ['/', '/users/new/auth', '/users/reset', '/users/reset/auth', '/404', '500'];
 
     useEffect(() => {
         let show = false;

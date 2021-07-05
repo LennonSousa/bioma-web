@@ -18,7 +18,7 @@ export function Header() {
     const [showPageHeader, setShowPageHeader] = useState(false);
     const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-    const pathsNotShow = ['/', '/users/new/auth', '/404', '500'];
+    const pathsNotShow = ['/', '/users/new/auth', '/users/reset', '/users/reset/auth', '/404', '500'];
 
     const [showUserDetails, setShowUserDetails] = useState(false);
 
