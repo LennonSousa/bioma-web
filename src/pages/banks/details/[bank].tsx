@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { NextSeo } from 'next-seo';
 import { Button, ButtonGroup, Col, Container, Row, Tabs, Tab } from 'react-bootstrap';
 import { FaAngleRight, FaPencilAlt, FaPlus } from 'react-icons/fa';
 
@@ -85,239 +86,262 @@ export default function BankDetails() {
         router.push(route);
     }
 
-    return !user || loading ? <PageWaiting status="waiting" /> :
+    return (
         <>
+            <NextSeo
+                title="Detalhe do banco"
+                description="Detalhe do banco da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Detalhe do banco',
+                    description: 'Detalhe do banco da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Detalhe do banco | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
+
             {
-                can(user, "banks", "read:any") ? <>
-                    {
-                        loadingData ? <PageWaiting
-                            status={typeLoadingMessage}
-                            message={textLoadingMessage}
-                        /> :
-                            <>
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "banks", "read:any") ? <>
                                 {
-                                    !bankData ? <PageWaiting status="waiting" /> :
-                                        <Container className="content-page">
-                                            <Row>
-                                                <Col>
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <PageBack href="/banks" subTitle="Voltar para a lista de bancos" />
-                                                        </Col>
+                                    loadingData ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <>
+                                            {
+                                                !bankData ? <PageWaiting status="waiting" /> :
+                                                    <Container className="content-page">
+                                                        <Row>
+                                                            <Col>
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <PageBack href="/banks" subTitle="Voltar para a lista de bancos" />
+                                                                    </Col>
 
-                                                        <Col className="col-row">
-                                                            <ButtonGroup className="col-12">
-                                                                <Button
-                                                                    title="Editar banco."
-                                                                    variant="success"
-                                                                    onClick={() => handleRoute(`/customers/edit/${bankData.id}`)}
+                                                                    <Col className="col-row">
+                                                                        <ButtonGroup className="col-12">
+                                                                            <Button
+                                                                                title="Editar banco."
+                                                                                variant="success"
+                                                                                onClick={() => handleRoute(`/customers/edit/${bankData.id}`)}
+                                                                            >
+                                                                                <FaPencilAlt />
+                                                                            </Button>
+                                                                        </ButtonGroup>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={6}>
+                                                                        <Row className="align-items-center">
+                                                                            <Col>
+                                                                                <h3 className="form-control-plaintext text-success">{bankData.institution.name}</h3>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={6} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Agência</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.agency}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={3}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Telefone comercial</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.phone}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={3} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Celular</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.cellphone}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={6}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Endereço</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.address}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Cidade</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.city}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={2} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Estado</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.state}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={3}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Setor/gerente</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.sector}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={3} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Departamento</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{bankData.department}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Col className="border-top mb-3"></Col>
+
+                                                                <Tabs
+                                                                    id="relations-tabs"
+                                                                    defaultActiveKey="projects"
+                                                                    onSelect={(k) => setTabKey(k)}
                                                                 >
-                                                                    <FaPencilAlt />
-                                                                </Button>
-                                                            </ButtonGroup>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={6}>
-                                                            <Row className="align-items-center">
-                                                                <Col>
-                                                                    <h3 className="form-control-plaintext text-success">{bankData.institution.name}</h3>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={6} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Agência</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.agency}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={3}>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Telefone comercial</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.phone}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={3} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Celular</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.cellphone}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={6}>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Endereço</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.address}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Cidade</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.city}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={2} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Estado</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.state}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={3}>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Setor/gerente</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.sector}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={3} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Departamento</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{bankData.department}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Col className="border-top mb-3"></Col>
-
-                                                    <Tabs
-                                                        id="relations-tabs"
-                                                        defaultActiveKey="projects"
-                                                        onSelect={(k) => setTabKey(k)}
-                                                    >
-                                                        <Tab eventKey="projects" title="Projetos">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
-                                                                        {
-                                                                            loadingProjects ? <Col sm={4}>
-                                                                                <AlertMessage status="waiting" />
-                                                                            </Col> :
-                                                                                <>
+                                                                    <Tab eventKey="projects" title="Projetos">
+                                                                        <Row className={styles.relationsContainer}>
+                                                                            <Col>
+                                                                                <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                                     {
-                                                                                        !projectsErrorShow ? <>
-                                                                                            {
-                                                                                                !!projectsData.length ? <>
-                                                                                                    {
-                                                                                                        projectsData.map((project, index) => {
-                                                                                                            return <ProjectListItem
-                                                                                                                key={index}
-                                                                                                                project={project}
-                                                                                                            />
-                                                                                                        })
-                                                                                                    }
+                                                                                        loadingProjects ? <Col sm={4}>
+                                                                                            <AlertMessage status="waiting" />
+                                                                                        </Col> :
+                                                                                            <>
+                                                                                                {
+                                                                                                    !projectsErrorShow ? <>
+                                                                                                        {
+                                                                                                            !!projectsData.length ? <>
+                                                                                                                {
+                                                                                                                    projectsData.map((project, index) => {
+                                                                                                                        return <ProjectListItem
+                                                                                                                            key={index}
+                                                                                                                            project={project}
+                                                                                                                        />
+                                                                                                                    })
+                                                                                                                }
 
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-end">
-                                                                                                            <Col className="col-row">
-                                                                                                                <Button
-                                                                                                                    title="Ver todos os projetos para esse banco."
-                                                                                                                    variant="success"
-                                                                                                                    onClick={() => handleRoute(`/projects?bank=${bankData.id}`)}
-                                                                                                                >
-                                                                                                                    Ver mais <FaAngleRight />
-                                                                                                                </Button>
-                                                                                                            </Col>
-                                                                                                        </Row>
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-end">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <Button
+                                                                                                                                title="Ver todos os projetos para esse banco."
+                                                                                                                                variant="success"
+                                                                                                                                onClick={() => handleRoute(`/projects?bank=${bankData.id}`)}
+                                                                                                                            >
+                                                                                                                                Ver mais <FaAngleRight />
+                                                                                                                            </Button>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                            </> :
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-center">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <span className="text-success">Nenhum projeto encontrado.</span>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                        }
+                                                                                                    </> : <Col sm={4}>
+                                                                                                        <AlertMessage status="error" />
                                                                                                     </Col>
-                                                                                                </> :
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-center">
-                                                                                                            <Col className="col-row">
-                                                                                                                <span className="text-success">Nenhum projeto encontrado.</span>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                            }
-                                                                                        </> : <Col sm={4}>
-                                                                                            <AlertMessage status="error" />
-                                                                                        </Col>
+                                                                                                }
+                                                                                            </>
                                                                                     }
-                                                                                </>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
-                                                    </Tabs>
-                                                </Col>
-                                            </Row>
-                                        </Container>
+                                                                                </Row>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Tab>
+                                                                </Tabs>
+                                                            </Col>
+                                                        </Row>
+                                                    </Container>
+                                            }
+                                        </>
                                 }
-                            </>
-                    }
-                </> :
-                    <PageWaiting status="warning" message="Acesso negado!" />
+                            </> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
+                        }
+                    </>
             }
         </>
+    )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

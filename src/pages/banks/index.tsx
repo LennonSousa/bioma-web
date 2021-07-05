@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import { NextSeo } from 'next-seo';
 import { Col, Container, Row } from 'react-bootstrap';
 
 import { Bank } from '../../components/Banks';
@@ -72,48 +73,69 @@ export default function Banks() {
     }
 
     return (
-        !user || loading ? <PageWaiting status="waiting" /> :
-            <>
-                {
-                    can(user, "banks", "read:any") ? <>
-                        <Container className="page-container">
-                            <Row>
-                                {
-                                    loadingData ? <PageWaiting
-                                        status={typeLoadingMessage}
-                                        message={textLoadingMessage}
-                                    /> :
-                                        <>
-                                            {
-                                                !!banks.length ? banks.map((bank, index) => {
-                                                    return <BankListItem key={index} bank={bank} />
-                                                }) :
-                                                    <PageWaiting status="empty" message="Nenhum banco registrado." />
-                                            }
-                                        </>
-                                }
-                            </Row>
+        <>
+            <NextSeo
+                title="Lista de Bancos"
+                description="Lista de Bancos da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Lista de Bancos',
+                    description: 'Lista de Bancos da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Lista de Bancos | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
 
-                            <Row className="row-grow align-items-end">
-                                <Col>
-                                    {
-                                        !!banks.length && <Row className="justify-content-center align-items-center">
-                                            <Col className="col-row">
-                                                <Paginations
-                                                    pages={totalPages}
-                                                    active={activePage}
-                                                    handleActivePage={handleActivePage}
-                                                />
-                                            </Col>
-                                        </Row>
-                                    }
-                                </Col>
-                            </Row>
-                        </Container>
-                    </> :
-                        <PageWaiting status="warning" message="Acesso negado!" />
-                }
-            </>
+            {
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "banks", "read:any") ? <>
+                                <Container className="page-container">
+                                    <Row>
+                                        {
+                                            loadingData ? <PageWaiting
+                                                status={typeLoadingMessage}
+                                                message={textLoadingMessage}
+                                            /> :
+                                                <>
+                                                    {
+                                                        !!banks.length ? banks.map((bank, index) => {
+                                                            return <BankListItem key={index} bank={bank} />
+                                                        }) :
+                                                            <PageWaiting status="empty" message="Nenhum banco registrado." />
+                                                    }
+                                                </>
+                                        }
+                                    </Row>
+
+                                    <Row className="row-grow align-items-end">
+                                        <Col>
+                                            {
+                                                !!banks.length && <Row className="justify-content-center align-items-center">
+                                                    <Col className="col-row">
+                                                        <Paginations
+                                                            pages={totalPages}
+                                                            active={activePage}
+                                                            handleActivePage={handleActivePage}
+                                                        />
+                                                    </Col>
+                                                </Row>
+                                            }
+                                        </Col>
+                                    </Row>
+                                </Container>
+                            </> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
+                        }
+                    </>
+            }
+        </>
     )
 }
 

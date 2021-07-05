@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
+import { NextSeo } from 'next-seo';
 import Link from 'next/link';
 import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
@@ -159,461 +160,484 @@ export default function PropertyDetails() {
         router.push(route);
     }
 
-    return !user || loading ? <PageWaiting status="waiting" /> :
+    return (
         <>
+            <NextSeo
+                title="Detalhes do imóvel"
+                description="Detalhes do imóvel da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Detalhes do imóvel',
+                    description: 'Detalhes do imóvel da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Detalhes do imóvel | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
+
             {
-                can(user, "properties", "read:any") ? <>
-                    {
-                        loadingData || hasErrors ? <PageWaiting
-                            status={typeLoadingMessage}
-                            message={textLoadingMessage}
-                        /> :
-                            <>
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "properties", "read:any") ? <>
                                 {
-                                    !propertyData ? <PageWaiting status="waiting" /> :
-                                        <Container className="content-page">
-                                            <Row>
-                                                <Col>
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <PageBack href="/properties" subTitle="Voltar para a lista de imóveis" />
-                                                        </Col>
-
-                                                        <Col className="col-row">
-                                                            <ButtonGroup className="col-12">
-                                                                <Button
-                                                                    title="Editar imóvel."
-                                                                    variant="success"
-                                                                    onClick={() => handleRoute(`/properties/edit/${propertyData.id}`)}
-                                                                >
-                                                                    <FaPencilAlt />
-                                                                </Button>
-                                                            </ButtonGroup>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Membros</h6>
-                                                                </Col>
-                                                            </Row>
-                                                            <Row>
-                                                                {
-                                                                    propertyData.members.map(member => {
-                                                                        return <Members
-                                                                            key={member.id}
-                                                                            member={member}
-                                                                            canRemove={false}
-                                                                        />
-                                                                    })
-                                                                }
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={6}>
-                                                            <Row className="align-items-center">
-                                                                <Col className="col-row">
-                                                                    <h3 className="form-control-plaintext text-success">{propertyData.name}</h3>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={6} >
-                                                            <Row>
-                                                                <Col className="col-row">
-                                                                    <Row>
-                                                                        <Col>
-                                                                            <span className="text-success">Cliente</span>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row>
-                                                                        <Col>
-                                                                            <Link href={`/customers/details/${propertyData.customer.id}`}>
-                                                                                <a title="Ir para detalhes do cliente." data-title="Ir para detalhes do cliente.">
-                                                                                    <h6 className="text-secondary">{propertyData.customer.name}</h6>
-                                                                                </a>
-                                                                            </Link>
-                                                                        </Col>
-                                                                    </Row>
-                                                                </Col>
-
-                                                                <Col className="col-row">
-                                                                    <ButtonGroup size="sm" className="col-12">
-                                                                        <Button
-                                                                            variant="success"
-                                                                            title="Criar um novo imóvel para este cliente."
-                                                                            onClick={() => handleRoute(`/properties/new?customer=${propertyData.customer.id}`)}
-                                                                        >
-                                                                            <FaPlus /><FaMapSigns />
-                                                                        </Button>
-                                                                    </ButtonGroup>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={4}>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Matrícula</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{propertyData.registration}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Área</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{propertyData.area}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Coordenadas</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{propertyData.coordinates}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Cidade</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{propertyData.city}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={2} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Estado</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{propertyData.state}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Roteiro</h6>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-secondary text-wrap">{propertyData.route}</span>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col >
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Observação {propertyData.warnings && <FaStickyNote />}</h6>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-secondary text-wrap">{propertyData.notes}</span>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    {
-                                                        propertyData.warnings && <Row className="mb-3">
-                                                            <Col >
-                                                                <Row>
+                                    loadingData || hasErrors ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <>
+                                            {
+                                                !propertyData ? <PageWaiting status="waiting" /> :
+                                                    <Container className="content-page">
+                                                        <Row>
+                                                            <Col>
+                                                                <Row className="mb-3">
                                                                     <Col>
-                                                                        <h6 className="text-success">Pendências {propertyData.warnings && <FaExclamationCircle />}</h6>
+                                                                        <PageBack href="/properties" subTitle="Voltar para a lista de imóveis" />
+                                                                    </Col>
+
+                                                                    <Col className="col-row">
+                                                                        <ButtonGroup className="col-12">
+                                                                            <Button
+                                                                                title="Editar imóvel."
+                                                                                variant="success"
+                                                                                onClick={() => handleRoute(`/properties/edit/${propertyData.id}`)}
+                                                                            >
+                                                                                <FaPencilAlt />
+                                                                            </Button>
+                                                                        </ButtonGroup>
                                                                     </Col>
                                                                 </Row>
 
-                                                                <Row>
+                                                                <Row className="mb-3">
                                                                     <Col>
-                                                                        <span className="text-secondary text-wrap">{propertyData.warnings_text}</span>
-                                                                    </Col>
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    }
-
-                                                    <Col className="border-top mb-3"></Col>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Criado em</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{format(new Date(propertyData.created_at), 'dd/MM/yyyy')}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Usuário</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{propertyData.created_by}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Documentação <FaIdCard /></h6>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <ListGroup className="mb-3">
-                                                                        {
-                                                                            propertyData.docs.map((doc, index) => {
-                                                                                return <ListGroup.Item key={index} action as="div" variant="light">
-                                                                                    <Row>
-                                                                                        <Col className={`${doc.checked ? 'text-success' : ''}`} sm={8}>
-                                                                                            {
-                                                                                                doc.checked ? <FaCheck /> :
-                                                                                                    <FaRegFile />} <label>{doc.doc.name} </label>
-                                                                                        </Col>
-
-                                                                                        {
-                                                                                            doc.checked && <>
-                                                                                                <Col sm={2}>Data do recebimento</Col>
-
-                                                                                                <Col sm={2}>
-                                                                                                    {format(new Date(doc.received_at), 'dd/MM/yyyy')}
-                                                                                                </Col>
-                                                                                            </>
-                                                                                        }
-                                                                                    </Row>
-                                                                                </ListGroup.Item>
-                                                                            })
-                                                                        }
-                                                                    </ListGroup>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Anexos <FaFileAlt /></h6>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                {
-                                                                    !!propertyData.attachments.length ? <Col>
-                                                                        <ListGroup>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Membros</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                        <Row>
                                                                             {
-                                                                                propertyData.attachments.map((attachment, index) => {
-                                                                                    return <PropertyAttachments
-                                                                                        key={index}
-                                                                                        attachment={attachment}
-                                                                                        canEdit={false}
+                                                                                propertyData.members.map(member => {
+                                                                                    return <Members
+                                                                                        key={member.id}
+                                                                                        member={member}
+                                                                                        canRemove={false}
                                                                                     />
                                                                                 })
                                                                             }
-                                                                        </ListGroup>
-                                                                    </Col> :
-                                                                        <Col>
-                                                                            <AlertMessage
-                                                                                status="warning"
-                                                                                message="Nenhum anexo enviado para esse imóvel."
-                                                                            />
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={6}>
+                                                                        <Row className="align-items-center">
+                                                                            <Col className="col-row">
+                                                                                <h3 className="form-control-plaintext text-success">{propertyData.name}</h3>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={6} >
+                                                                        <Row>
+                                                                            <Col className="col-row">
+                                                                                <Row>
+                                                                                    <Col>
+                                                                                        <span className="text-success">Cliente</span>
+                                                                                    </Col>
+                                                                                </Row>
+
+                                                                                <Row>
+                                                                                    <Col>
+                                                                                        <Link href={`/customers/details/${propertyData.customer.id}`}>
+                                                                                            <a title="Ir para detalhes do cliente." data-title="Ir para detalhes do cliente.">
+                                                                                                <h6 className="text-secondary">{propertyData.customer.name}</h6>
+                                                                                            </a>
+                                                                                        </Link>
+                                                                                    </Col>
+                                                                                </Row>
+                                                                            </Col>
+
+                                                                            <Col className="col-row">
+                                                                                <ButtonGroup size="sm" className="col-12">
+                                                                                    <Button
+                                                                                        variant="success"
+                                                                                        title="Criar um novo imóvel para este cliente."
+                                                                                        onClick={() => handleRoute(`/properties/new?customer=${propertyData.customer.id}`)}
+                                                                                    >
+                                                                                        <FaPlus /><FaMapSigns />
+                                                                                    </Button>
+                                                                                </ButtonGroup>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={4}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Matrícula</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{propertyData.registration}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Área</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{propertyData.area}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Coordenadas</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{propertyData.coordinates}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Cidade</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{propertyData.city}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={2} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Estado</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{propertyData.state}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Roteiro</h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-secondary text-wrap">{propertyData.route}</span>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Observação {propertyData.warnings && <FaStickyNote />}</h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-secondary text-wrap">{propertyData.notes}</span>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                {
+                                                                    propertyData.warnings && <Row className="mb-3">
+                                                                        <Col >
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <h6 className="text-success">Pendências {propertyData.warnings && <FaExclamationCircle />}</h6>
+                                                                                </Col>
+                                                                            </Row>
+
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <span className="text-secondary text-wrap">{propertyData.warnings_text}</span>
+                                                                                </Col>
+                                                                            </Row>
                                                                         </Col>
+                                                                    </Row>
                                                                 }
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
 
-                                                    <Col className="border-top mb-3"></Col>
+                                                                <Col className="border-top mb-3"></Col>
 
-                                                    <Tabs
-                                                        id="relations-tabs"
-                                                        defaultActiveKey="projects"
-                                                        onSelect={(k) => setTabKey(k)}
-                                                    >
-                                                        <Tab eventKey="projects" title="Projetos">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
-                                                                        {
-                                                                            loadingProjects ? <Col sm={4}>
-                                                                                <AlertMessage status="waiting" />
-                                                                            </Col> :
-                                                                                <>
+                                                                <Row className="mb-3">
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Criado em</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{format(new Date(propertyData.created_at), 'dd/MM/yyyy')}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Usuário</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{propertyData.created_by}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Documentação <FaIdCard /></h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <ListGroup className="mb-3">
                                                                                     {
-                                                                                        !projectsErrorShow ? <>
-                                                                                            {
-                                                                                                !!projectsData.length ? <>
+                                                                                        propertyData.docs.map((doc, index) => {
+                                                                                            return <ListGroup.Item key={index} action as="div" variant="light">
+                                                                                                <Row>
+                                                                                                    <Col className={`${doc.checked ? 'text-success' : ''}`} sm={8}>
+                                                                                                        {
+                                                                                                            doc.checked ? <FaCheck /> :
+                                                                                                                <FaRegFile />} <label>{doc.doc.name} </label>
+                                                                                                    </Col>
+
                                                                                                     {
-                                                                                                        projectsData.map((project, index) => {
-                                                                                                            return <ProjectListItem
-                                                                                                                key={index}
-                                                                                                                project={project}
-                                                                                                            />
-                                                                                                        })
+                                                                                                        doc.checked && <>
+                                                                                                            <Col sm={2}>Data do recebimento</Col>
+
+                                                                                                            <Col sm={2}>
+                                                                                                                {format(new Date(doc.received_at), 'dd/MM/yyyy')}
+                                                                                                            </Col>
+                                                                                                        </>
                                                                                                     }
-
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-end">
-                                                                                                            <Col className="col-row">
-                                                                                                                <Button
-                                                                                                                    title="Ver todos os projetos para esse imóvel."
-                                                                                                                    variant="success"
-                                                                                                                    onClick={() => handleRoute(`/projects?property=${propertyData.id}`)}
-                                                                                                                >
-                                                                                                                    Ver mais <FaAngleRight />
-                                                                                                                </Button>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                                </> :
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-center">
-                                                                                                            <Col className="col-row">
-                                                                                                                <span className="text-success">Nenhum projeto encontrado.</span>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                            }
-                                                                                        </> : <Col sm={4}>
-                                                                                            <AlertMessage status="error" />
-                                                                                        </Col>
+                                                                                                </Row>
+                                                                                            </ListGroup.Item>
+                                                                                        })
                                                                                     }
-                                                                                </>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
+                                                                                </ListGroup>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
 
-                                                        <Tab eventKey="properties" title="Outros imóveis">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
-                                                                        {
-                                                                            loadingProperties ? <Col sm={4}>
-                                                                                <AlertMessage status="waiting" />
-                                                                            </Col> :
-                                                                                <>
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Anexos <FaFileAlt /></h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            {
+                                                                                !!propertyData.attachments.length ? <Col>
+                                                                                    <ListGroup>
+                                                                                        {
+                                                                                            propertyData.attachments.map((attachment, index) => {
+                                                                                                return <PropertyAttachments
+                                                                                                    key={index}
+                                                                                                    attachment={attachment}
+                                                                                                    canEdit={false}
+                                                                                                />
+                                                                                            })
+                                                                                        }
+                                                                                    </ListGroup>
+                                                                                </Col> :
+                                                                                    <Col>
+                                                                                        <AlertMessage
+                                                                                            status="warning"
+                                                                                            message="Nenhum anexo enviado para esse imóvel."
+                                                                                        />
+                                                                                    </Col>
+                                                                            }
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Col className="border-top mb-3"></Col>
+
+                                                                <Tabs
+                                                                    id="relations-tabs"
+                                                                    defaultActiveKey="projects"
+                                                                    onSelect={(k) => setTabKey(k)}
+                                                                >
+                                                                    <Tab eventKey="projects" title="Projetos">
+                                                                        <Row className={styles.relationsContainer}>
+                                                                            <Col>
+                                                                                <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                                     {
-                                                                                        !propertiesErrorShow ? <>
-                                                                                            {
-                                                                                                !!propertiesData.length ? <>
-                                                                                                    {
-                                                                                                        propertiesData.map((property, index) => {
-                                                                                                            return <PropertyListItem
-                                                                                                                key={index}
-                                                                                                                property={property}
-                                                                                                            />
-                                                                                                        })
-                                                                                                    }
+                                                                                        loadingProjects ? <Col sm={4}>
+                                                                                            <AlertMessage status="waiting" />
+                                                                                        </Col> :
+                                                                                            <>
+                                                                                                {
+                                                                                                    !projectsErrorShow ? <>
+                                                                                                        {
+                                                                                                            !!projectsData.length ? <>
+                                                                                                                {
+                                                                                                                    projectsData.map((project, index) => {
+                                                                                                                        return <ProjectListItem
+                                                                                                                            key={index}
+                                                                                                                            project={project}
+                                                                                                                        />
+                                                                                                                    })
+                                                                                                                }
 
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-end">
-                                                                                                            <Col className="col-row">
-                                                                                                                <Button
-                                                                                                                    title="Ver todos os imóveis para esse cliente."
-                                                                                                                    variant="success"
-                                                                                                                    onClick={() => handleRoute(`/properties?customer=${propertyData.customer.id}`)}
-                                                                                                                >
-                                                                                                                    Ver mais <FaAngleRight />
-                                                                                                                </Button>
-                                                                                                            </Col>
-                                                                                                        </Row>
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-end">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <Button
+                                                                                                                                title="Ver todos os projetos para esse imóvel."
+                                                                                                                                variant="success"
+                                                                                                                                onClick={() => handleRoute(`/projects?property=${propertyData.id}`)}
+                                                                                                                            >
+                                                                                                                                Ver mais <FaAngleRight />
+                                                                                                                            </Button>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                            </> :
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-center">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <span className="text-success">Nenhum projeto encontrado.</span>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                        }
+                                                                                                    </> : <Col sm={4}>
+                                                                                                        <AlertMessage status="error" />
                                                                                                     </Col>
-                                                                                                </> :
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-center">
-                                                                                                            <Col className="col-row">
-                                                                                                                <span className="text-success">Nenhum imóvel encontrado.</span>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                            }
-                                                                                        </> : <Col sm={4}>
-                                                                                            <AlertMessage status="error" />
-                                                                                        </Col>
+                                                                                                }
+                                                                                            </>
                                                                                     }
-                                                                                </>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
-                                                    </Tabs>
-                                                </Col>
-                                            </Row>
-                                        </Container>
+                                                                                </Row>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Tab>
+
+                                                                    <Tab eventKey="properties" title="Outros imóveis">
+                                                                        <Row className={styles.relationsContainer}>
+                                                                            <Col>
+                                                                                <Row className={`justify-content-center ${styles.relationsContent}`}>
+                                                                                    {
+                                                                                        loadingProperties ? <Col sm={4}>
+                                                                                            <AlertMessage status="waiting" />
+                                                                                        </Col> :
+                                                                                            <>
+                                                                                                {
+                                                                                                    !propertiesErrorShow ? <>
+                                                                                                        {
+                                                                                                            !!propertiesData.length ? <>
+                                                                                                                {
+                                                                                                                    propertiesData.map((property, index) => {
+                                                                                                                        return <PropertyListItem
+                                                                                                                            key={index}
+                                                                                                                            property={property}
+                                                                                                                        />
+                                                                                                                    })
+                                                                                                                }
+
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-end">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <Button
+                                                                                                                                title="Ver todos os imóveis para esse cliente."
+                                                                                                                                variant="success"
+                                                                                                                                onClick={() => handleRoute(`/properties?customer=${propertyData.customer.id}`)}
+                                                                                                                            >
+                                                                                                                                Ver mais <FaAngleRight />
+                                                                                                                            </Button>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                            </> :
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-center">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <span className="text-success">Nenhum imóvel encontrado.</span>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                        }
+                                                                                                    </> : <Col sm={4}>
+                                                                                                        <AlertMessage status="error" />
+                                                                                                    </Col>
+                                                                                                }
+                                                                                            </>
+                                                                                    }
+                                                                                </Row>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Tab>
+                                                                </Tabs>
+                                                            </Col>
+                                                        </Row>
+                                                    </Container>
+                                            }
+                                        </>
                                 }
-                            </>
-                    }
-                </> :
-                    <PageWaiting status="warning" message="Acesso negado!" />
+                            </> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
+                        }
+                    </>
             }
         </>
+    )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

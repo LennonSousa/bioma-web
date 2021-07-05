@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
+import { NextSeo } from 'next-seo';
 import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
@@ -184,554 +185,577 @@ export default function CustomerDetails() {
         router.push(route);
     }
 
-    return !user || loading ? <PageWaiting status="waiting" /> :
+    return (
         <>
+            <NextSeo
+                title="Detalhes do cliente"
+                description="Detalhes do cliente da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Detalhes do cliente',
+                    description: 'Detalhes do cliente da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Detalhes do cliente | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
+
             {
-                can(user, "customers", "read:any") ? <>
-                    {
-                        loadingData || hasErrors ? <PageWaiting
-                            status={typeLoadingMessage}
-                            message={textLoadingMessage}
-                        /> :
-                            <>
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "customers", "read:any") ? <>
                                 {
-                                    !customerData ? <PageWaiting status="waiting" /> :
-                                        <Container className="content-page">
-                                            <Row>
-                                                <Col>
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
-                                                        </Col>
-
-                                                        <Col className="col-row">
-                                                            <ButtonGroup className="col-12">
-                                                                <Button
-                                                                    title="Editar cliente."
-                                                                    variant="success"
-                                                                    onClick={() => handleRoute(`/customers/edit/${customerData.id}`)}
-                                                                >
-                                                                    <FaPencilAlt />
-                                                                </Button>
-                                                            </ButtonGroup>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Membros</h6>
-                                                                </Col>
-                                                            </Row>
-                                                            <Row>
-                                                                {
-                                                                    customerData.members.map(member => {
-                                                                        return <Members
-                                                                            key={member.id}
-                                                                            member={member}
-                                                                            canRemove={false}
-                                                                        />
-                                                                    })
-                                                                }
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={6}>
-                                                            <Row className="align-items-center">
-                                                                <Col className="col-row">
-                                                                    <h3 className="form-control-plaintext text-success">{customerData.name}</h3>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">{documentType}</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.document}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={2} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Nascimento</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{format(new Date(customerData.birth), 'dd/MM/yyyy')}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={3}>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Telefone comercial</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.phone}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={3} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Celular</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.cellphone}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={6} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">E-mail</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.email}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={8}>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Outros contatos</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.contacts}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Responsável</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.owner}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={6}>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Endereço</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.address}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Cidade</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.city}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={2} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Estado</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.state}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col >
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Observação {customerData.warnings && <FaStickyNote />}</h6>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-secondary text-wrap">{customerData.notes}</span>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    {
-                                                        customerData.warnings && <Row className="mb-3">
-                                                            <Col >
-                                                                <Row>
+                                    loadingData || hasErrors ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <>
+                                            {
+                                                !customerData ? <PageWaiting status="waiting" /> :
+                                                    <Container className="content-page">
+                                                        <Row>
+                                                            <Col>
+                                                                <Row className="mb-3">
                                                                     <Col>
-                                                                        <h6 className="text-success">Pendências {customerData.warnings && <FaExclamationCircle />}</h6>
+                                                                        <PageBack href="/customers" subTitle="Voltar para a lista de clientes" />
+                                                                    </Col>
+
+                                                                    <Col className="col-row">
+                                                                        <ButtonGroup className="col-12">
+                                                                            <Button
+                                                                                title="Editar cliente."
+                                                                                variant="success"
+                                                                                onClick={() => handleRoute(`/customers/edit/${customerData.id}`)}
+                                                                            >
+                                                                                <FaPencilAlt />
+                                                                            </Button>
+                                                                        </ButtonGroup>
                                                                     </Col>
                                                                 </Row>
 
-                                                                <Row>
+                                                                <Row className="mb-3">
                                                                     <Col>
-                                                                        <span className="text-secondary text-wrap">{customerData.warnings_text}</span>
-                                                                    </Col>
-                                                                </Row>
-                                                            </Col>
-                                                        </Row>
-                                                    }
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Tipo</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.type.name}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Col className="border-top mb-3"></Col>
-
-                                                    <Row className="mb-3">
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Criado em</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{format(new Date(customerData.created_at), 'dd/MM/yyyy')}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col sm={4} >
-                                                            <Row>
-                                                                <Col>
-                                                                    <span className="text-success">Usuário</span>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-secondary">{customerData.created_by}</h6>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Documentação <FaIdCard /></h6>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col>
-                                                                    <ListGroup className="mb-3">
-                                                                        {
-                                                                            customerData.docs.map((doc, index) => {
-                                                                                return <ListGroup.Item key={index} action as="div" variant="light">
-                                                                                    <Row>
-                                                                                        <Col className={`${doc.checked ? 'text-success' : ''}`} sm={8}>
-                                                                                            {
-                                                                                                doc.checked ? <FaCheck /> :
-                                                                                                    <FaRegFile />} <label>{doc.doc.name} </label>
-                                                                                        </Col>
-
-                                                                                        {
-                                                                                            doc.checked && <>
-                                                                                                <Col sm={2}>Data do recebimento</Col>
-
-                                                                                                <Col sm={2}>
-                                                                                                    {format(new Date(doc.received_at), 'dd/MM/yyyy')}
-                                                                                                </Col>
-                                                                                            </>
-                                                                                        }
-                                                                                    </Row>
-                                                                                </ListGroup.Item>
-                                                                            })
-                                                                        }
-                                                                    </ListGroup>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Row className="mb-3">
-                                                        <Col>
-                                                            <Row>
-                                                                <Col>
-                                                                    <h6 className="text-success">Anexos <FaFileAlt /></h6>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                {
-                                                                    !!customerData.attachments.length ? <Col>
-                                                                        <ListGroup>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Membros</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                        <Row>
                                                                             {
-                                                                                customerData.attachments.map((attachment, index) => {
-                                                                                    return <CustomerAttachments
-                                                                                        key={index}
-                                                                                        attachment={attachment}
-                                                                                        canEdit={false}
+                                                                                customerData.members.map(member => {
+                                                                                    return <Members
+                                                                                        key={member.id}
+                                                                                        member={member}
+                                                                                        canRemove={false}
                                                                                     />
                                                                                 })
                                                                             }
-                                                                        </ListGroup>
-                                                                    </Col> :
-                                                                        <Col>
-                                                                            <AlertMessage
-                                                                                status="warning"
-                                                                                message="Nenhum anexo enviado para esse cliente."
-                                                                            />
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={6}>
+                                                                        <Row className="align-items-center">
+                                                                            <Col className="col-row">
+                                                                                <h3 className="form-control-plaintext text-success">{customerData.name}</h3>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">{documentType}</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.document}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={2} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Nascimento</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{format(new Date(customerData.birth), 'dd/MM/yyyy')}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={3}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Telefone comercial</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.phone}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={3} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Celular</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.cellphone}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={6} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">E-mail</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.email}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={8}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Outros contatos</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.contacts}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Responsável</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.owner}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={6}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Endereço</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.address}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Cidade</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.city}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={2} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Estado</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.state}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Observação {customerData.warnings && <FaStickyNote />}</h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-secondary text-wrap">{customerData.notes}</span>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                {
+                                                                    customerData.warnings && <Row className="mb-3">
+                                                                        <Col >
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <h6 className="text-success">Pendências {customerData.warnings && <FaExclamationCircle />}</h6>
+                                                                                </Col>
+                                                                            </Row>
+
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <span className="text-secondary text-wrap">{customerData.warnings_text}</span>
+                                                                                </Col>
+                                                                            </Row>
                                                                         </Col>
+                                                                    </Row>
                                                                 }
-                                                            </Row>
-                                                        </Col>
-                                                    </Row>
 
-                                                    <Col className="border-top mb-3"></Col>
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Tipo</span>
+                                                                            </Col>
+                                                                        </Row>
 
-                                                    <Tabs
-                                                        id="relations-tabs"
-                                                        defaultActiveKey="properties"
-                                                        onSelect={(k) => setTabKey(k)}
-                                                    >
-                                                        <Tab eventKey="properties" title="Imóveis">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
-                                                                        {
-                                                                            loadingProperties ? <Col sm={4}>
-                                                                                <AlertMessage status="waiting" />
-                                                                            </Col> :
-                                                                                <>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.type.name}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Col className="border-top mb-3"></Col>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Criado em</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{format(new Date(customerData.created_at), 'dd/MM/yyyy')}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Usuário</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{customerData.created_by}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Documentação <FaIdCard /></h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <ListGroup className="mb-3">
                                                                                     {
-                                                                                        !propertiesErrorShow ? <>
-                                                                                            {
-                                                                                                !!propertiesData.length ? <>
+                                                                                        customerData.docs.map((doc, index) => {
+                                                                                            return <ListGroup.Item key={index} action as="div" variant="light">
+                                                                                                <Row>
+                                                                                                    <Col className={`${doc.checked ? 'text-success' : ''}`} sm={8}>
+                                                                                                        {
+                                                                                                            doc.checked ? <FaCheck /> :
+                                                                                                                <FaRegFile />} <label>{doc.doc.name} </label>
+                                                                                                    </Col>
+
                                                                                                     {
-                                                                                                        propertiesData.map((property, index) => {
-                                                                                                            return <PropertyListItem
-                                                                                                                key={index}
-                                                                                                                property={property}
-                                                                                                            />
-                                                                                                        })
+                                                                                                        doc.checked && <>
+                                                                                                            <Col sm={2}>Data do recebimento</Col>
+
+                                                                                                            <Col sm={2}>
+                                                                                                                {format(new Date(doc.received_at), 'dd/MM/yyyy')}
+                                                                                                            </Col>
+                                                                                                        </>
                                                                                                     }
-
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-end">
-                                                                                                            <Col className="col-row">
-                                                                                                                <Button
-                                                                                                                    title="Ver todos os imóveis para esse cliente."
-                                                                                                                    variant="success"
-                                                                                                                    onClick={() => handleRoute(`/properties?customer=${customerData.id}`)}
-                                                                                                                >
-                                                                                                                    Ver mais <FaAngleRight />
-                                                                                                                </Button>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                                </> :
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-center">
-                                                                                                            <Col className="col-row">
-                                                                                                                <span className="text-success">Nenhum imóvel encontrado.</span>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                            }
-                                                                                        </> : <Col sm={4}>
-                                                                                            <AlertMessage status="error" />
-                                                                                        </Col>
+                                                                                                </Row>
+                                                                                            </ListGroup.Item>
+                                                                                        })
                                                                                     }
-                                                                                </>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
+                                                                                </ListGroup>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
 
-                                                        <Tab eventKey="projects" title="Projetos">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
-                                                                        {
-                                                                            loadingProjects ? <Col sm={4}>
-                                                                                <AlertMessage status="waiting" />
-                                                                            </Col> :
-                                                                                <>
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Anexos <FaFileAlt /></h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            {
+                                                                                !!customerData.attachments.length ? <Col>
+                                                                                    <ListGroup>
+                                                                                        {
+                                                                                            customerData.attachments.map((attachment, index) => {
+                                                                                                return <CustomerAttachments
+                                                                                                    key={index}
+                                                                                                    attachment={attachment}
+                                                                                                    canEdit={false}
+                                                                                                />
+                                                                                            })
+                                                                                        }
+                                                                                    </ListGroup>
+                                                                                </Col> :
+                                                                                    <Col>
+                                                                                        <AlertMessage
+                                                                                            status="warning"
+                                                                                            message="Nenhum anexo enviado para esse cliente."
+                                                                                        />
+                                                                                    </Col>
+                                                                            }
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Col className="border-top mb-3"></Col>
+
+                                                                <Tabs
+                                                                    id="relations-tabs"
+                                                                    defaultActiveKey="properties"
+                                                                    onSelect={(k) => setTabKey(k)}
+                                                                >
+                                                                    <Tab eventKey="properties" title="Imóveis">
+                                                                        <Row className={styles.relationsContainer}>
+                                                                            <Col>
+                                                                                <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                                     {
-                                                                                        !projectsErrorShow ? <>
-                                                                                            {
-                                                                                                !!projectsData.length ? <>
-                                                                                                    {
-                                                                                                        projectsData.map((project, index) => {
-                                                                                                            return <ProjectListItem
-                                                                                                                key={index}
-                                                                                                                project={project}
-                                                                                                            />
-                                                                                                        })
-                                                                                                    }
+                                                                                        loadingProperties ? <Col sm={4}>
+                                                                                            <AlertMessage status="waiting" />
+                                                                                        </Col> :
+                                                                                            <>
+                                                                                                {
+                                                                                                    !propertiesErrorShow ? <>
+                                                                                                        {
+                                                                                                            !!propertiesData.length ? <>
+                                                                                                                {
+                                                                                                                    propertiesData.map((property, index) => {
+                                                                                                                        return <PropertyListItem
+                                                                                                                            key={index}
+                                                                                                                            property={property}
+                                                                                                                        />
+                                                                                                                    })
+                                                                                                                }
 
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-end">
-                                                                                                            <Col className="col-row">
-                                                                                                                <Button
-                                                                                                                    title="Ver todos os projetos para esse cliente."
-                                                                                                                    variant="success"
-                                                                                                                    onClick={() => handleRoute(`/projects?customer=${customerData.id}`)}
-                                                                                                                >
-                                                                                                                    Ver mais <FaAngleRight />
-                                                                                                                </Button>
-                                                                                                            </Col>
-                                                                                                        </Row>
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-end">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <Button
+                                                                                                                                title="Ver todos os imóveis para esse cliente."
+                                                                                                                                variant="success"
+                                                                                                                                onClick={() => handleRoute(`/properties?customer=${customerData.id}`)}
+                                                                                                                            >
+                                                                                                                                Ver mais <FaAngleRight />
+                                                                                                                            </Button>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                            </> :
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-center">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <span className="text-success">Nenhum imóvel encontrado.</span>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                        }
+                                                                                                    </> : <Col sm={4}>
+                                                                                                        <AlertMessage status="error" />
                                                                                                     </Col>
-                                                                                                </> :
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-center">
-                                                                                                            <Col className="col-row">
-                                                                                                                <span className="text-success">Nenhum projeto encontrado.</span>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                            }
-                                                                                        </> : <Col sm={4}>
-                                                                                            <AlertMessage status="error" />
-                                                                                        </Col>
+                                                                                                }
+                                                                                            </>
                                                                                     }
-                                                                                </>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
+                                                                                </Row>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Tab>
 
-                                                        <Tab eventKey="licensings" title="Licenciamentos">
-                                                            <Row className={styles.relationsContainer}>
-                                                                <Col>
-                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
-                                                                        {
-                                                                            loadingLicensings ? <Col sm={4}>
-                                                                                <AlertMessage status="waiting" />
-                                                                            </Col> :
-                                                                                <>
+                                                                    <Tab eventKey="projects" title="Projetos">
+                                                                        <Row className={styles.relationsContainer}>
+                                                                            <Col>
+                                                                                <Row className={`justify-content-center ${styles.relationsContent}`}>
                                                                                     {
-                                                                                        !licensingsErrorShow ? <>
-                                                                                            {
-                                                                                                !!licensingsData.length ? <>
-                                                                                                    {
-                                                                                                        licensingsData.map((licensing, index) => {
-                                                                                                            return <LicensingListItem
-                                                                                                                key={index}
-                                                                                                                licensing={licensing}
-                                                                                                            />
-                                                                                                        })
-                                                                                                    }
+                                                                                        loadingProjects ? <Col sm={4}>
+                                                                                            <AlertMessage status="waiting" />
+                                                                                        </Col> :
+                                                                                            <>
+                                                                                                {
+                                                                                                    !projectsErrorShow ? <>
+                                                                                                        {
+                                                                                                            !!projectsData.length ? <>
+                                                                                                                {
+                                                                                                                    projectsData.map((project, index) => {
+                                                                                                                        return <ProjectListItem
+                                                                                                                            key={index}
+                                                                                                                            project={project}
+                                                                                                                        />
+                                                                                                                    })
+                                                                                                                }
 
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-end">
-                                                                                                            <Col className="col-row">
-                                                                                                                <Button
-                                                                                                                    title="Ver todos os licenciamentos para esse cliente."
-                                                                                                                    variant="success"
-                                                                                                                    onClick={() => handleRoute(`/licensings?customer=${customerData.id}`)}
-                                                                                                                >
-                                                                                                                    Ver mais <FaAngleRight />
-                                                                                                                </Button>
-                                                                                                            </Col>
-                                                                                                        </Row>
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-end">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <Button
+                                                                                                                                title="Ver todos os projetos para esse cliente."
+                                                                                                                                variant="success"
+                                                                                                                                onClick={() => handleRoute(`/projects?customer=${customerData.id}`)}
+                                                                                                                            >
+                                                                                                                                Ver mais <FaAngleRight />
+                                                                                                                            </Button>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                            </> :
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-center">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <span className="text-success">Nenhum projeto encontrado.</span>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                        }
+                                                                                                    </> : <Col sm={4}>
+                                                                                                        <AlertMessage status="error" />
                                                                                                     </Col>
-                                                                                                </> :
-                                                                                                    <Col>
-                                                                                                        <Row className="justify-content-center">
-                                                                                                            <Col className="col-row">
-                                                                                                                <span className="text-success">Nenhum licenciamentol encontrado.</span>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </Col>
-                                                                                            }
-                                                                                        </> : <Col sm={4}>
-                                                                                            <AlertMessage status="error" />
-                                                                                        </Col>
+                                                                                                }
+                                                                                            </>
                                                                                     }
-                                                                                </>
-                                                                        }
-                                                                    </Row>
-                                                                </Col>
-                                                            </Row>
-                                                        </Tab>
-                                                    </Tabs>
-                                                </Col>
-                                            </Row>
-                                        </Container>
+                                                                                </Row>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Tab>
+
+                                                                    <Tab eventKey="licensings" title="Licenciamentos">
+                                                                        <Row className={styles.relationsContainer}>
+                                                                            <Col>
+                                                                                <Row className={`justify-content-center ${styles.relationsContent}`}>
+                                                                                    {
+                                                                                        loadingLicensings ? <Col sm={4}>
+                                                                                            <AlertMessage status="waiting" />
+                                                                                        </Col> :
+                                                                                            <>
+                                                                                                {
+                                                                                                    !licensingsErrorShow ? <>
+                                                                                                        {
+                                                                                                            !!licensingsData.length ? <>
+                                                                                                                {
+                                                                                                                    licensingsData.map((licensing, index) => {
+                                                                                                                        return <LicensingListItem
+                                                                                                                            key={index}
+                                                                                                                            licensing={licensing}
+                                                                                                                        />
+                                                                                                                    })
+                                                                                                                }
+
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-end">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <Button
+                                                                                                                                title="Ver todos os licenciamentos para esse cliente."
+                                                                                                                                variant="success"
+                                                                                                                                onClick={() => handleRoute(`/licensings?customer=${customerData.id}`)}
+                                                                                                                            >
+                                                                                                                                Ver mais <FaAngleRight />
+                                                                                                                            </Button>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                            </> :
+                                                                                                                <Col>
+                                                                                                                    <Row className="justify-content-center">
+                                                                                                                        <Col className="col-row">
+                                                                                                                            <span className="text-success">Nenhum licenciamentol encontrado.</span>
+                                                                                                                        </Col>
+                                                                                                                    </Row>
+                                                                                                                </Col>
+                                                                                                        }
+                                                                                                    </> : <Col sm={4}>
+                                                                                                        <AlertMessage status="error" />
+                                                                                                    </Col>
+                                                                                                }
+                                                                                            </>
+                                                                                    }
+                                                                                </Row>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Tab>
+                                                                </Tabs>
+                                                            </Col>
+                                                        </Row>
+                                                    </Container>
+                                            }
+                                        </>
                                 }
-                            </>
-                    }
-                </> :
-                    <PageWaiting status="warning" message="Acesso negado!" />
+                            </> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
+                        }
+                    </>
             }
         </>
+    )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

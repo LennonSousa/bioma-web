@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
+import { NextSeo } from 'next-seo';
 import { Col, Container, Row } from 'react-bootstrap';
 
 import api from '../../api/api';
@@ -110,48 +111,69 @@ export default function Properties() {
     }
 
     return (
-        !user || loading ? <PageWaiting status="waiting" /> :
-            <>
-                {
-                    can(user, "properties", "read:any") ? <>
-                        <Container className="page-container">
-                            <Row>
-                                {
-                                    loadingData ? <PageWaiting
-                                        status={typeLoadingMessage}
-                                        message={textLoadingMessage}
-                                    /> :
-                                        <>
-                                            {
-                                                !!properties.length ? properties.map((property, index) => {
-                                                    return <PropertyListItem key={index} property={property} />
-                                                }) :
-                                                    <PageWaiting status="empty" message="Nenhum imóvel registrado." />
-                                            }
-                                        </>
-                                }
-                            </Row>
+        <>
+            <NextSeo
+                title="Lista de imóveis"
+                description="Lista de imóveis da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Lista de imóveis',
+                    description: 'Lista de imóveis da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Lista de imóveis | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
 
-                            <Row className="row-grow align-items-end">
-                                <Col>
-                                    {
-                                        !!properties.length && <Row className="justify-content-center align-items-center">
-                                            <Col className="col-row">
-                                                <Paginations
-                                                    pages={totalPages}
-                                                    active={activePage}
-                                                    handleActivePage={handleActivePage}
-                                                />
-                                            </Col>
-                                        </Row>
-                                    }
-                                </Col>
-                            </Row>
-                        </Container>
-                    </> :
-                        <PageWaiting status="warning" message="Acesso negado!" />
-                }
-            </>
+            {
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "properties", "read:any") ? <>
+                                <Container className="page-container">
+                                    <Row>
+                                        {
+                                            loadingData ? <PageWaiting
+                                                status={typeLoadingMessage}
+                                                message={textLoadingMessage}
+                                            /> :
+                                                <>
+                                                    {
+                                                        !!properties.length ? properties.map((property, index) => {
+                                                            return <PropertyListItem key={index} property={property} />
+                                                        }) :
+                                                            <PageWaiting status="empty" message="Nenhum imóvel registrado." />
+                                                    }
+                                                </>
+                                        }
+                                    </Row>
+
+                                    <Row className="row-grow align-items-end">
+                                        <Col>
+                                            {
+                                                !!properties.length && <Row className="justify-content-center align-items-center">
+                                                    <Col className="col-row">
+                                                        <Paginations
+                                                            pages={totalPages}
+                                                            active={activePage}
+                                                            handleActivePage={handleActivePage}
+                                                        />
+                                                    </Col>
+                                                </Row>
+                                            }
+                                        </Col>
+                                    </Row>
+                                </Container>
+                            </> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
+                        }
+                    </>
+            }
+        </>
     )
 }
 

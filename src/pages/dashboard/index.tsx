@@ -208,7 +208,7 @@ export default function Dashboard() {
                 title="Início"
                 description="Início da plataforma de gerenciamento da Bioma consultoria."
                 openGraph={{
-                    url: 'https://app.biomaconsultoria.com/dashboard',
+                    url: 'https://app.biomaconsultoria.com',
                     title: 'Início',
                     description: 'Início da plataforma de gerenciamento da Bioma consultoria.',
                     images: [

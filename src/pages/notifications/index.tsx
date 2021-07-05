@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import { NextSeo } from 'next-seo';
 import { Col, Container, Form, Image, ListGroup, Row } from 'react-bootstrap';
 
 import { NotificationsContext } from '../../contexts/NotificationsContext';
@@ -38,60 +39,81 @@ export default function Notifications() {
         setTypeFilter(event.target.value);
     }
 
-    return <Container className="content-page">
-        <Row>
-            <Col>
-                <Form>
-                    <Row className="mb-3 align-items-end">
-                        <Form.Group as={Col} sm={4} controlId="formGridFilter">
-                            <Form.Label>Filtro</Form.Label>
-                            <Form.Control
-                                as="select"
-                                onChange={handleTypeFilter}
-                                name="filter"
-                            >
-                                <option value='all'>Todas</option>
-                                <option value='unread'>Não lidos</option>
-                                <option value='read'>Lidos</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Row>
-                </Form>
-            </Col>
-        </Row>
-        <article className="mt-3">
-            <Row>
-                {
-                    !!filteredNotifications.length ? <Col>
-                        <ListGroup>
-                            {
-                                filteredNotifications && filteredNotifications.map(notification => {
-                                    return <NotificationItem
-                                        key={notification.id}
-                                        notification={notification}
-                                        filtered={typeFilter === 'all' ? false : true}
-                                    />
-                                })
-                            }
-                        </ListGroup>
-                    </Col> :
-                        <Col>
-                            <Row>
-                                <Col className="text-center">
-                                    <p style={{ color: 'var(--gray)' }}>Nenhuma notificação encontrada.</p>
-                                </Col>
-                            </Row>
+    return (
+        <>
+            <NextSeo
+                title="Notificações"
+                description="Notificações da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Notificações',
+                    description: 'Notificações da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Notificações | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
 
-                            <Row className="justify-content-center mt-3 mb-3">
-                                <Col sm={3}>
-                                    <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
-                                </Col>
+            <Container className="content-page">
+                <Row>
+                    <Col>
+                        <Form>
+                            <Row className="mb-3 align-items-end">
+                                <Form.Group as={Col} sm={4} controlId="formGridFilter">
+                                    <Form.Label>Filtro</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        onChange={handleTypeFilter}
+                                        name="filter"
+                                    >
+                                        <option value='all'>Todas</option>
+                                        <option value='unread'>Não lidos</option>
+                                        <option value='read'>Lidos</option>
+                                    </Form.Control>
+                                </Form.Group>
                             </Row>
-                        </Col>
-                }
-            </Row>
-        </article>
-    </Container>
+                        </Form>
+                    </Col>
+                </Row>
+                <article className="mt-3">
+                    <Row>
+                        {
+                            !!filteredNotifications.length ? <Col>
+                                <ListGroup>
+                                    {
+                                        filteredNotifications && filteredNotifications.map(notification => {
+                                            return <NotificationItem
+                                                key={notification.id}
+                                                notification={notification}
+                                                filtered={typeFilter === 'all' ? false : true}
+                                            />
+                                        })
+                                    }
+                                </ListGroup>
+                            </Col> :
+                                <Col>
+                                    <Row>
+                                        <Col className="text-center">
+                                            <p style={{ color: 'var(--gray)' }}>Nenhuma notificação encontrada.</p>
+                                        </Col>
+                                    </Row>
+
+                                    <Row className="justify-content-center mt-3 mb-3">
+                                        <Col sm={3}>
+                                            <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                        </Col>
+                                    </Row>
+                                </Col>
+                        }
+                    </Row>
+                </article>
+            </Container>
+        </>
+    )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

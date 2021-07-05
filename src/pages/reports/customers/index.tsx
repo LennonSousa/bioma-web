@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
+import { NextSeo } from 'next-seo';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -48,150 +49,172 @@ export default function Reports() {
         });
     }, []);
 
-    return <Container className="content-page">
-        <Row className="mb-3">
-            <Col>
-                <Row>
+    return (
+        <>
+            <NextSeo
+                title="Relatórios de clientes"
+                description="Relatórios de clientes da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Relatórios de clientes',
+                    description: 'Relatórios de clientes da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Relatórios de clientes | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
+
+
+            <Container className="content-page">
+                <Row className="mb-3">
                     <Col>
-                        <h6 className="text-success">Selecione os itens para gerar o relatório.</h6>
+                        <Row>
+                            <Col>
+                                <h6 className="text-success">Selecione os itens para gerar o relatório.</h6>
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
-            </Col>
-        </Row>
 
-        <Row className="mb-3">
-            <Col>
-                <Formik
-                    initialValues={
-                        {
-                            item: '',
-                            sub_item: '',
-                        }
-                    }
-                    onSubmit={async values => {
-                        setShowResultMessage(false);
-                        setIsFirstView(false);
-                        setTypeMessage("waiting");
-                        setMessageShow(true);
-
-                        try {
-                            const res = await api.get(
-                                `reports/customers?${values.item === "warnings" ? 'warnings' : 'type'}=${values.sub_item}`
-                            );
-
-                            const customers: Customer[] = res.data;
-
-                            const dataRes = customers.map(customer => {
-                                return {
-                                    link: `/customers/details/${customer.id}`,
-                                    item: [
-                                        customer.name,
-                                        customer.cellphone,
-                                        customer.city,
-                                        customer.state,
-                                    ]
+                <Row className="mb-3">
+                    <Col>
+                        <Formik
+                            initialValues={
+                                {
+                                    item: '',
+                                    sub_item: '',
                                 }
-                            });
+                            }
+                            onSubmit={async values => {
+                                setShowResultMessage(false);
+                                setIsFirstView(false);
+                                setTypeMessage("waiting");
+                                setMessageShow(true);
 
-                            if (dataRes.length < 1) setShowResultMessage(true);
+                                try {
+                                    const res = await api.get(
+                                        `reports/customers?${values.item === "warnings" ? 'warnings' : 'type'}=${values.sub_item}`
+                                    );
 
-                            setTableData(dataRes);
+                                    const customers: Customer[] = res.data;
 
-                            setMessageShow(false);
-                        }
-                        catch (err) {
-                            setTypeMessage("error");
+                                    const dataRes = customers.map(customer => {
+                                        return {
+                                            link: `/customers/details/${customer.id}`,
+                                            item: [
+                                                customer.name,
+                                                customer.cellphone,
+                                                customer.city,
+                                                customer.state,
+                                            ]
+                                        }
+                                    });
 
-                            setTimeout(() => {
-                                setMessageShow(false);
-                            }, 4000);
+                                    if (dataRes.length < 1) setShowResultMessage(true);
 
-                            console.log('error create institution.');
-                            console.log(err);
-                        }
+                                    setTableData(dataRes);
 
-                    }}
-                    validationSchema={validationSchema}
-                >
-                    {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
-                        <Form onSubmit={handleSubmit}>
-                            <Row className="mb-3 align-items-end">
-                                <Form.Group as={Col} sm={4} controlId="formGridType">
-                                    <Form.Label>Filtro</Form.Label>
-                                    <Form.Control
-                                        as="select"
-                                        onChange={e => {
-                                            setFieldValue('item', e.target.value);
-                                            setFieldValue('sub_item', '');
-                                        }}
-                                        onBlur={handleBlur}
-                                        value={values.item}
-                                        name="item"
-                                        isInvalid={!!errors.item && touched.item}
-                                    >
-                                        <option hidden>...</option>
-                                        <option value='warnings'>Pendências</option>
-                                        <option value='type'>Tipo</option>
-                                    </Form.Control>
-                                    <Form.Control.Feedback type="invalid">{touched.item && errors.item}</Form.Control.Feedback>
-                                </Form.Group>
+                                    setMessageShow(false);
+                                }
+                                catch (err) {
+                                    setTypeMessage("error");
 
-                                <Form.Group as={Col} sm={6} controlId="formGridLine">
-                                    {
-                                        !!values.item && <>
-                                            <Form.Label>{`${values.item === "warnings" ? 'Clientes por pendência' : 'Tipo de cliente'}`}</Form.Label>
+                                    setTimeout(() => {
+                                        setMessageShow(false);
+                                    }, 4000);
+
+                                    console.log('error create institution.');
+                                    console.log(err);
+                                }
+
+                            }}
+                            validationSchema={validationSchema}
+                        >
+                            {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
+                                <Form onSubmit={handleSubmit}>
+                                    <Row className="mb-3 align-items-end">
+                                        <Form.Group as={Col} sm={4} controlId="formGridType">
+                                            <Form.Label>Filtro</Form.Label>
                                             <Form.Control
                                                 as="select"
-                                                onChange={handleChange}
+                                                onChange={e => {
+                                                    setFieldValue('item', e.target.value);
+                                                    setFieldValue('sub_item', '');
+                                                }}
                                                 onBlur={handleBlur}
-                                                value={values.sub_item}
-                                                name="sub_item"
-                                                isInvalid={!!errors.sub_item && touched.sub_item}
+                                                value={values.item}
+                                                name="item"
+                                                isInvalid={!!errors.item && touched.item}
                                             >
                                                 <option hidden>...</option>
-                                                {
-                                                    values.item === "warnings" && <>
-                                                        <option value='true'>Com pendência</option>
-                                                        <option value='false'>Sem pendência</option>
-                                                    </>
-                                                }
-
-                                                {
-                                                    values.item === "type" && customerTypes.map((type, index) => {
-                                                        return <option key={index} value={type.id}>{type.name}</option>
-                                                    })
-                                                }
-
+                                                <option value='warnings'>Pendências</option>
+                                                <option value='type'>Tipo</option>
                                             </Form.Control>
-                                            <Form.Control.Feedback type="invalid">{touched.sub_item && errors.sub_item}</Form.Control.Feedback>
-                                        </>
-                                    }
-                                </Form.Group>
+                                            <Form.Control.Feedback type="invalid">{touched.item && errors.item}</Form.Control.Feedback>
+                                        </Form.Group>
 
-                                <Form.Group as={Col} sm={2} controlId="formGridButton">
-                                    {
-                                        messageShow ? <AlertMessage status={typeMessage} /> :
-                                            <Button variant="outline-success" type="submit">Consultar</Button>
-                                    }
-                                </Form.Group>
-                            </Row>
-                        </Form>
-                    )}
-                </Formik>
-            </Col>
-        </Row>
+                                        <Form.Group as={Col} sm={6} controlId="formGridLine">
+                                            {
+                                                !!values.item && <>
+                                                    <Form.Label>{`${values.item === "warnings" ? 'Clientes por pendência' : 'Tipo de cliente'}`}</Form.Label>
+                                                    <Form.Control
+                                                        as="select"
+                                                        onChange={handleChange}
+                                                        onBlur={handleBlur}
+                                                        value={values.sub_item}
+                                                        name="sub_item"
+                                                        isInvalid={!!errors.sub_item && touched.sub_item}
+                                                    >
+                                                        <option hidden>...</option>
+                                                        {
+                                                            values.item === "warnings" && <>
+                                                                <option value='true'>Com pendência</option>
+                                                                <option value='false'>Sem pendência</option>
+                                                            </>
+                                                        }
 
-        <Row className="mb-3">
-            <Col>
-                {
-                    isFirstView ? <AlertMessage status="success" message="Configure os items acima para fazer a pesquisa." /> :
-                        showResultMessage ? <AlertMessage status="warning" message="A pesquisa não retornou nenhum resultado." /> :
-                            <ReportsItem header={tableHeader} data={tableData} />
+                                                        {
+                                                            values.item === "type" && customerTypes.map((type, index) => {
+                                                                return <option key={index} value={type.id}>{type.name}</option>
+                                                            })
+                                                        }
 
-                }
-            </Col>
-        </Row>
-    </Container>
+                                                    </Form.Control>
+                                                    <Form.Control.Feedback type="invalid">{touched.sub_item && errors.sub_item}</Form.Control.Feedback>
+                                                </>
+                                            }
+                                        </Form.Group>
+
+                                        <Form.Group as={Col} sm={2} controlId="formGridButton">
+                                            {
+                                                messageShow ? <AlertMessage status={typeMessage} /> :
+                                                    <Button variant="outline-success" type="submit">Consultar</Button>
+                                            }
+                                        </Form.Group>
+                                    </Row>
+                                </Form>
+                            )}
+                        </Formik>
+                    </Col>
+                </Row>
+
+                <Row className="mb-3">
+                    <Col>
+                        {
+                            isFirstView ? <AlertMessage status="success" message="Configure os items acima para fazer a pesquisa." /> :
+                                showResultMessage ? <AlertMessage status="warning" message="A pesquisa não retornou nenhum resultado." /> :
+                                    <ReportsItem header={tableHeader} data={tableData} />
+
+                        }
+                    </Col>
+                </Row>
+            </Container>
+        </>
+    )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

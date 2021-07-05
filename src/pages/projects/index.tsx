@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
+import { NextSeo } from 'next-seo';
 import { Col, Container, Row } from 'react-bootstrap';
 
 import { SideBarContext } from '../../contexts/SideBarContext';
@@ -118,49 +119,70 @@ export default function Projects() {
     }
 
     return (
-        !user || loading ? <PageWaiting status="waiting" /> :
-            <>
-                {
-                    can(user, "projects", "read:any") ? <>
-                        <Container className="page-container">
-                            <Row>
-                                {
-                                    loadingData ? <PageWaiting
-                                        status={typeLoadingMessage}
-                                        message={textLoadingMessage}
-                                    /> :
-                                        <>
+        <>
+            <NextSeo
+                title="Lista de projetos"
+                description="Lista de projetos da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Lista de projetos',
+                    description: 'Lista de projetos da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Lista de projetos | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
+
+            {
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "projects", "read:any") ? <>
+                                <Container className="page-container">
+                                    <Row>
+                                        {
+                                            loadingData ? <PageWaiting
+                                                status={typeLoadingMessage}
+                                                message={textLoadingMessage}
+                                            /> :
+                                                <>
+                                                    {
+                                                        !!projects.length ? projects.map((project, index) => {
+                                                            return <ProjectListItem key={index} project={project} />
+                                                        }) :
+                                                            <PageWaiting status="empty" message="Nenhum projeto registrado." />
+                                                    }
+                                                </>
+
+                                        }
+                                    </Row>
+
+                                    <Row className="row-grow align-items-end">
+                                        <Col>
                                             {
-                                                !!projects.length ? projects.map((project, index) => {
-                                                    return <ProjectListItem key={index} project={project} />
-                                                }) :
-                                                    <PageWaiting status="empty" message="Nenhum projeto registrado." />
+                                                !!projects.length && <Row className="justify-content-center align-items-center">
+                                                    <Col className="col-row">
+                                                        <Paginations
+                                                            pages={totalPages}
+                                                            active={activePage}
+                                                            handleActivePage={handleActivePage}
+                                                        />
+                                                    </Col>
+                                                </Row>
                                             }
-                                        </>
-
-                                }
-                            </Row>
-
-                            <Row className="row-grow align-items-end">
-                                <Col>
-                                    {
-                                        !!projects.length && <Row className="justify-content-center align-items-center">
-                                            <Col className="col-row">
-                                                <Paginations
-                                                    pages={totalPages}
-                                                    active={activePage}
-                                                    handleActivePage={handleActivePage}
-                                                />
-                                            </Col>
-                                        </Row>
-                                    }
-                                </Col>
-                            </Row>
-                        </Container>
-                    </> :
-                        <PageWaiting status="warning" message="Acesso negado!" />
-                }
-            </>
+                                        </Col>
+                                    </Row>
+                                </Container>
+                            </> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
+                        }
+                    </>
+            }
+        </>
     )
 }
 

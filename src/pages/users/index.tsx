@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
+import { NextSeo } from 'next-seo';
 import { Button, Col, Container, Image, ListGroup, Row } from 'react-bootstrap';
 import { FaPlus } from 'react-icons/fa';
 
@@ -51,75 +52,97 @@ export default function UsersPage() {
         router.push('/users/new');
     }
 
-    return !user || loading ? <PageWaiting status="waiting" /> :
+    return (
         <>
-            {
-                can(user, "users", "read:any") ? <Container className="content-page">
-                    {
-                        can(user, "users", "create") && <Row>
-                            <Col>
-                                <Button variant="outline-success" onClick={goNewUser}>
-                                    <FaPlus /> Criar um usuário
-                                </Button>
-                            </Col>
-                        </Row>
-                    }
-
-                    <article className="mt-3">
+            <NextSeo
+                title="Lista de usuários"
+                description="Lista de usuários da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Lista de usuários',
+                    description: 'Lista de usuários da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
                         {
-                            loadingData ? <Col>
-                                <Row>
-                                    <Col>
-                                        <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
-                                    </Col>
-                                </Row>
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Lista de usuários | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
 
+            {
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "users", "read:any") ? <Container className="content-page">
                                 {
-                                    typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
-                                        <Col sm={3}>
-                                            <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
+                                    can(user, "users", "create") && <Row>
+                                        <Col>
+                                            <Button variant="outline-success" onClick={goNewUser}>
+                                                <FaPlus /> Criar um usuário
+                                            </Button>
                                         </Col>
                                     </Row>
                                 }
-                            </Col> :
-                                <Row>
-                                    {
-                                        user && !!users.length ? <Col>
-                                            <ListGroup>
-                                                {
-                                                    users && users.map((userItem, index) => {
-                                                        return <Users
-                                                            key={index}
-                                                            user={userItem}
-                                                            userAuthenticated={user}
-                                                            handleListUsers={handleListUsers}
-                                                        />
-                                                    })
-                                                }
-                                            </ListGroup>
-                                        </Col> :
-                                            <Col>
-                                                <Row>
-                                                    <Col className="text-center">
-                                                        <p style={{ color: 'var(--gray)' }}>Nenhum usuário registrado.</p>
-                                                    </Col>
-                                                </Row>
 
-                                                <Row className="justify-content-center mt-3 mb-3">
+                                <article className="mt-3">
+                                    {
+                                        loadingData ? <Col>
+                                            <Row>
+                                                <Col>
+                                                    <AlertMessage status={typeLoadingMessage} message={textLoadingMessage} />
+                                                </Col>
+                                            </Row>
+
+                                            {
+                                                typeLoadingMessage === "error" && <Row className="justify-content-center mt-3 mb-3">
                                                     <Col sm={3}>
-                                                        <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                                        <Image src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro de conexão." fluid />
                                                     </Col>
                                                 </Row>
-                                            </Col>
+                                            }
+                                        </Col> :
+                                            <Row>
+                                                {
+                                                    user && !!users.length ? <Col>
+                                                        <ListGroup>
+                                                            {
+                                                                users && users.map((userItem, index) => {
+                                                                    return <Users
+                                                                        key={index}
+                                                                        user={userItem}
+                                                                        userAuthenticated={user}
+                                                                        handleListUsers={handleListUsers}
+                                                                    />
+                                                                })
+                                                            }
+                                                        </ListGroup>
+                                                    </Col> :
+                                                        <Col>
+                                                            <Row>
+                                                                <Col className="text-center">
+                                                                    <p style={{ color: 'var(--gray)' }}>Nenhum usuário registrado.</p>
+                                                                </Col>
+                                                            </Row>
+
+                                                            <Row className="justify-content-center mt-3 mb-3">
+                                                                <Col sm={3}>
+                                                                    <Image src="/assets/images/undraw_not_found.svg" alt="Sem dados para mostrar." fluid />
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
+                                                }
+                                            </Row>
                                     }
-                                </Row>
+                                </article>
+                            </Container> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
                         }
-                    </article>
-                </Container> :
-                    <PageWaiting status="warning" message="Acesso negado!" />
+                    </>
             }
         </>
-
+    )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
