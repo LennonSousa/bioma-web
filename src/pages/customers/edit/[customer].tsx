@@ -99,6 +99,13 @@ export default function NewCustomer() {
     const [fileToSave, setFileToSave] = useState<File>();
     const [filePreview, setFilePreview] = useState('');
 
+    const [deletingMessageShow, setDeletingMessageShow] = useState(false);
+
+    const [showItemDelete, setShowItemDelete] = useState(false);
+
+    const handleCloseItemDelete = () => setShowItemDelete(false);
+    const handelShowItemDelete = () => setShowItemDelete(true);
+
     useEffect(() => {
         handleItemSideBar('customers');
         handleSelectedMenu('customers-index');
@@ -262,6 +269,35 @@ export default function NewCustomer() {
         });
 
         setCustomerData({ ...customerData, docs: updatedDocs });
+    }
+
+    async function handleItemDelete() {
+        if (customer) {
+            setTypeMessage("waiting");
+            setDeletingMessageShow(true);
+
+            try {
+                if (can(user, "customers", "delete")) {
+                    await api.delete(`customers/${customer}`);
+
+                    setTypeMessage("success");
+
+                    setTimeout(() => {
+                        router.push('/customers');
+                    }, 1000);
+                }
+            }
+            catch (err) {
+                console.log('error deleting customer');
+                console.log(err);
+
+                setTypeMessage("error");
+
+                setTimeout(() => {
+                    setDeletingMessageShow(false);
+                }, 4000);
+            }
+        }
     }
 
     return (
@@ -784,16 +820,29 @@ export default function NewCustomer() {
                                                                         <Row className="justify-content-end">
                                                                             {
                                                                                 messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                                                                    <Col sm={1}>
-                                                                                        <Button
-                                                                                            variant="success"
-                                                                                            type="submit"
-                                                                                            title="Salvar todas as alteraçãos deste cliente."
-                                                                                        >
-                                                                                            Salvar
-                                                                                        </Button>
-                                                                                    </Col>
+                                                                                    <>
+                                                                                        {
+                                                                                            can(user, "customers", "delete") && <Col className="col-row">
+                                                                                                <Button
+                                                                                                    variant="danger"
+                                                                                                    title="Excluir cliente."
+                                                                                                    onClick={handelShowItemDelete}
+                                                                                                >
+                                                                                                    Excluir
+                                                                                                </Button>
+                                                                                            </Col>
+                                                                                        }
 
+                                                                                        <Col sm={1}>
+                                                                                            <Button
+                                                                                                variant="success"
+                                                                                                type="submit"
+                                                                                                title="Salvar todas as alteraçãos deste cliente."
+                                                                                            >
+                                                                                                Salvar
+                                                                                            </Button>
+                                                                                        </Col>
+                                                                                    </>
                                                                             }
                                                                         </Row>
                                                                     </Form>
@@ -1045,6 +1094,43 @@ export default function NewCustomer() {
                                                                         </Form>
                                                                     )}
                                                                 </Formik>
+                                                            </Modal>
+
+                                                            <Modal show={showItemDelete} onHide={handleCloseItemDelete}>
+                                                                <Modal.Header closeButton>
+                                                                    <Modal.Title>Excluir cliente</Modal.Title>
+                                                                </Modal.Header>
+                                                                <Modal.Body>
+                                                                    Você tem certeza que deseja excluir o cliente <b>{customerData.name}</b>? Essa ação não poderá ser desfeita.
+                                                                </Modal.Body>
+                                                                <Modal.Footer>
+                                                                    <Row>
+                                                                        {
+                                                                            deletingMessageShow ? <Col><AlertMessage status={typeMessage} /></Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        can(user, "customers", "delete") && <Col className="col-row">
+                                                                                            <Button
+                                                                                                variant="danger"
+                                                                                                type="button"
+                                                                                                onClick={handleItemDelete}
+                                                                                            >
+                                                                                                Excluir
+                                                                                            </Button>
+                                                                                        </Col>
+                                                                                    }
+
+                                                                                    <Button
+                                                                                        className="col-row"
+                                                                                        variant="outline-secondary"
+                                                                                        onClick={handleCloseItemDelete}
+                                                                                    >
+                                                                                        Cancelar
+                                                                                    </Button>
+                                                                                </>
+                                                                        }
+                                                                    </Row>
+                                                                </Modal.Footer>
                                                             </Modal>
                                                         </>
                                                     </Container>
