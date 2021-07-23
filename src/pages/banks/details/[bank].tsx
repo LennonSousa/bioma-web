@@ -131,7 +131,7 @@ export default function BankDetails() {
                                                                             <Button
                                                                                 title="Editar banco."
                                                                                 variant="success"
-                                                                                onClick={() => handleRoute(`/customers/edit/${bankData.id}`)}
+                                                                                onClick={() => handleRoute(`/banks/edit/${bankData.id}`)}
                                                                             >
                                                                                 <FaPencilAlt />
                                                                             </Button>

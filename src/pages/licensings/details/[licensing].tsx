@@ -198,7 +198,7 @@ export default function LicensingDetails() {
                                                                     <Col sm={5} >
                                                                         <Row>
                                                                             <Col>
-                                                                                <span className="text-success">Documento emitido</span>
+                                                                                <span className="text-success">Fase</span>
                                                                             </Col>
                                                                         </Row>
 

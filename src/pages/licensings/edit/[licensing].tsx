@@ -522,7 +522,7 @@ export default function NewCustomer() {
                                                                         </Form.Group>
 
                                                                         <Form.Group as={Col} sm={5} controlId="formGridStatus">
-                                                                            <Form.Label>Documento emitido</Form.Label>
+                                                                            <Form.Label>Fase</Form.Label>
                                                                             <Form.Control
                                                                                 as="select"
                                                                                 onChange={handleChange}

@@ -34,7 +34,7 @@ export default function Reports() {
         "Licença/autorização",
         "Orgão",
         "Validade",
-        "Documento emitido",
+        "Fase",
         "Atualização",
     ]);
 
@@ -121,7 +121,7 @@ export default function Reports() {
                                                     "Licença/autorização",
                                                     "Orgão",
                                                     "Validade",
-                                                    "Documento emitido",
+                                                    "Fase",
                                                     "Criação",
                                                     "Atualização",
                                                 ]
