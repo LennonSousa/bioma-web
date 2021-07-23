@@ -32,7 +32,7 @@ import { DocsProperty } from '../../../components/DocsProperty';
 import PropertyAttachments from '../../../components/PropertyAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-import { AlertMessage } from '../../../components/Interfaces/AlertMessage';
+import { AlertMessage } from '../../../components/Interface/AlertMessage';
 
 import styles from './styles.module.css';
 

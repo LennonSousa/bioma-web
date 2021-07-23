@@ -23,7 +23,7 @@ import { Property } from '../../../components/Properties';
 import { DocsProject } from '../../../components/DocsProject';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interface/AlertMessage';
 import { prettifyCurrency } from '../../../components/InputMask/masks';
 
 const validationSchema = Yup.object().shape({
