@@ -28,7 +28,7 @@ import EventsLicensing from '../../../components/EventsLicensing';
 import LicensingAttachments from '../../../components/LicensingAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../../components/Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 

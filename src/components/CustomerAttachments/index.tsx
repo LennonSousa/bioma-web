@@ -10,7 +10,7 @@ import FileSaver from 'file-saver';
 import api from '../../api/api';
 import { Customer } from '../Customers';
 import { LogCustomerAttachment } from '../LogsCustomerAttachment';
-import { AlertMessage, statusModal } from '../Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface CustomerAttachment {
     id: string;

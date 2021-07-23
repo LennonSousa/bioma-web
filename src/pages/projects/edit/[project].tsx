@@ -38,7 +38,7 @@ import { DocsProject } from '../../../components/DocsProject';
 import EventsProject from '../../../components/EventsProject';
 import ProjectAttachments from '../../../components/ProjectAttachments';
 import PageBack from '../../../components/PageBack';
-import { AlertMessage, statusModal } from '../../../components/Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { prettifyCurrency } from '../../../components/InputMask/masks';
 

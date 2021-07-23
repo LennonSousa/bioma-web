@@ -29,7 +29,7 @@ import { DocsProject } from '../../../components/DocsProject';
 import EventsProject from '../../../components/EventsProject';
 import ProjectAttachments from '../../../components/ProjectAttachments';
 import PageBack from '../../../components/PageBack';
-import { AlertMessage } from '../../../components/Interface/AlertMessage';
+import { AlertMessage } from '../../../components/Interfaces/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 
 export default function PropertyDetails() {

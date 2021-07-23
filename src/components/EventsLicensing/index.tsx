@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 
 import api from '../../api/api';
 import { Licensing } from '../Licensings';
-import { AlertMessage, statusModal } from '../Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface EventLicensing {
     id: string;

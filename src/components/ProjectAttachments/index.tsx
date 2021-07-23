@@ -10,7 +10,7 @@ import FileSaver from 'file-saver';
 import api from '../../api/api';
 import { Project } from '../Projects';
 import { LogProjectAttachment } from '../LogsProjectAttachment';
-import { AlertMessage, statusModal } from '../Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface ProjectAttachment {
     id: string;

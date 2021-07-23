@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 
 import api from '../../api/api';
 import { Licensing } from '../Licensings';
-import { AlertMessage, statusModal } from '../Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface LicensingStatus {
     id: string;

@@ -32,7 +32,7 @@ import LicensingListItem from '../../../components/LicensingListItem';
 import CustomerAttachments from '../../../components/CustomerAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-import { AlertMessage } from '../../../components/Interface/AlertMessage';
+import { AlertMessage } from '../../../components/Interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 

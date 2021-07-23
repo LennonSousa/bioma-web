@@ -5,7 +5,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import api from '../../api/api';
-import { AlertMessage, statusModal } from '../Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface DocsProject {
     id: string;

@@ -18,7 +18,7 @@ import { Licensing } from '../../components/Licensings';
 import { LicensingStatus } from '../../components/LicensingStatus';
 import PieChart from '../../components/Graphs/PieChart';
 import { PageWaiting } from '../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../components/Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../../components/Interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 

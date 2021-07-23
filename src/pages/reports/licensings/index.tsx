@@ -13,7 +13,7 @@ import { Licensing } from '../../../components/Licensings';
 import { Bank } from '../../../components/Banks';
 import { LicensingStatus } from '../../../components/LicensingStatus';
 import ReportsItem from '../../../components/Reports';
-import { AlertMessage, statusModal } from '../../../components/Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
     item: Yup.string().required('Obrigatório!'),

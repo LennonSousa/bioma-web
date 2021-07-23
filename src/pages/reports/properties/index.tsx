@@ -12,7 +12,7 @@ import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Project } from '../../../components/Projects';
 import { Property } from '../../../components/Properties';
 import ReportsItem from '../../../components/Reports';
-import { AlertMessage, statusModal } from '../../../components/Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
     item: Yup.string().required('Obrigatório!'),

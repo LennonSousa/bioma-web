@@ -5,7 +5,7 @@ import { FaUserTie } from 'react-icons/fa';
 import api from '../../api/api';
 import { Project } from '../Projects';
 import { User } from '../Users';
-import { AlertMessage, statusModal } from '../Interface/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface Member {
     id: string;
@@ -30,7 +30,7 @@ const Members: React.FC<MemberProps> = ({ member, canRemove = true, isNewItem = 
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     async function deleteMember() {
-        if (isNewItem && handleListMembers) {
+        if (isNewItem && handleDeleteMember) {
             handleDeleteMember(member.user.id);
             toggleShowUserDetails();
 
