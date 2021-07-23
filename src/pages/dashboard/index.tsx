@@ -70,7 +70,7 @@ export default function Dashboard() {
                 handleLicensingsMonth();
             }
         }
-    }, [signed, user]);
+    }, [signed, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleCustomersWarnings() {
         try {

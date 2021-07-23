@@ -48,7 +48,7 @@ const Sidebar: React.FC = () => {
         }
 
         setShowPageHeader(show);
-    }, [signed, router.route, user]);
+    }, [signed, router.route, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleToDashboard() {
         router.push('/dashboard');

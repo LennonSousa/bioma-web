@@ -99,7 +99,7 @@ export default function PropertyDetails() {
                 }
             }
         }
-    }, [user, project]);
+    }, [user, project]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleRoute(route: string) {
         router.push(route);

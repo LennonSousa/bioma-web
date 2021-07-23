@@ -114,7 +114,7 @@ export default function PropertyDetails() {
                 }
             }
         }
-    }, [user, property]);
+    }, [user, property]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (propertyData) {

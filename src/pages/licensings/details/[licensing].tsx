@@ -59,7 +59,7 @@ export default function LicensingDetails() {
                 }
             }
         }
-    }, [user, licensing]);
+    }, [user, licensing]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleRoute(route: string) {
         router.push(route);

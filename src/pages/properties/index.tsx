@@ -77,7 +77,7 @@ export default function Properties() {
                 });
             }
         }
-    }, [user, customer]);
+    }, [user, customer, userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleActivePage(page: number) {
         setLoadingData(true);

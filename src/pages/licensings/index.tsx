@@ -80,7 +80,7 @@ export default function Licensings() {
                 });
             }
         }
-    }, [user, customer, property]);
+    }, [user, customer, property, userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleActivePage(page: number) {
         setLoadingData(true);

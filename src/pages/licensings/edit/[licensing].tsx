@@ -213,7 +213,7 @@ export default function NewCustomer() {
                 });
             }
         }
-    }, [user, licensing]);
+    }, [user, licensing]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListEvents() {
         const res = await api.get(`licensings/${licensing}`);

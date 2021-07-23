@@ -60,7 +60,7 @@ export default function Lines() {
                 });
             }
         }
-    }, []);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListAuthorizations() {
         const res = await api.get('licensings/authorizations');

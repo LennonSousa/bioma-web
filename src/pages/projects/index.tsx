@@ -82,7 +82,7 @@ export default function Projects() {
                 });
             }
         }
-    }, [user, customer, property, bank]);
+    }, [user, customer, property, bank, userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleActivePage(page: number) {
         setLoadingData(true);

@@ -183,7 +183,7 @@ export default function NewProperty() {
                 });
             }
         }
-    }, [user, property]);
+    }, [user, property]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleSearch(event: ChangeEvent<HTMLInputElement>) {
         if (customers) {

@@ -50,7 +50,7 @@ export default function Reports() {
         }).catch(err => {
             console.log('Error to get properties on reports, ', err);
         });
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>

@@ -264,7 +264,7 @@ export default function NewCustomer() {
                 }
             }
         }
-    }, [user, project]);
+    }, [user, project]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListEvents() {
         const res = await api.get(`projects/${project}`);

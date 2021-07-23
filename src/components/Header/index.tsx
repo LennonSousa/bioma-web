@@ -27,7 +27,7 @@ export function Header() {
     useEffect(() => {
         if (!pathsNotShow.find(item => { return item === router.route }))
             handleAuthenticated();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         let show = false;
@@ -35,7 +35,7 @@ export function Header() {
         if (signed && !pathsNotShow.find(item => { return item === router.route })) show = true;
 
         setShowPageHeader(show);
-    }, [signed, router.route]);
+    }, [signed, router.route]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (notifications) {

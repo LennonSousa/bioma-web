@@ -59,7 +59,7 @@ export default function Reports() {
         }).catch(err => {
             console.log('Error to get projects status on reports, ', err);
         });
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>
