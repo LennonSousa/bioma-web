@@ -64,7 +64,7 @@ const EventsLicensing: React.FC<EventsLicensingProps> = ({ event, handleListEven
 
             handleCloseModalEditEvent();
 
-            handleListEvents();
+            if (handleListEvents) handleListEvents();
         }
         catch (err) {
             setIconDeleteConfirm(false);
@@ -124,7 +124,7 @@ const EventsLicensing: React.FC<EventsLicensingProps> = ({ event, handleListEven
                                 description: values.description,
                             });
 
-                            await handleListEvents();
+                            if (handleListEvents) await handleListEvents();
 
                             setTypeMessage("success");
 

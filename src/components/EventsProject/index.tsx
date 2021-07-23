@@ -64,7 +64,7 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
 
             handleCloseModalEditEvent();
 
-            handleListEvents();
+            if (handleListEvents) handleListEvents();
         }
         catch (err) {
             setIconDeleteConfirm(false);
@@ -124,7 +124,7 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                                 description: values.description,
                             });
 
-                            await handleListEvents();
+                            if (handleListEvents) await handleListEvents();
 
                             setTypeMessage("success");
 
