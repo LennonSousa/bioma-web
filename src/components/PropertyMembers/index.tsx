@@ -30,7 +30,7 @@ const Members: React.FC<MemberProps> = ({ member, canRemove = true, isNewItem = 
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     async function deleteMember() {
-        if (isNewItem && handleListMembers) {
+        if (isNewItem && handleDeleteMember) {
             handleDeleteMember(member.user.id);
             toggleShowUserDetails();
 
