@@ -107,7 +107,7 @@ export default function Reports() {
                                 setMessageShow(true);
 
                                 try {
-                                    let dataRes = [];
+                                    let dataRes: Data[] = [];
 
                                     if (values.item === 'status') {
                                         const res = await api.get(`reports/licensings?status=${values.sub_item}`);
@@ -161,7 +161,7 @@ export default function Reports() {
                                                         licensing.customer.name,
                                                         licensing.authorization.department,
                                                         licensing.agency.name,
-                                                        licensing.expire ? format(new Date(licensing.expire), 'dd/MM/yyyy') : '', ,
+                                                        licensing.expire ? format(new Date(licensing.expire), 'dd/MM/yyyy') : '',
                                                         format(new Date(licensing.created_at), 'dd/MM/yyyy'),
                                                         format(new Date(licensing.updated_at), 'dd/MM/yyyy'),
                                                     ]
