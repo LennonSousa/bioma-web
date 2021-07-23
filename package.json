@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.1.0",
+  "version": "1.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,14 +9,35 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "axios": "^0.21.1",
+    "bootstrap": "^5.0.2",
+    "chart.js": "^3.4.1",
+    "date-fns": "^2.23.0",
+    "file-saver": "^2.0.5",
+    "filesize": "^7.0.0",
+    "formik": "^2.2.9",
+    "immer": "^9.0.5",
+    "js-cookie": "^2.2.1",
     "next": "11.0.1",
+    "next-seo": "^4.26.0",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-beautiful-dnd": "^13.1.0",
+    "react-bootstrap": "^2.0.0-beta.4",
+    "react-chartjs-2": "^3.0.4",
+    "react-circular-progressbar": "^2.0.4",
+    "react-dom": "17.0.2",
+    "react-icons": "^4.2.0",
+    "yup": "^0.32.9"
   },
   "devDependencies": {
+    "@types/bootstrap": "^5.0.17",
+    "@types/file-saver": "^2.0.3",
+    "@types/js-cookie": "^2.2.7",
     "@types/react": "17.0.14",
+    "@types/react-beautiful-dnd": "^13.1.1",
+    "@types/react-circular-progressbar": "^1.1.0",
     "eslint": "7.31.0",
     "eslint-config-next": "11.0.1",
-    "typescript": "4.3.5"
+    "typescript": "^4.3.5"
   }
 }

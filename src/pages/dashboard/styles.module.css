@@ -1,0 +1,44 @@
+.rowWarnings {
+    justify-content: space-between;
+}
+
+.containerWarnings {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.containerIconAmount {
+    border-radius: 50%;
+    height: 2rem;
+    width: 2rem;
+    color: var(--white);
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.customersText {
+    color: var(--green);
+}
+
+.projectsText {
+    color: var(--blue);
+}
+
+.propertiesText {
+    color: var(--purple);
+}
+
+.customersBackground {
+    background-color: var(--green);
+}
+
+.projectsBackground {
+    background-color: var(--blue);
+}
+
+.propertiesBackground {
+    background-color: var(--purple);
+}

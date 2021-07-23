@@ -1,0 +1,24 @@
+.pageContainer {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient( -135deg, #7ABC3E, #0B722B);
+}
+
+.formContainer {
+    background-color: var(--background);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 50px 10px;
+    box-shadow: 3px 3px 10px rgb(0 0 0 / 32%);
+}
+
+.version{
+    text-align: right;
+    color: var(--gray);
+}

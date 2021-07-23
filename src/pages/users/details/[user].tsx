@@ -1,0 +1,636 @@
+import { useContext, useEffect, useState } from 'react';
+import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+import { NextSeo } from 'next-seo';
+import { Button, ButtonGroup, Col, Container, Tab, Tabs, ListGroup, Row } from 'react-bootstrap';
+import { FaAngleRight, FaKey, FaUserEdit } from 'react-icons/fa';
+import { format } from 'date-fns';
+
+import api from '../../../api/api';
+import { TokenVerify } from '../../../utils/tokenVerify';
+import { SideBarContext } from '../../../contexts/SideBarContext';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { User, UserRole, can, translatedRoles } from '../../../components/Users';
+
+import { Member as CustomerMember } from '../../../components/CustomerMembers';
+import CustomerListItem from '../../../components/CustomerListItem';
+
+import { Member as LicensingMember } from '../../../components/LicensingMembers';
+import LicensingListItem from '../../../components/LicensingListItem';
+
+import { Member as ProjectMember } from '../../../components/ProjectMembers';
+import ProjectListItem from '../../../components/ProjectListItem';
+
+import { Member as PropertyMember } from '../../../components/PropertyMembers';
+import PropertyListItem from '../../../components/PropertyListItem';
+
+import PageBack from '../../../components/PageBack';
+import { PageWaiting, PageType } from '../../../components/PageWaiting';
+import { AlertMessage } from '../../../components/interfaces/AlertMessage';
+
+import styles from './styles.module.css';
+
+interface TranslateRoles {
+    role: string,
+    translated: string;
+}
+
+export default function UserDetails() {
+    const router = useRouter();
+    const userId = router.query['user'];
+
+    const { loading, user } = useContext(AuthContext);
+
+    const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
+
+    const [loadingData, setLoadingData] = useState(true);
+    const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
+    const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
+
+    const [userData, setUserData] = useState<User>();
+    const [usersRoles, setUsersRoles] = useState<UserRole[]>([]);
+
+    // Relations tabs.
+    const [tabKey, setTabKey] = useState('customers');
+
+    const [loadingCustomerMembers, setLoadingCustomerMembers] = useState(false);
+    const [customerMembersData, setCustomerMembersData] = useState<CustomerMember[]>([]);
+    const [customersErrorShow, setCustomersErrorShow] = useState(false);
+
+    const [loadingPropertyMembers, setLoadingPropertyMembers] = useState(false);
+    const [propertyMembersData, setPropertyMembersData] = useState<PropertyMember[]>([]);
+    const [propertiesErrorShow, setPropertiesErrorShow] = useState(false);
+
+    const [loadingProjectMembers, setLoadingProjectMembers] = useState(false);
+    const [projectMembersData, setProjectMembersData] = useState<ProjectMember[]>([]);
+    const [projectsErrorShow, setProjectsErrorShow] = useState(false);
+
+    const [loadingLicensingMembers, setLoadingLicensingMembers] = useState(false);
+    const [licensingMembersData, setLicensingMembersData] = useState<LicensingMember[]>([]);
+    const [licensingsErrorShow, setLicensingsErrorShow] = useState(false);
+
+    useEffect(() => {
+        handleItemSideBar('users');
+        handleSelectedMenu('users-index');
+
+        if (user) {
+            if (can(user, "users", "read:any") || userId === user.id) {
+                api.get(`users/${userId}`).then(res => {
+                    let userRes: User = res.data;
+
+                    setUsersRoles(userRes.roles);
+
+                    setUserData(userRes);
+
+                    setLoadingData(false);
+                }).catch(err => {
+                    console.log('Error get user to edit, ', err);
+
+                    setTypeLoadingMessage("error");
+                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                });
+            }
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (userId) {
+            if (tabKey === "customers") {
+                setCustomersErrorShow(false);
+                setLoadingCustomerMembers(true);
+
+                api.get(`members/customers/user/${userId}`).then(res => {
+                    setCustomerMembersData(res.data);
+
+                    setLoadingCustomerMembers(false);
+                }).catch(err => {
+                    console.log('Error to get customers user, ', err);
+                    setCustomersErrorShow(true);
+
+                    setLoadingCustomerMembers(false);
+                });
+
+                return;
+            }
+
+            if (tabKey === "properties") {
+                setPropertiesErrorShow(false);
+                setLoadingPropertyMembers(true);
+
+                api.get(`members/properties/user/${userId}`).then(res => {
+                    setPropertyMembersData(res.data);
+
+                    setLoadingPropertyMembers(false);
+                }).catch(err => {
+                    console.log('Error to get properties user, ', err);
+                    setPropertiesErrorShow(true);
+
+                    setLoadingPropertyMembers(false);
+                });
+
+                return;
+            }
+
+            if (tabKey === "projects") {
+                setProjectsErrorShow(false);
+                setLoadingProjectMembers(true);
+
+                api.get(`members/projects/user/${userId}`).then(res => {
+                    setProjectMembersData(res.data);
+
+                    setLoadingProjectMembers(false);
+                }).catch(err => {
+                    console.log('Error to get projects user, ', err);
+                    setProjectsErrorShow(true);
+
+                    setLoadingProjectMembers(false);
+                });
+
+                return;
+            }
+
+            if (tabKey === "licensings") {
+                setLicensingsErrorShow(false);
+                setLoadingLicensingMembers(true);
+
+                api.get(`members/licensings/user/${userId}`).then(res => {
+                    setLicensingMembersData(res.data);
+
+                    setLoadingLicensingMembers(false);
+                }).catch(err => {
+                    console.log('Error to get licensings user, ', err);
+                    setLicensingsErrorShow(true);
+
+                    setLoadingLicensingMembers(false);
+                });
+
+                return;
+            }
+        }
+    }, [userId, tabKey]);
+
+    function handleRoute(route: string) {
+        router.push(route);
+    }
+
+    return (
+        <>
+            <NextSeo
+                title="Detalhes do usuário"
+                description="Detalhes do usuário da plataforma de gerenciamento da Bioma consultoria."
+                openGraph={{
+                    url: 'https://app.biomaconsultoria.com',
+                    title: 'Detalhes do usuário',
+                    description: 'Detalhes do usuário da plataforma de gerenciamento da Bioma consultoria.',
+                    images: [
+                        {
+                            url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg',
+                            alt: 'Detalhes do usuário | Plataforma Bioma',
+                        },
+                        { url: 'https://app.biomaconsultoria.com/assets/images/logo-bioma.jpg' },
+                    ],
+                }}
+            />
+
+            {
+                !user || loading ? <PageWaiting status="waiting" /> :
+                    <>
+                        {
+                            can(user, "users", "read:any") || userId === user.id ? <>
+                                {
+                                    loadingData ? <PageWaiting
+                                        status={typeLoadingMessage}
+                                        message={textLoadingMessage}
+                                    /> :
+                                        <>
+                                            {
+                                                !userData ? <PageWaiting status="waiting" /> :
+                                                    <Container className="content-page">
+                                                        <Row>
+                                                            <Col>
+                                                                {
+                                                                    can(user, "users", "read:any") && <Row className="mb-3">
+                                                                        <Col>
+                                                                            <PageBack href="/users" subTitle="Voltar para a lista de usuários" />
+                                                                        </Col>
+                                                                    </Row>
+                                                                }
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={6}>
+                                                                        <Row className="align-items-center">
+                                                                            <Col className="col-row">
+                                                                                <h3 className="form-control-plaintext text-success">{userData.name}</h3>
+                                                                            </Col>
+
+                                                                            {
+                                                                                can(user, "users", "update:any") ||
+                                                                                    can(user, "users", "update:own") &&
+                                                                                    userId === user.id ?
+                                                                                    <Col className="col-row">
+                                                                                        <ButtonGroup size="sm" className="col-12">
+                                                                                            <Button
+                                                                                                title="Editar usuário."
+                                                                                                variant="success"
+                                                                                                onClick={() => handleRoute(`/users/edit/${userData.id}`)}
+                                                                                            >
+                                                                                                <FaUserEdit />
+                                                                                            </Button>
+                                                                                        </ButtonGroup>
+                                                                                    </Col> : <Col></Col>
+                                                                            }
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={3} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Celular</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{userData.phone}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={6} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">E-mail</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{userData.email}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Col className="border-top mb-3"></Col>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Criado em</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{format(new Date(userData.created_at), 'dd/MM/yyyy')}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Permissões <FaKey /></h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <ListGroup className="mb-3">
+                                                                                    {
+                                                                                        usersRoles.map((role, index) => {
+                                                                                            const translatedRole = translatedRoles.find(item => { return item.role === role.role });
+
+                                                                                            return <ListGroup.Item key={index} as="div" variant="light">
+                                                                                                <Row>
+                                                                                                    <Col>
+                                                                                                        <h6 className="text-success" >
+                                                                                                            {
+                                                                                                                translatedRole ? translatedRole.translated : role.role
+                                                                                                            }
+                                                                                                        </h6>
+                                                                                                    </Col>
+
+                                                                                                    {
+                                                                                                        role.view && <Col className="col-row">
+                                                                                                            <span>Visualizar</span>
+                                                                                                        </Col>
+                                                                                                    }
+
+                                                                                                    {
+                                                                                                        role.create && <Col className="col-row">
+                                                                                                            <span>Criar</span>
+                                                                                                        </Col>
+                                                                                                    }
+
+                                                                                                    {
+                                                                                                        role.update && <Col className="col-row">
+                                                                                                            <span>Editar</span>
+                                                                                                        </Col>
+                                                                                                    }
+
+
+
+                                                                                                    {
+                                                                                                        role.role === 'users' && role.update_self && <Col className="col-row">
+                                                                                                            <span>Editar próprio</span>
+                                                                                                        </Col>
+                                                                                                    }
+
+                                                                                                    {
+                                                                                                        role.remove && <Col className="col-row">
+                                                                                                            <span>Excluir</span>
+                                                                                                        </Col>
+                                                                                                    }
+                                                                                                </Row>
+                                                                                            </ListGroup.Item>
+                                                                                        })
+                                                                                    }
+                                                                                </ListGroup>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+
+                                                                <Col className="border-top mb-3"></Col>
+
+                                                                <Tabs
+                                                                    id="relations-tabs"
+                                                                    activeKey={tabKey}
+                                                                    onSelect={(k) => k && setTabKey(k)}
+                                                                >
+                                                                    {
+                                                                        can(user, "customers", "read:any") && <Tab eventKey="customers" title="Clientes">
+                                                                            <Row className={styles.relationsContainer}>
+                                                                                <Col>
+                                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
+                                                                                        {
+                                                                                            loadingCustomerMembers ? <Col sm={4}>
+                                                                                                <AlertMessage status="waiting" />
+                                                                                            </Col> :
+                                                                                                <>
+                                                                                                    {
+                                                                                                        !customersErrorShow ? <>
+                                                                                                            {
+                                                                                                                !!customerMembersData.length ? <>
+                                                                                                                    {
+                                                                                                                        customerMembersData.map((customerMember, index) => {
+                                                                                                                            return <CustomerListItem
+                                                                                                                                key={index}
+                                                                                                                                customer={customerMember.customer}
+                                                                                                                            />
+                                                                                                                        })
+                                                                                                                    }
+
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-end">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <Button
+                                                                                                                                    title="Ver todos os clientes para esse usuário."
+                                                                                                                                    variant="success"
+                                                                                                                                    onClick={() => handleRoute(`/customers?user=${userData.id}`)}
+                                                                                                                                >
+                                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                                </Button>
+                                                                                                                            </Col>
+                                                                                                                        </Row>
+                                                                                                                    </Col>
+                                                                                                                </> :
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-center">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <span className="text-success">Nenhum cliente encontrado.</span>
+                                                                                                                            </Col>
+                                                                                                                        </Row>
+                                                                                                                    </Col>
+                                                                                                            }
+                                                                                                        </> : <Col sm={4}>
+                                                                                                            <AlertMessage status="error" />
+                                                                                                        </Col>
+                                                                                                    }
+                                                                                                </>
+                                                                                        }
+                                                                                    </Row>
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </Tab>
+                                                                    }
+
+                                                                    {
+                                                                        can(user, "properties", "read:any") && <Tab eventKey="properties" title="Imóveis">
+                                                                            <Row className={styles.relationsContainer}>
+                                                                                <Col>
+                                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
+                                                                                        {
+                                                                                            loadingPropertyMembers ? <Col sm={4}>
+                                                                                                <AlertMessage status="waiting" />
+                                                                                            </Col> :
+                                                                                                <>
+                                                                                                    {
+                                                                                                        !propertiesErrorShow ? <>
+                                                                                                            {
+                                                                                                                !!propertyMembersData.length ? <>
+                                                                                                                    {
+                                                                                                                        propertyMembersData.map((propertyMember, index) => {
+                                                                                                                            return <PropertyListItem
+                                                                                                                                key={index}
+                                                                                                                                property={propertyMember.property}
+                                                                                                                            />
+                                                                                                                        })
+                                                                                                                    }
+
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-end">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <Button
+                                                                                                                                    title="Ver todos os imóveis para esse usuário."
+                                                                                                                                    variant="success"
+                                                                                                                                    onClick={() => handleRoute(`/properties?user=${userData.id}`)}
+                                                                                                                                >
+                                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                                </Button>
+                                                                                                                            </Col>
+                                                                                                                        </Row>
+                                                                                                                    </Col>
+                                                                                                                </> :
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-center">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <span className="text-success">Nenhum imóvel encontrado.</span>
+                                                                                                                            </Col>
+                                                                                                                        </Row>                                                                                                        </Col>
+                                                                                                            }
+                                                                                                        </> : <Col sm={4}>
+                                                                                                            <AlertMessage status="error" />
+                                                                                                        </Col>
+                                                                                                    }
+                                                                                                </>
+                                                                                        }
+                                                                                    </Row>
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </Tab>
+                                                                    }
+
+                                                                    {
+                                                                        can(user, "projects", "read:any") && <Tab eventKey="projects" title="Projetos">
+                                                                            <Row className={styles.relationsContainer}>
+                                                                                <Col>
+                                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
+                                                                                        {
+                                                                                            loadingProjectMembers ? <Col sm={4}>
+                                                                                                <AlertMessage status="waiting" />
+                                                                                            </Col> :
+                                                                                                <>
+                                                                                                    {
+                                                                                                        !projectsErrorShow ? <>
+                                                                                                            {
+                                                                                                                !!projectMembersData.length ? <>
+                                                                                                                    {
+                                                                                                                        projectMembersData.map((projectMember, index) => {
+                                                                                                                            return <ProjectListItem
+                                                                                                                                key={index}
+                                                                                                                                project={projectMember.project}
+                                                                                                                            />
+                                                                                                                        })
+                                                                                                                    }
+
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-end">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <Button
+                                                                                                                                    title="Ver todos os projetos para esse usuário."
+                                                                                                                                    variant="success"
+                                                                                                                                    onClick={() => handleRoute(`/projects?user=${userData.id}`)}
+                                                                                                                                >
+                                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                                </Button>
+                                                                                                                            </Col>
+                                                                                                                        </Row>
+                                                                                                                    </Col>
+                                                                                                                </> :
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-center">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <span className="text-success">Nenhum projeto encontrado.</span>
+                                                                                                                            </Col>
+                                                                                                                        </Row>
+                                                                                                                    </Col>
+                                                                                                            }
+                                                                                                        </> : <Col sm={4}>
+                                                                                                            <AlertMessage status="error" />
+                                                                                                        </Col>
+                                                                                                    }
+                                                                                                </>
+                                                                                        }
+                                                                                    </Row>
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </Tab>
+                                                                    }
+
+                                                                    {
+                                                                        can(user, "licensings", "read:any") && <Tab eventKey="licensings" title="Licenciamentos">
+                                                                            <Row className={styles.relationsContainer}>
+                                                                                <Col>
+                                                                                    <Row className={`justify-content-center ${styles.relationsContent}`}>
+                                                                                        {
+                                                                                            loadingLicensingMembers ? <Col sm={4}>
+                                                                                                <AlertMessage status="waiting" />
+                                                                                            </Col> :
+                                                                                                <>
+                                                                                                    {
+                                                                                                        !licensingsErrorShow ? <>
+                                                                                                            {
+                                                                                                                !!licensingMembersData.length ? <>
+                                                                                                                    {
+                                                                                                                        licensingMembersData.map((licensingMember, index) => {
+                                                                                                                            return <LicensingListItem
+                                                                                                                                key={index}
+                                                                                                                                licensing={licensingMember.licensing}
+                                                                                                                            />
+                                                                                                                        })
+                                                                                                                    }
+
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-end">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <Button
+                                                                                                                                    title="Ver todos os licenciamentos para esse usuário."
+                                                                                                                                    variant="success"
+                                                                                                                                    onClick={() => handleRoute(`/licensings?user=${userData.id}`)}
+                                                                                                                                >
+                                                                                                                                    Ver mais <FaAngleRight />
+                                                                                                                                </Button>
+                                                                                                                            </Col>
+                                                                                                                        </Row>
+                                                                                                                    </Col>
+                                                                                                                </> :
+                                                                                                                    <Col>
+                                                                                                                        <Row className="justify-content-center">
+                                                                                                                            <Col className="col-row">
+                                                                                                                                <span className="text-success">Nenhum licenciamento encontrado.</span>
+                                                                                                                            </Col>
+                                                                                                                        </Row>
+                                                                                                                    </Col>
+                                                                                                            }
+                                                                                                        </> : <Col sm={4}>
+                                                                                                            <AlertMessage status="error" />
+                                                                                                        </Col>
+                                                                                                    }
+                                                                                                </>
+                                                                                        }
+                                                                                    </Row>
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </Tab>
+                                                                    }
+                                                                </Tabs>
+                                                            </Col>
+                                                        </Row>
+                                                    </Container>
+                                            }
+                                        </>
+                                }
+                            </> :
+                                <PageWaiting status="warning" message="Acesso negado!" />
+                        }
+                    </>
+            }
+        </>
+    )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { token } = context.req.cookies;
+
+    const tokenVerified = await TokenVerify(token);
+
+    if (tokenVerified === "not-authorized") { // Not authenticated, token invalid!
+        return {
+            redirect: {
+                destination: `/?returnto=${context.req.url}`,
+                permanent: false,
+            },
+        }
+    }
+
+    if (tokenVerified === "error") { // Server error!
+        return {
+            redirect: {
+                destination: '/500',
+                permanent: false,
+            },
+        }
+    }
+
+    return {
+        props: {},
+    }
+}
