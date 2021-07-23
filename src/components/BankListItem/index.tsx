@@ -50,7 +50,7 @@ const BankItem: React.FC<BankItemProps> = ({ bank }) => {
                         <span
                             className={`form-control-plaintext text-secondary ${styles.itemText}`}
                         >
-                            {`${bank.agency} ${!!bank.address && " - "} ${bank.address}`}
+                            {`${bank.agency} ${!!bank.address ? ` - ${bank.address}` : ''}`}
                         </span>
                     </Col>
                 </Row>

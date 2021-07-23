@@ -639,8 +639,8 @@ export default function NewCustomer() {
                                                                                 <Form.Label>Estado</Form.Label>
                                                                                 <Form.Select
                                                                                     onChange={(e) => {
-                                                                                        setFieldValue('state', e.target.value);
-                                                                                        const stateCities = statesCities.estados.find(item => { return item.nome === e.target.value })
+                                                                                        setFieldValue('state', e.currentTarget.value);
+                                                                                        const stateCities = statesCities.estados.find(item => { return item.nome === e.currentTarget.value })
 
                                                                                         if (stateCities)
                                                                                             setCities(stateCities.cidades);
