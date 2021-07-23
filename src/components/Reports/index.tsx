@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Table } from 'react-bootstrap';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
 
-interface Data {
+export interface Data {
     link: string;
     item: String[];
 }

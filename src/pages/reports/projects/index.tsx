@@ -12,7 +12,7 @@ import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Project } from '../../../components/Projects';
 import { Bank } from '../../../components/Banks';
 import { ProjectStatus } from '../../../components/ProjectStatus';
-import ReportsItem from '../../../components/Reports';
+import ReportsItem, { Data } from '../../../components/Reports';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -39,7 +39,7 @@ export default function Reports() {
         "Atualização",
     ]
 
-    const [tableData, setTableData] = useState([]);
+    const [tableData, setTableData] = useState<Data[]>([]);
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");

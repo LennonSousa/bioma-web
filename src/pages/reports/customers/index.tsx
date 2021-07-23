@@ -10,7 +10,7 @@ import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { Customer } from '../../../components/Customers';
 import { CustomerType } from '../../../components/CustomerTypes'
-import ReportsItem from '../../../components/Reports';
+import ReportsItem, { Data } from '../../../components/Reports';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
@@ -33,7 +33,7 @@ export default function Reports() {
         "Estado",
     ]
 
-    const [tableData, setTableData] = useState([]);
+    const [tableData, setTableData] = useState<Data[]>([]);
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
