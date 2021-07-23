@@ -86,7 +86,7 @@ export default function EditBank() {
                 });
             }
         }
-    }, [user, bank]);
+    }, [user, bank]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>

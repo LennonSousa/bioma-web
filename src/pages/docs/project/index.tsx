@@ -58,7 +58,7 @@ export default function DocsProjectPage() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListDocs() {
         const res = await api.get('docs/project');

@@ -59,7 +59,7 @@ export default function DocsCustomerPage() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListDocs() {
         const res = await api.get('docs/customer');

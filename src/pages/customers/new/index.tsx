@@ -134,7 +134,7 @@ export default function NewCustomer() {
             }
         }
 
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function createMember(userId: string) {
         const userFound = usersToAdd.find(user => { return user.id === userId });

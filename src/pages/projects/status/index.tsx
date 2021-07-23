@@ -58,7 +58,7 @@ export default function Status() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListStatus() {
         const res = await api.get('projects/status');

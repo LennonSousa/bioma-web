@@ -191,7 +191,7 @@ export default function NewCustomer() {
                 });
             }
         }
-    }, [user, customer]);
+    }, [user, customer]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListMembers() {
         if (customerData) {

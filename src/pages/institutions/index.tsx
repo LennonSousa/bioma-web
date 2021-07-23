@@ -55,7 +55,7 @@ export default function Institutions() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListInstitutions() {
         const res = await api.get('institutions');

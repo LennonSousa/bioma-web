@@ -81,7 +81,7 @@ export default function NewUser() {
             });
         }
 
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleChecks(event: ChangeEvent<HTMLInputElement>) {
         const roleId = event.target.value.split("-", 1)[0];

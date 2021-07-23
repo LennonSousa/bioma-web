@@ -40,7 +40,7 @@ export default function UsersPage() {
                 setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
             });
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListUsers() {
         const res = await api.get('users');

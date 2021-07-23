@@ -121,7 +121,7 @@ export default function CustomerDetails() {
                 }
             }
         }
-    }, [user, customer]);
+    }, [user, customer]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (customer) {

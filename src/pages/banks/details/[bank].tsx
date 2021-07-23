@@ -60,7 +60,7 @@ export default function BankDetails() {
                 }
             }
         }
-    }, [user, bank]);
+    }, [user, bank]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (tabKey === "projects") {

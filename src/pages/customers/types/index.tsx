@@ -59,7 +59,7 @@ export default function Types() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListTypes() {
         const res = await api.get('customers/types');

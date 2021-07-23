@@ -63,7 +63,7 @@ export default function NewBank() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>

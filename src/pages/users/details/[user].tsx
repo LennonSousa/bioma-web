@@ -91,7 +91,7 @@ export default function UserDetails() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (userId) {

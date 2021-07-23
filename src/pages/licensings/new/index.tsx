@@ -187,7 +187,7 @@ export default function NewLicensing() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleSearch(event: ChangeEvent<HTMLInputElement>) {
         if (customers) {

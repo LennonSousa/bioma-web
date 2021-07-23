@@ -59,7 +59,7 @@ export default function DocsPropertyPage() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListDocs() {
         const res = await api.get('docs/property');

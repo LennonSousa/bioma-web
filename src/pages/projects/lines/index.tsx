@@ -58,7 +58,7 @@ export default function Lines() {
                 });
             }
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleListLines() {
         const res = await api.get('projects/lines');
