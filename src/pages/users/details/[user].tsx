@@ -12,28 +12,28 @@ import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { User, UserRole, can, translatedRoles } from '../../../components/Users';
 
-import { Member as CustomerMember } from '../../../components/CustomerMembers';
+import { Customer } from '../../../components/Customers';
 import CustomerListItem from '../../../components/CustomerListItem';
 
-import { Member as LicensingMember } from '../../../components/LicensingMembers';
+import { Licensing } from '../../../components/Licensings';
 import LicensingListItem from '../../../components/LicensingListItem';
 
-import { Member as ProjectMember } from '../../../components/ProjectMembers';
+import { Project } from '../../../components/Projects';
 import ProjectListItem from '../../../components/ProjectListItem';
 
-import { Member as PropertyMember } from '../../../components/PropertyMembers';
+import { Property } from '../../../components/Properties';
 import PropertyListItem from '../../../components/PropertyListItem';
+
+import { Member as CustomerMember } from '../../../components/CustomerMembers';
+import { Member as LicensingMember } from '../../../components/LicensingMembers';
+import { Member as ProjectMember } from '../../../components/ProjectMembers';
+import { Member as PropertyMember } from '../../../components/PropertyMembers';
 
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage } from '../../../components/Interfaces/AlertMessage';
 
 import styles from './styles.module.css';
-
-interface TranslateRoles {
-    role: string,
-    translated: string;
-}
 
 export default function UserDetails() {
     const router = useRouter();
@@ -54,19 +54,19 @@ export default function UserDetails() {
     const [tabKey, setTabKey] = useState('customers');
 
     const [loadingCustomerMembers, setLoadingCustomerMembers] = useState(false);
-    const [customerMembersData, setCustomerMembersData] = useState<CustomerMember[]>([]);
+    const [customerMembersData, setCustomerMembersData] = useState<Customer[]>([]);
     const [customersErrorShow, setCustomersErrorShow] = useState(false);
 
     const [loadingPropertyMembers, setLoadingPropertyMembers] = useState(false);
-    const [propertyMembersData, setPropertyMembersData] = useState<PropertyMember[]>([]);
+    const [propertyMembersData, setPropertyMembersData] = useState<Property[]>([]);
     const [propertiesErrorShow, setPropertiesErrorShow] = useState(false);
 
     const [loadingProjectMembers, setLoadingProjectMembers] = useState(false);
-    const [projectMembersData, setProjectMembersData] = useState<ProjectMember[]>([]);
+    const [projectMembersData, setProjectMembersData] = useState<Project[]>([]);
     const [projectsErrorShow, setProjectsErrorShow] = useState(false);
 
     const [loadingLicensingMembers, setLoadingLicensingMembers] = useState(false);
-    const [licensingMembersData, setLicensingMembersData] = useState<LicensingMember[]>([]);
+    const [licensingMembersData, setLicensingMembersData] = useState<Licensing[]>([]);
     const [licensingsErrorShow, setLicensingsErrorShow] = useState(false);
 
     useEffect(() => {
@@ -100,7 +100,16 @@ export default function UserDetails() {
                 setLoadingCustomerMembers(true);
 
                 api.get(`members/customers/user/${userId}`).then(res => {
-                    setCustomerMembersData(res.data);
+                    const customersMember: CustomerMember[] = res.data;
+                    let customers: Customer[] = [];
+
+                    customersMember.forEach(member => {
+                        if (member.customer) {
+                            customers.push(member.customer);
+                        }
+                    });
+
+                    setCustomerMembersData(customers);
 
                     setLoadingCustomerMembers(false);
                 }).catch(err => {
@@ -118,7 +127,16 @@ export default function UserDetails() {
                 setLoadingPropertyMembers(true);
 
                 api.get(`members/properties/user/${userId}`).then(res => {
-                    setPropertyMembersData(res.data);
+                    const propertiesMember: PropertyMember[] = res.data;
+                    let properties: Property[] = [];
+
+                    propertiesMember.forEach(member => {
+                        if (member.property) {
+                            properties.push(member.property);
+                        }
+                    });
+
+                    setPropertyMembersData(properties);
 
                     setLoadingPropertyMembers(false);
                 }).catch(err => {
@@ -136,7 +154,16 @@ export default function UserDetails() {
                 setLoadingProjectMembers(true);
 
                 api.get(`members/projects/user/${userId}`).then(res => {
-                    setProjectMembersData(res.data);
+                    const projectsMember: ProjectMember[] = res.data;
+                    let projects: Project[] = [];
+
+                    projectsMember.forEach(member => {
+                        if (member.project) {
+                            projects.push(member.project);
+                        }
+                    });
+
+                    setProjectMembersData(projects);
 
                     setLoadingProjectMembers(false);
                 }).catch(err => {
@@ -154,7 +181,16 @@ export default function UserDetails() {
                 setLoadingLicensingMembers(true);
 
                 api.get(`members/licensings/user/${userId}`).then(res => {
-                    setLicensingMembersData(res.data);
+                    const licensingsMember: LicensingMember[] = res.data;
+                    let licensings: Licensing[] = [];
+
+                    licensingsMember.forEach(member => {
+                        if (member.licensing) {
+                            licensings.push(member.licensing);
+                        }
+                    });
+
+                    setLicensingMembersData(licensings);
 
                     setLoadingLicensingMembers(false);
                 }).catch(err => {
@@ -383,7 +419,7 @@ export default function UserDetails() {
                                                                                                                         customerMembersData.map((customerMember, index) => {
                                                                                                                             return <CustomerListItem
                                                                                                                                 key={index}
-                                                                                                                                customer={customerMember.customer}
+                                                                                                                                customer={customerMember}
                                                                                                                             />
                                                                                                                         })
                                                                                                                     }
@@ -437,10 +473,10 @@ export default function UserDetails() {
                                                                                                             {
                                                                                                                 !!propertyMembersData.length ? <>
                                                                                                                     {
-                                                                                                                        propertyMembersData.map((propertyMember, index) => {
+                                                                                                                        propertyMembersData.map((property, index) => {
                                                                                                                             return <PropertyListItem
                                                                                                                                 key={index}
-                                                                                                                                property={propertyMember.property}
+                                                                                                                                property={property}
                                                                                                                             />
                                                                                                                         })
                                                                                                                     }
@@ -493,10 +529,10 @@ export default function UserDetails() {
                                                                                                             {
                                                                                                                 !!projectMembersData.length ? <>
                                                                                                                     {
-                                                                                                                        projectMembersData.map((projectMember, index) => {
+                                                                                                                        projectMembersData.map((project, index) => {
                                                                                                                             return <ProjectListItem
                                                                                                                                 key={index}
-                                                                                                                                project={projectMember.project}
+                                                                                                                                project={project}
                                                                                                                             />
                                                                                                                         })
                                                                                                                     }
@@ -550,10 +586,10 @@ export default function UserDetails() {
                                                                                                             {
                                                                                                                 !!licensingMembersData.length ? <>
                                                                                                                     {
-                                                                                                                        licensingMembersData.map((licensingMember, index) => {
+                                                                                                                        licensingMembersData.map((licensing, index) => {
                                                                                                                             return <LicensingListItem
                                                                                                                                 key={index}
-                                                                                                                                licensing={licensingMember.licensing}
+                                                                                                                                licensing={licensing}
                                                                                                                             />
                                                                                                                         })
                                                                                                                     }
