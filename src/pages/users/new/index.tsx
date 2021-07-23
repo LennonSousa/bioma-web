@@ -21,11 +21,6 @@ interface userRoles {
     grants: string[],
 };
 
-interface TranslateRoles {
-    role: string,
-    translated: string;
-}
-
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
     email: Yup.string().email('E-mail invlálido!').required('Obrigatório!'),

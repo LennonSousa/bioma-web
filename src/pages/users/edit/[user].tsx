@@ -17,11 +17,6 @@ import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 
-interface TranslateRoles {
-    role: string,
-    translated: string;
-}
-
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
     phone: Yup.string().notRequired(),
@@ -140,29 +135,31 @@ export default function UserEdit() {
     }
 
     async function handleUserDelete() {
-        setTypeMessage("waiting");
-        setDeletingMessageShow(true);
+        if (user && userData) {
+            setTypeMessage("waiting");
+            setDeletingMessageShow(true);
 
-        try {
-            if (can(user, "users", "delete") && !userData.sudo) {
-                await api.delete(`users/${userId}`);
+            try {
+                if (can(user, "users", "delete") && !userData.sudo) {
+                    await api.delete(`users/${userId}`);
 
-                setTypeMessage("success");
+                    setTypeMessage("success");
+
+                    setTimeout(() => {
+                        router.push('/users');
+                    }, 1500);
+                }
+            }
+            catch (err) {
+                console.log('error deleting user');
+                console.log(err);
+
+                setTypeMessage("error");
 
                 setTimeout(() => {
-                    router.push('/users');
-                }, 1500);
+                    setDeletingMessageShow(false);
+                }, 4000);
             }
-        }
-        catch (err) {
-            console.log('error deleting user');
-            console.log(err);
-
-            setTypeMessage("error");
-
-            setTimeout(() => {
-                setDeletingMessageShow(false);
-            }, 4000);
         }
     }
 
