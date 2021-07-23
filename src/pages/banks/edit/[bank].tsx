@@ -17,7 +17,7 @@ import PageBack from '../../../components/PageBack';
 import { cellphone } from '../../../components/InputMask/masks';
 import { statesCities } from '../../../components/StatesCities';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interface/AlertMessage';
 
 const validationSchema = Yup.object().shape({
     agency: Yup.string().required('Obrigatório!'),

@@ -15,8 +15,8 @@ import { can } from '../../components/Users';
 import { Customer } from '../../components/Customers';
 import CustomerItem from '../../components/CustomerListItem';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../components/Interfaces/AlertMessage';
-import { Paginations } from '../../components/Interfaces/Pagination';
+import { AlertMessage, statusModal } from '../../components/Interface/AlertMessage';
+import { Paginations } from '../../components/Interface/Pagination';
 
 import { Member } from '../../components/CustomerMembers';
 

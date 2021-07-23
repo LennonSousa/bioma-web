@@ -23,7 +23,7 @@ import { Licensing } from '../../../components/Licensings';
 import EventsLicensing from '../../../components/EventsLicensing';
 import LicensingAttachments from '../../../components/LicensingAttachments';
 import PageBack from '../../../components/PageBack';
-import { AlertMessage } from '../../../components/Interfaces/AlertMessage';
+import { AlertMessage } from '../../../components/Interface/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 
 export default function LicensingDetails() {

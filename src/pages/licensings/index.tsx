@@ -10,7 +10,7 @@ import { can } from '../../components/Users';
 import { Licensing } from '../../components/Licensings';
 import LicensingListItem from '../../components/LicensingListItem';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
-import { Paginations } from '../../components/Interfaces/Pagination';
+import { Paginations } from '../../components/Interface/Pagination';
 
 import { Member } from '../../components/LicensingMembers';
 

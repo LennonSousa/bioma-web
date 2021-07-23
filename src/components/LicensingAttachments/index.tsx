@@ -10,7 +10,7 @@ import FileSaver from 'file-saver';
 import api from '../../api/api';
 import { Licensing } from '../Licensings';
 import { LogLicensingAttachment } from '../LogsLicensingAttachment';
-import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../Interface/AlertMessage';
 
 export interface LicensingAttachment {
     id: string;

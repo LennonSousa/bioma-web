@@ -5,7 +5,7 @@ import { FaUserTie } from 'react-icons/fa';
 import api from '../../api/api';
 import { Customer } from '../Customers';
 import { User } from '../Users';
-import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../Interface/AlertMessage';
 
 export interface Member {
     id: string;
