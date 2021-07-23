@@ -45,7 +45,7 @@ const LineChart: React.FC<LineChartProps> = (props) => {
             }
         ]
     }
-    return <Pie type='pie' data={data} redraw={false} />
+    return <Pie data={data} redraw={false} />
 }
 
 export default LineChart;
