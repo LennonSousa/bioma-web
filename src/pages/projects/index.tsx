@@ -10,7 +10,7 @@ import { can } from '../../components/Users';
 import { Project } from '../../components/Projects';
 import ProjectListItem from '../../components/ProjectListItem';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
-import { Paginations } from '../../components/interfaces/Pagination';
+import { Paginations } from '../../components/Interfaces/Pagination';
 
 import { Member } from '../../components/ProjectMembers';
 

@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 
 import api from '../../api/api';
 import { Project } from '../Projects';
-import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface EventProject {
     id: string;

@@ -3,7 +3,7 @@ import { NextSeo } from 'next-seo';
 import { Col, Container, Image, Row } from 'react-bootstrap';
 import { FaArrowRight } from 'react-icons/fa';
 
-import { AlertMessage } from '../components/interfaces/AlertMessage';
+import { AlertMessage } from '../components/Interfaces/AlertMessage';
 
 export default function Page404() {
   return (

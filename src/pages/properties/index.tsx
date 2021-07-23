@@ -12,7 +12,7 @@ import { Property } from '../../components/Properties';
 import PropertyListItem from '../../components/PropertyListItem';
 import { SideBarContext } from '../../contexts/SideBarContext';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
-import { Paginations } from '../../components/interfaces/Pagination';
+import { Paginations } from '../../components/Interfaces/Pagination';
 
 import { Member } from '../../components/PropertyMembers';
 

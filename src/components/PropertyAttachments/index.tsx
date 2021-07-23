@@ -10,7 +10,7 @@ import FileSaver from 'file-saver';
 import api from '../../api/api';
 import { Property } from '../Properties';
 import { LogPropertyAttachment } from '../LogsPropertyAttachment';
-import { AlertMessage, statusModal } from '../interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface PropertyAttachment {
     id: string;

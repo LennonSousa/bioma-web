@@ -11,7 +11,7 @@ import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import Users, { User, can } from '../../components/Users';
 import { PageWaiting } from '../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../components/interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../../components/Interfaces/AlertMessage';
 
 export default function UsersPage() {
     const router = useRouter();

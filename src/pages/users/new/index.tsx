@@ -13,7 +13,7 @@ import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { UserRole, can, translatedRoles } from '../../../components/Users';
 import PageBack from '../../../components/PageBack';
-import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 
 interface userRoles {

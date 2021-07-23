@@ -69,7 +69,7 @@ export function Header() {
                 </Navbar.Collapse>
             </div>
 
-            <Form inline>
+            <Form>
                 <Row>
                     <Col>
                         <Button
@@ -85,7 +85,7 @@ export function Header() {
                         >
                             {
                                 unreadNotifications > 0 ? <div className={styles.buttonNotificationsContainer}>
-                                    <FaBell /> <Badge className={styles.buttonNotificationsContainerBadge} variant="warning">{unreadNotifications}</Badge>
+                                    <FaBell /> <Badge className={styles.buttonNotificationsContainerBadge} bg="warning">{unreadNotifications}</Badge>
                                 </div> : <FaRegBell />
                             }
                         </Button>

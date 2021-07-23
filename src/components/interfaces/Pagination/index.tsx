@@ -8,10 +8,10 @@ interface WaitingModalProps {
 }
 
 const Paginations: React.FC<WaitingModalProps> = ({ pages, active = 1, handleActivePage }) => {
-    const [pageItems, setPageItems] = useState([]);
+    const [pageItems, setPageItems] = useState<JSX.Element[]>([]);
 
     useEffect(() => {
-        let items = [];
+        let items: JSX.Element[] = [];
 
         for (let index = 1; index <= pages; index++) {
             items.push(
@@ -26,7 +26,7 @@ const Paginations: React.FC<WaitingModalProps> = ({ pages, active = 1, handleAct
         }
 
         setPageItems(items);
-    }, [pages, active]);
+    }, [pages, active]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <Pagination size="sm">{pageItems}</Pagination>

@@ -21,7 +21,7 @@ import { LicensingStatus } from '../../../components/LicensingStatus';
 import { Property } from '../../../components/Properties';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
     licensing_number: Yup.string().notRequired().nullable(),

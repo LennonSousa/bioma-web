@@ -16,7 +16,7 @@ import { Project } from '../../../components/Projects';
 import ProjectListItem from '../../../components/ProjectListItem';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-import { AlertMessage } from '../../../components/interfaces/AlertMessage';
+import { AlertMessage } from '../../../components/Interfaces/AlertMessage';
 
 import styles from './styles.module.css';
 

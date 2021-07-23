@@ -10,7 +10,7 @@ import { FaKey } from 'react-icons/fa';
 
 import api from '../api/api';
 import { AuthContext } from '../contexts/AuthContext';
-import { AlertMessage, statusModal } from '../components/interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../components/Interfaces/AlertMessage';
 
 import packageJson from '../../package.json';
 

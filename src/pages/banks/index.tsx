@@ -12,7 +12,7 @@ import { SideBarContext } from '../../contexts/SideBarContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import { can } from '../../components/Users';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
-import { Paginations } from '../../components/interfaces/Pagination';
+import { Paginations } from '../../components/Interfaces/Pagination';
 
 const limit = 15;
 

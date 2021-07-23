@@ -11,7 +11,7 @@ import Cookies from 'js-cookie';
 
 import api from '../../../../api/api';
 import { User } from '../../../../components/Users';
-import { AlertMessage, statusModal } from '../../../../components/interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../../../../components/Interfaces/AlertMessage';
 
 import styles from '../../../../styles/index.module.css';
 

@@ -15,7 +15,7 @@ import { AuthContext } from '../../../contexts/AuthContext';
 import { can } from '../../../components/Users';
 import LicensingAuthorizations, { LicensingAuthorization } from '../../../components/LicensingAuthorizations';
 import { PageWaiting } from '../../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../../components/interfaces/AlertMessage';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
 const validationSchema = Yup.object().shape({
     department: Yup.string().required('Obrigatório!').max(50, 'Deve conter no máximo 50 caracteres!'),
