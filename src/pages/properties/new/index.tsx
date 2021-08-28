@@ -1,9 +1,9 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
-import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row, Toast } from 'react-bootstrap';
-import { Formik, Field } from 'formik';
+import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Row, Toast } from 'react-bootstrap';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FaSearchPlus, FaPlus, FaUserTie } from 'react-icons/fa';
 
@@ -19,6 +19,7 @@ import { statesCities } from '../../../components/StatesCities';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
+import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
@@ -40,14 +41,12 @@ export default function NewProperty() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
-    const [customers, setCustomers] = useState<Customer[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
     const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
 
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
     const [membersAdded, setMembersAdded] = useState<Member[]>([]);
-    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
     const [docsProperty, setDocsProperty] = useState<DocsProperty[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
@@ -62,10 +61,10 @@ export default function NewProperty() {
 
     const toggleShowUsers = () => setShowUsers(!showUsers);
 
-    const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
+    const [showSearchModal, setShowSearchModal] = useState(false);
 
-    const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
-    const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
+    const handleCloseSearchModal = () => setShowSearchModal(false);
+    const handleShowSearchModal = () => setShowSearchModal(true);
 
     useEffect(() => {
         handleItemSideBar('customers');
@@ -111,23 +110,16 @@ export default function NewProperty() {
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
                 });
 
-                api.get('customers').then(res => {
-                    const customersRes: Customer[] = res.data;
+                if (customer) {
+                    api.get(`customers/${customer}`).then(res => {
+                        setSelectedCustomer(res.data)
+                    }).catch(err => {
+                        console.log('Error to get customers, ', err);
 
-                    if (customer) {
-                        customersRes.forEach(customerItem => {
-                            if (customerItem.id === customer)
-                                setSelectedCustomer(customerItem)
-                        })
-                    }
-
-                    setCustomers(customersRes);
-                }).catch(err => {
-                    console.log('Error to get customers, ', err);
-
-                    setTypeLoadingMessage("error");
-                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                });
+                        setTypeLoadingMessage("error");
+                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                    });
+                }
 
                 api.get('docs/property').then(res => {
                     let docsPropertyRes: DocsProperty[] = res.data;
@@ -145,25 +137,10 @@ export default function NewProperty() {
         }
     }, [user, customer]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    function handleSearch(event: ChangeEvent<HTMLInputElement>) {
-        if (customers) {
-            const term = event.target.value;
-
-            if (term === "") {
-                setCustomerResults([]);
-                return;
-            }
-
-            let resultsUpdated: Customer[] = [];
-
-            const customersFound = customers.filter(product => {
-                return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
-            });
-
-            if (!!customersFound.length) resultsUpdated = customersFound;
-
-            setCustomerResults(resultsUpdated);
-        }
+    function handleCustomer(customer: Customer) {
+        setSelectedCustomer(customer);
+        setErrorSelectedCustomer(false);
+        handleCloseSearchModal();
     }
 
     function createMember(userId: string) {
@@ -397,7 +374,7 @@ export default function NewProperty() {
                                                                     <Button
                                                                         id="btnGroupAddon"
                                                                         variant="success"
-                                                                        onClick={handleShowModalChooseCustomer}
+                                                                        onClick={handleShowSearchModal}
                                                                     >
                                                                         <FaSearchPlus />
                                                                     </Button>
@@ -528,12 +505,14 @@ export default function NewProperty() {
                                                         </Row>
 
                                                         <Row className="mb-2">
-                                                            <Form.Switch
-                                                                id="warnings"
-                                                                label="Pendências"
-                                                                checked={values.warnings}
-                                                                onChange={() => { setFieldValue('warnings', !values.warnings) }}
-                                                            />
+                                                            <Col>
+                                                                <Form.Switch
+                                                                    id="warnings"
+                                                                    label="Pendências"
+                                                                    checked={values.warnings}
+                                                                    onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                                                                />
+                                                            </Col>
                                                         </Row>
 
                                                         <Row className="mb-3">
@@ -562,65 +541,15 @@ export default function NewProperty() {
 
                                                             }
                                                         </Row>
-
-                                                        <Modal show={showModalChooseCustomer} onHide={handleCloseModalChooseCustomer}>
-                                                            <Modal.Header closeButton>
-                                                                <Modal.Title>Lista de clientes</Modal.Title>
-                                                            </Modal.Header>
-
-                                                            <Modal.Body>
-                                                                <Form.Group controlId="categoryFormGridName">
-                                                                    <Form.Label>Nome do cliente</Form.Label>
-                                                                    <Form.Control type="search"
-                                                                        placeholder="Digite para pesquisar"
-                                                                        autoComplete="off"
-                                                                        onChange={handleSearch}
-                                                                    />
-                                                                </Form.Group>
-                                                            </Modal.Body>
-
-                                                            <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
-                                                                <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
-                                                                    <Row>
-                                                                        <Col>
-                                                                            <ListGroup className="mt-3 mb-3">
-                                                                                {
-                                                                                    customerResults.map((customer, index) => {
-                                                                                        return <ListGroup.Item
-                                                                                            key={index}
-                                                                                            action
-                                                                                            variant="light"
-                                                                                            onClick={() => {
-                                                                                                setSelectedCustomer(customer);
-                                                                                                setErrorSelectedCustomer(false);
-                                                                                                handleCloseModalChooseCustomer();
-                                                                                            }}
-                                                                                        >
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <h6>{customer.name}</h6>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <span className="text-italic">{`${customer.document} - ${customer.city}/${customer.state}`}</span>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                        </ListGroup.Item>
-                                                                                    })
-                                                                                }
-                                                                            </ListGroup>
-                                                                        </Col>
-                                                                    </Row>
-                                                                </Modal.Body>
-                                                                <Modal.Footer>
-                                                                    <Button variant="secondary" onClick={handleCloseModalChooseCustomer}>Cancelar</Button>
-                                                                </Modal.Footer>
-                                                            </Modal.Dialog>
-                                                        </Modal>
                                                     </Form>
                                                 )}
                                             </Formik>
+
+                                            <SearchCustomers
+                                                show={showSearchModal}
+                                                handleCustomer={handleCustomer}
+                                                handleCloseSearchModal={handleCloseSearchModal}
+                                            />
                                         </Container>
                                 }
                             </> :

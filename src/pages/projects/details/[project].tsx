@@ -329,7 +329,7 @@ export default function PropertyDetails() {
 
                                                                         <Row>
                                                                             <Col>
-                                                                                <h6 className="text-secondary">{String(projectData.deal).replace(".", ",")}</h6>
+                                                                                <h6 className="text-secondary">{String(projectData.deal).replaceAll(".", ",")}</h6>
                                                                             </Col>
                                                                         </Row>
                                                                     </Col>

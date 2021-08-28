@@ -41,6 +41,7 @@ import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { prettifyCurrency } from '../../../components/InputMask/masks';
+import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
 import "react-circular-progressbar/dist/styles.css";
 import styles from './styles.module.css';
@@ -56,12 +57,10 @@ const validationSchema = Yup.object().shape({
     notes: Yup.string().notRequired(),
     warnings: Yup.boolean().notRequired(),
     warnings_text: Yup.string().notRequired().nullable(),
-    customer: Yup.string().required('Obrigatório!'),
     type: Yup.string().required('Obrigatório!'),
     line: Yup.string().required('Obrigatório!'),
     status: Yup.string().required('Obrigatório!'),
     bank: Yup.string().required('Obrigatório!'),
-    property: Yup.string().required('Obrigatório!'),
 });
 
 const validationSchemaEvents = Yup.object().shape({
@@ -88,10 +87,15 @@ export default function NewCustomer() {
     const { loading, user } = useContext(AuthContext);
 
     const [projectData, setProjectData] = useState<Project>();
-    const [customers, setCustomers] = useState<Customer[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
-    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
+    const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
+
+    const [selectedProperty, setSelectedProperty] = useState<Property>();
+    const [errorSelectedProperty, setErrorSelectedProperty] = useState(false);
+
     const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
     const [projectLines, setProjectLines] = useState<ProjectLine[]>([]);
     const [projectStatus, setProjectStatus] = useState<ProjectStatus[]>([]);
@@ -114,10 +118,10 @@ export default function NewCustomer() {
 
     const toggleShowUsers = () => setShowUsers(!showUsers);
 
-    const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
+    const [showSearchModal, setShowSearchModal] = useState(false);
 
-    const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
-    const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
+    const handleCloseSearchModal = () => setShowSearchModal(false);
+    const handleShowSearchModal = () => setShowSearchModal(true);
 
     const [showModalNewEvent, setShowModalNewEvent] = useState(false);
 
@@ -136,6 +140,13 @@ export default function NewCustomer() {
     const [fileToSave, setFileToSave] = useState<File>();
     const [filePreview, setFilePreview] = useState('');
 
+    const [deletingMessageShow, setDeletingMessageShow] = useState(false);
+
+    const [showItemDelete, setShowItemDelete] = useState(false);
+
+    const handleCloseItemDelete = () => setShowItemDelete(false);
+    const handelShowItemDelete = () => setShowItemDelete(true);
+
     useEffect(() => {
         handleItemSideBar('projects');
         handleSelectedMenu('projects-index');
@@ -147,15 +158,7 @@ export default function NewCustomer() {
                     api.get(`projects/${project}`).then(res => {
                         let projectRes: Project = res.data;
 
-                        api.get('customers').then(res => {
-                            setCustomers(res.data);
-                        }).catch(err => {
-                            console.log('Error to get project status, ', err);
-
-                            setTypeLoadingMessage("error");
-                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                            setHasErrors(true);
-                        });
+                        setSelectedCustomer(projectRes.customer);
 
                         api.get('users').then(res => {
                             setUsers(res.data);
@@ -232,9 +235,6 @@ export default function NewCustomer() {
                                     };
                                 })
                             }
-
-                            setProjectData(projectRes);
-                            setLoadingData(false);
                         }).catch(err => {
                             console.log('Error to get docs project to edit, ', err);
 
@@ -244,9 +244,16 @@ export default function NewCustomer() {
                         });
 
                         api.get(`customers/${projectRes.customer.id}/properties`).then(res => {
-                            setProperties(res.data);
+                            const propertiesRes: Property[] = res.data;
+
+                            const property = propertiesRes.find(property => { return property.id === projectRes.property.id });
+
+                            if (property) setSelectedProperty(property);
+
+                            setProperties(propertiesRes);
 
                             setProjectData(projectRes);
+                            setLoadingData(false);
                         }).catch(err => {
                             console.log('Error to get customer properties ', err);
 
@@ -272,25 +279,26 @@ export default function NewCustomer() {
         setProjectData(res.data);
     }
 
-    function handleSearch(event: ChangeEvent<HTMLInputElement>) {
-        if (customers) {
-            const term = event.target.value;
+    function handleCustomer(customer: Customer) {
+        setSelectedCustomer(customer);
 
-            if (term === "") {
-                setCustomerResults([]);
-                return;
-            }
+        api.get(`customers/${customer.id}/properties`).then(res => {
+            setProperties(res.data);
 
-            let resultsUpdated: Customer[] = [];
+            setSelectedProperty(undefined);
 
-            const customersFound = customers.filter(product => {
-                return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
-            });
+            setErrorSelectedCustomer(false);
+            setErrorSelectedProperty(false);
+            handleCloseSearchModal();
+        }).catch(err => {
+            console.log('Error to get customer properties ', err);
+        });
+    }
 
-            if (!!customersFound.length) resultsUpdated = customersFound;
+    function handleProperty(propertyId: String) {
+        const property = properties.find(property => { return property.id === propertyId });
 
-            setCustomerResults(resultsUpdated);
-        }
+        if (property) setSelectedProperty(property);
     }
 
     async function handleListMembers() {
@@ -379,6 +387,35 @@ export default function NewCustomer() {
             });
 
             setProjectData({ ...projectData, docs: updatedDocs });
+        }
+    }
+
+    async function handleItemDelete() {
+        if (user && project) {
+            setTypeMessage("waiting");
+            setDeletingMessageShow(true);
+
+            try {
+                if (can(user, "projects", "delete")) {
+                    await api.delete(`projects/${project}`);
+
+                    setTypeMessage("success");
+
+                    setTimeout(() => {
+                        router.push('/projects');
+                    }, 1000);
+                }
+            }
+            catch (err) {
+                console.log('error deleting project');
+                console.log(err);
+
+                setTypeMessage("error");
+
+                setTimeout(() => {
+                    setDeletingMessageShow(false);
+                }, 4000);
+            }
         }
     }
 
@@ -495,22 +532,29 @@ export default function NewCustomer() {
                                                                     notes: projectData.notes,
                                                                     warnings: projectData.warnings,
                                                                     warnings_text: projectData.warnings_text,
-                                                                    customer: projectData.customer.id,
-                                                                    customerName: projectData.customer.name,
                                                                     type: projectData.type.id,
                                                                     line: projectData.line.id,
                                                                     status: projectData.status.id,
                                                                     bank: projectData.bank.id,
-                                                                    property: projectData.property.id,
                                                                 }}
                                                                 onSubmit={async values => {
+                                                                    if (!selectedCustomer) {
+                                                                        setErrorSelectedCustomer(true);
+                                                                        return;
+                                                                    }
+
+                                                                    if (!selectedProperty) {
+                                                                        setErrorSelectedProperty(true);
+                                                                        return;
+                                                                    }
+
                                                                     setTypeMessage("waiting");
                                                                     setMessageShow(true);
 
                                                                     try {
                                                                         await api.put(`projects/${projectData.id}`, {
-                                                                            value: Number(values.value.replace(".", "").replace(",", ".")),
-                                                                            deal: Number(values.deal.replace(".", "").replace(",", ".")),
+                                                                            value: Number(values.value.replaceAll(".", "").replaceAll(",", ".")),
+                                                                            deal: Number(values.deal.replaceAll(".", "").replaceAll(",", ".")),
                                                                             paid: values.paid,
                                                                             paid_date: values.paid_date,
                                                                             contract: values.contract,
@@ -519,12 +563,12 @@ export default function NewCustomer() {
                                                                             notes: values.notes,
                                                                             warnings: values.warnings,
                                                                             warnings_text: values.warnings_text,
-                                                                            customer: values.customer,
+                                                                            customer: selectedCustomer.id,
                                                                             type: values.type,
                                                                             line: values.line,
                                                                             status: values.status,
                                                                             bank: values.bank,
-                                                                            property: values.property,
+                                                                            property: selectedProperty.id,
                                                                         });
 
                                                                         projectData.docs.forEach(async doc => {
@@ -573,33 +617,34 @@ export default function NewCustomer() {
                                                                                         type="name"
                                                                                         onChange={handleChange}
                                                                                         onBlur={handleBlur}
-                                                                                        value={values.customerName}
+                                                                                        value={selectedCustomer ? selectedCustomer.name : ''}
                                                                                         name="customerName"
                                                                                         aria-label="Nome do cliente"
                                                                                         aria-describedby="btnGroupAddon"
-                                                                                        isInvalid={!!errors.customerName}
+                                                                                        isInvalid={errorSelectedCustomer}
                                                                                         readOnly
                                                                                     />
                                                                                     <Button
                                                                                         id="btnGroupAddon"
                                                                                         variant="success"
-                                                                                        onClick={handleShowModalChooseCustomer}
+                                                                                        onClick={handleShowSearchModal}
                                                                                     >
                                                                                         <FaSearchPlus />
                                                                                     </Button>
                                                                                 </InputGroup>
-                                                                                <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
+                                                                                <Form.Control.Feedback type="invalid">{errorSelectedCustomer && 'Obrigatório!'}</Form.Control.Feedback>
                                                                             </Col>
 
                                                                             <Form.Group as={Col} sm={6} controlId="formGridProperty">
                                                                                 <Form.Label>Fazenda/imóvel</Form.Label>
                                                                                 <Form.Select
-                                                                                    onChange={handleChange}
-                                                                                    onBlur={handleBlur}
-                                                                                    value={values.property}
+                                                                                    onChange={e => {
+                                                                                        handleProperty(e.currentTarget.value);
+                                                                                    }}
+                                                                                    value={selectedProperty ? selectedProperty.id : ''}
                                                                                     name="property"
-                                                                                    disabled={!!!values.customer}
-                                                                                    isInvalid={!!errors.property && touched.property}
+                                                                                    disabled={!selectedCustomer}
+                                                                                    isInvalid={errorSelectedProperty}
                                                                                 >
                                                                                     <option hidden>...</option>
                                                                                     {
@@ -608,7 +653,7 @@ export default function NewCustomer() {
                                                                                         })
                                                                                     }
                                                                                 </Form.Select>
-                                                                                <Form.Control.Feedback type="invalid">{touched.property && errors.property}</Form.Control.Feedback>
+                                                                                <Form.Control.Feedback type="invalid">{errorSelectedProperty && 'Obrigatório!'}</Form.Control.Feedback>
                                                                             </Form.Group>
                                                                         </Row>
 
@@ -726,7 +771,7 @@ export default function NewCustomer() {
                                                                         </Row>
 
                                                                         <Row className="align-items-center mb-2">
-                                                                            <Form.Group as={Col} sm={3} controlId="formGridValue">
+                                                                            <Form.Group as={Col} sm={2} controlId="formGridValue">
                                                                                 <Form.Label>Valor</Form.Label>
                                                                                 <InputGroup className="mb-2">
                                                                                     <InputGroup.Text id="btnGroupValue">R$</InputGroup.Text>
@@ -780,7 +825,7 @@ export default function NewCustomer() {
                                                                             </Form.Group>
 
                                                                             {
-                                                                                values.paid && <Form.Group as={Col} sm={3} controlId="formGridPaidDate">
+                                                                                values.paid && <Form.Group as={Col} sm={2} controlId="formGridPaidDate">
                                                                                     <Form.Label>Data do pagamento</Form.Label>
                                                                                     <Form.Control
                                                                                         type="date"
@@ -824,12 +869,14 @@ export default function NewCustomer() {
                                                                         </Row>
 
                                                                         <Row className="mb-2">
-                                                                            <Form.Switch
-                                                                                id="warnings"
-                                                                                label="Pendências"
-                                                                                checked={values.warnings}
-                                                                                onChange={() => { setFieldValue('warnings', !values.warnings) }}
-                                                                            />
+                                                                            <Col>
+                                                                                <Form.Switch
+                                                                                    id="warnings"
+                                                                                    label="Pendências"
+                                                                                    checked={values.warnings}
+                                                                                    onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                                                                                />
+                                                                            </Col>
                                                                         </Row>
 
                                                                         <Row className="mb-3">
@@ -889,84 +936,35 @@ export default function NewCustomer() {
                                                                         <Row className="justify-content-end">
                                                                             {
                                                                                 messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                                                                    <Col sm={1}>
-                                                                                        <Button variant="success" type="submit">Salvar</Button>
-                                                                                    </Col>
+                                                                                    <>
+                                                                                        {
+                                                                                            can(user, "projects", "delete") && <Col className="col-row">
+                                                                                                <Button
+                                                                                                    variant="danger"
+                                                                                                    title="Excluir projeto."
+                                                                                                    onClick={handelShowItemDelete}
+                                                                                                >
+                                                                                                    Excluir
+                                                                                                </Button>
+                                                                                            </Col>
+                                                                                        }
+
+                                                                                        <Col className="col-row">
+                                                                                            <Button variant="success" type="submit">Salvar</Button>
+                                                                                        </Col>
+                                                                                    </>
 
                                                                             }
                                                                         </Row>
-
-                                                                        <Modal show={showModalChooseCustomer} onHide={handleCloseModalChooseCustomer}>
-                                                                            <Modal.Header closeButton>
-                                                                                <Modal.Title>Lista de clientes</Modal.Title>
-                                                                            </Modal.Header>
-
-                                                                            <Modal.Body>
-                                                                                <Form.Group controlId="categoryFormGridName">
-                                                                                    <Form.Label>Nome do cliente</Form.Label>
-                                                                                    <Form.Control type="search"
-                                                                                        placeholder="Digite para pesquisar"
-                                                                                        autoComplete="off"
-                                                                                        onChange={handleSearch}
-                                                                                    />
-                                                                                </Form.Group>
-                                                                            </Modal.Body>
-
-                                                                            <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
-                                                                                <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
-                                                                                    <Row>
-                                                                                        <Col>
-                                                                                            <ListGroup className="mt-3 mb-3">
-                                                                                                {
-                                                                                                    customerResults.map((customer, index) => {
-                                                                                                        return <ListGroup.Item
-                                                                                                            key={index}
-                                                                                                            action
-                                                                                                            variant="light"
-                                                                                                            onClick={() => {
-                                                                                                                setFieldValue('customer', customer.id);
-                                                                                                                setFieldValue('customerName', customer.name);
-
-                                                                                                                api.get(`customers/${customer.id}/properties`).then(res => {
-                                                                                                                    setProperties(res.data);
-
-                                                                                                                    setFieldValue('property', '');
-
-                                                                                                                    handleCloseModalChooseCustomer();
-                                                                                                                }).catch(err => {
-                                                                                                                    console.log('Error to get customer properties ', err);
-                                                                                                                });
-                                                                                                            }}
-                                                                                                        >
-                                                                                                            <Row>
-                                                                                                                <Col>
-                                                                                                                    <h6>{customer.name}</h6>
-                                                                                                                </Col>
-                                                                                                            </Row>
-                                                                                                            <Row>
-                                                                                                                <Col>
-                                                                                                                    <span
-                                                                                                                        className="text-italic"
-                                                                                                                    >
-                                                                                                                        {`${customer.document} - ${customer.city}/${customer.state}`}
-                                                                                                                    </span>
-                                                                                                                </Col>
-                                                                                                            </Row>
-                                                                                                        </ListGroup.Item>
-                                                                                                    })
-                                                                                                }
-                                                                                            </ListGroup>
-                                                                                        </Col>
-                                                                                    </Row>
-                                                                                </Modal.Body>
-                                                                                <Modal.Footer>
-                                                                                    <Button variant="secondary" onClick={handleCloseModalChooseCustomer}>Cancelar</Button>
-                                                                                </Modal.Footer>
-                                                                            </Modal.Dialog>
-                                                                        </Modal>
                                                                     </Form>
                                                                 )}
                                                             </Formik>
+
+                                                            <SearchCustomers
+                                                                show={showSearchModal}
+                                                                handleCustomer={handleCustomer}
+                                                                handleCloseSearchModal={handleCloseSearchModal}
+                                                            />
 
                                                             <Col className="border-top mt-3 mb-3"></Col>
 
@@ -1399,6 +1397,44 @@ export default function NewCustomer() {
                                                                         </Form>
                                                                     )}
                                                                 </Formik>
+                                                            </Modal>
+
+                                                            <Modal show={showItemDelete} onHide={handleCloseItemDelete}>
+                                                                <Modal.Header closeButton>
+                                                                    <Modal.Title>Excluir projeto</Modal.Title>
+                                                                </Modal.Header>
+                                                                <Modal.Body>
+                                                                    Você tem certeza que deseja excluir o projeto <b>{projectData.customer.name}</b>? Essa ação não poderá ser desfeita.
+                                                                </Modal.Body>
+                                                                <Modal.Footer>
+                                                                    <Row>
+                                                                        {
+                                                                            deletingMessageShow ? <Col><AlertMessage status={typeMessage} /></Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        can(user, "projects", "delete") && <Col className="col-row">
+                                                                                            <Button
+                                                                                                variant="danger"
+                                                                                                type="button"
+                                                                                                onClick={handleItemDelete}
+                                                                                            >
+                                                                                                Excluir
+                                                                                            </Button>
+                                                                                        </Col>
+                                                                                    }
+
+                                                                                    <Col className="col-row">
+                                                                                        <Button
+                                                                                            variant="outline-secondary"
+                                                                                            onClick={handleCloseItemDelete}
+                                                                                        >
+                                                                                            Cancelar
+                                                                                        </Button>
+                                                                                    </Col>
+                                                                                </>
+                                                                        }
+                                                                    </Row>
+                                                                </Modal.Footer>
                                                             </Modal>
                                                         </>
                                                     </Container>

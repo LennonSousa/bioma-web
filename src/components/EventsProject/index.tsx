@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button, Col, Form, ListGroup, Modal, Row } from 'react-bootstrap';
-import { FaCheck, FaClock } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format } from 'date-fns';

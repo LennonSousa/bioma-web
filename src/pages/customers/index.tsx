@@ -2,9 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
-import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
+import { Button, Col, Container, Row } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 
 import api from '../../api/api';
@@ -15,14 +13,10 @@ import { can } from '../../components/Users';
 import { Customer } from '../../components/Customers';
 import CustomerItem from '../../components/CustomerListItem';
 import { PageWaiting, PageType } from '../../components/PageWaiting';
-import { AlertMessage, statusModal } from '../../components/Interfaces/AlertMessage';
 import { Paginations } from '../../components/Interfaces/Pagination';
+import SearchCustomers from '../../components/Interfaces/SearchCustomers';
 
 import { Member } from '../../components/CustomerMembers';
-
-const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Obrigatório!'),
-});
 
 const limit = 15;
 
@@ -41,15 +35,10 @@ export default function Customers() {
     const [typeLoadingMessage, setTypeLoadingMessage] = useState<PageType>("waiting");
     const [textLoadingMessage, setTextLoadingMessage] = useState('Aguarde, carregando...');
 
-    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
-
     const [showSearchModal, setShowSearchModal] = useState(false);
 
     const handleCloseSearchModal = () => setShowSearchModal(false);
     const handleShowSearchModal = () => setShowSearchModal(true);
-
-    const [messageShow, setMessageShow] = useState(false);
-    const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     useEffect(() => {
         handleItemSideBar('customers');
@@ -97,7 +86,7 @@ export default function Customers() {
         setActivePage(page);
 
         try {
-            let requestUrl = `customers?limit=${limit}&page=${activePage}`;
+            let requestUrl = `customers?limit=${limit}&page=${page}`;
 
             if (userId) requestUrl = `members/customers/user/${userId}?limit=${limit}&page=${activePage}`;
 
@@ -125,6 +114,10 @@ export default function Customers() {
         }
 
         setLoadingData(false);
+    }
+
+    function handleCustomer(customer: Customer) {
+        handleRoute(`/customers/details/${customer.id}`);
     }
 
     function handleRoute(route: string) {
@@ -204,110 +197,11 @@ export default function Customers() {
                                         </Col>
                                     </Row>
 
-                                    <Modal show={showSearchModal} onHide={handleCloseSearchModal}>
-                                        <Modal.Header closeButton>
-                                            <Modal.Title>Lista de clientes</Modal.Title>
-                                        </Modal.Header>
-
-                                        <Formik
-                                            initialValues={{
-                                                name: '',
-                                            }}
-                                            onSubmit={async values => {
-                                                setTypeMessage("waiting");
-                                                setMessageShow(true);
-
-                                                try {
-                                                    const res = await api.get(`customers?name=${values.name}`);
-
-                                                    setCustomerResults(res.data);
-
-                                                    setMessageShow(false);
-                                                }
-                                                catch {
-                                                    setTypeMessage("error");
-
-                                                    setTimeout(() => {
-                                                        setMessageShow(false);
-                                                    }, 4000);
-                                                }
-                                            }}
-                                            validationSchema={validationSchema}
-                                        >
-                                            {({ handleSubmit, values, setFieldValue, errors, touched }) => (
-                                                <>
-                                                    <Modal.Body>
-                                                        <Form onSubmit={handleSubmit}>
-                                                            <Form.Group controlId="customerFormGridName">
-                                                                <Form.Label>Nome do cliente</Form.Label>
-                                                                <Form.Control type="search"
-                                                                    placeholder="Digite para pesquisar"
-                                                                    autoComplete="off"
-                                                                    onChange={(e) => {
-                                                                        setFieldValue('name', e.target.value);
-
-                                                                        if (e.target.value.length > 1)
-                                                                            handleSubmit();
-                                                                    }}
-                                                                    value={values.name}
-                                                                    isInvalid={!!errors.name && touched.name}
-                                                                />
-                                                                <Form.Control.Feedback type="invalid">{touched.name && errors.name}</Form.Control.Feedback>
-                                                            </Form.Group>
-
-                                                            <Row style={{ minHeight: '40px' }}>
-                                                                <Col>
-                                                                    {messageShow && <AlertMessage status={typeMessage} />}
-                                                                </Col>
-                                                            </Row>
-                                                        </Form>
-                                                    </Modal.Body>
-
-                                                    <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
-                                                        <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
-                                                            <Row style={{ minHeight: '150px' }}>
-                                                                {
-                                                                    values.name.length > 1 && <Col>
-                                                                        {
-                                                                            !!customerResults.length ? <ListGroup className="mt-3 mb-3">
-                                                                                {
-                                                                                    customerResults.map((customer, index) => {
-                                                                                        return <ListGroup.Item
-                                                                                            key={index}
-                                                                                            action
-                                                                                            variant="light"
-                                                                                            onClick={() => handleRoute(`/customers/details/${customer.id}`)}
-                                                                                        >
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <h6>{customer.name}</h6>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <span className="text-italic">
-                                                                                                        {`${customer.document} - ${customer.city}/${customer.state}`}
-                                                                                                    </span>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                        </ListGroup.Item>
-                                                                                    })
-                                                                                }
-                                                                            </ListGroup> :
-                                                                                <AlertMessage status="warning" message="Nenhum cliente encontrado!" />
-                                                                        }
-                                                                    </Col>
-                                                                }
-                                                            </Row>
-                                                        </Modal.Body>
-                                                        <Modal.Footer>
-                                                            <Button variant="secondary" onClick={handleCloseSearchModal}>Cancelar</Button>
-                                                        </Modal.Footer>
-                                                    </Modal.Dialog>
-                                                </>
-                                            )}
-                                        </Formik>
-                                    </Modal>
+                                    <SearchCustomers
+                                        show={showSearchModal}
+                                        handleCustomer={handleCustomer}
+                                        handleCloseSearchModal={handleCloseSearchModal}
+                                    />
                                 </Container>
                             </> :
                                 <PageWaiting status="warning" message="Acesso negado!" />

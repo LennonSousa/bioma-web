@@ -97,9 +97,9 @@ export default function Projects() {
 
             if (bank) query = `&bank=${bank}`;
 
-            let requestUrl = `projects?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+            let requestUrl = `projects?limit=${limit}&page=${page}${!!query ? query : ''}`;
 
-            if (userId) requestUrl = `members/projects/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+            if (userId) requestUrl = `members/projects/user/${userId}?limit=${limit}&page=${page}${!!query ? query : ''}`;
 
             const res = await api.get(requestUrl)
             if (userId) {

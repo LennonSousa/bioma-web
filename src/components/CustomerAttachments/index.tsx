@@ -75,6 +75,8 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
             const fileName = `${attachment.customer.name.replace('.', '')} - ${attachment.name.replace('.', '')}`;
 
             FileSaver.saveAs(res.data, fileName);
+
+            if (handleListAttachments) await handleListAttachments();
         }
         catch (err) {
             console.log("Error to get attachment");
@@ -236,7 +238,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                                             onClick={handleDownloadAttachment}
                                             title="Baixar o anexo."
                                         >
-                                            <FaCloudDownloadAlt />
+                                            {downloadingAttachment ? <Spinner animation="border" variant="success" size="sm" /> : <FaCloudDownloadAlt />}
                                         </Button>
                                     </Form.Group>
                                 </Row>
@@ -309,42 +311,36 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                                 }
 
                                 <Accordion>
-                                    <Card>
-                                        <Card.Header>
-                                            <AccordionButton as={Card.Header} variant="link" eventKey="0">
-                                                <h6 className="text-success">Acessos <FaFingerprint /></h6>
-                                            </AccordionButton>
-                                        </Card.Header>
-                                        <Accordion.Collapse eventKey="0">
-                                            <Card.Body>
-                                                <Table striped hover size="sm" responsive>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Data</th>
-                                                            <th>Usuário</th>
-                                                            <th>Acesso</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {
-                                                            attachment.logs.map(log => {
-                                                                let action = 'Criação';
+                                    <Accordion.Item eventKey="0">
+                                        <Accordion.Header><h6 className="text-success">Acessos <FaFingerprint /></h6></Accordion.Header>
+                                        <Accordion.Body>
+                                            <Table striped hover size="sm" responsive>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Data</th>
+                                                        <th>Usuário</th>
+                                                        <th>Acesso</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        attachment.logs.map(log => {
+                                                            let action = 'Criação';
 
-                                                                if (log.action === 'view') action = 'Download';
-                                                                else if (log.action === 'update') action = 'Edição';
+                                                            if (log.action === 'view') action = 'Download';
+                                                            else if (log.action === 'update') action = 'Edição';
 
-                                                                return <tr key={log.id}>
-                                                                    <td>{format(new Date(log.accessed_at), 'dd/MM/yyyy HH:mm')}</td>
-                                                                    <td>{log.user}</td>
-                                                                    <td>{action}</td>
-                                                                </tr>
-                                                            })
-                                                        }
-                                                    </tbody>
-                                                </Table>
-                                            </Card.Body>
-                                        </Accordion.Collapse>
-                                    </Card>
+                                                            return <tr key={log.id}>
+                                                                <td>{format(new Date(log.accessed_at), 'dd/MM/yyyy HH:mm')}</td>
+                                                                <td>{log.user}</td>
+                                                                <td>{action}</td>
+                                                            </tr>
+                                                        })
+                                                    }
+                                                </tbody>
+                                            </Table>
+                                        </Accordion.Body>
+                                    </Accordion.Item>
                                 </Accordion>
 
                             </Modal.Body>

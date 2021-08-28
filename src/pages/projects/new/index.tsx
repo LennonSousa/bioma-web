@@ -1,8 +1,8 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
-import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row, Toast } from 'react-bootstrap';
+import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Row, Toast } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FaPlus, FaSearchPlus, FaUserTie } from 'react-icons/fa';
@@ -25,6 +25,7 @@ import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import { prettifyCurrency } from '../../../components/InputMask/masks';
+import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
 const validationSchema = Yup.object().shape({
     value: Yup.string().notRequired(),
@@ -41,7 +42,6 @@ const validationSchema = Yup.object().shape({
     line: Yup.string().required('Obrigatório!'),
     status: Yup.string().required('Obrigatório!'),
     bank: Yup.string().required('Obrigatório!'),
-    property: Yup.string().required('Obrigatório!'),
 });
 
 export default function NewProject() {
@@ -57,9 +57,10 @@ export default function NewProject() {
 
     const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
     const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
-    const [customers, setCustomers] = useState<Customer[]>([]);
 
-    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+    const [selectedProperty, setSelectedProperty] = useState<Property>();
+    const [errorSelectedProperty, setErrorSelectedProperty] = useState(false);
+
     const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
     const [projectLines, setProjectLines] = useState<ProjectLine[]>([]);
     const [projectStatus, setProjectStatus] = useState<ProjectStatus[]>([]);
@@ -79,10 +80,10 @@ export default function NewProject() {
 
     const toggleShowUsers = () => setShowUsers(!showUsers);
 
-    const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
+    const [showSearchModal, setShowSearchModal] = useState(false);
 
-    const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
-    const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
+    const handleCloseSearchModal = () => setShowSearchModal(false);
+    const handleShowSearchModal = () => setShowSearchModal(true);
 
     useEffect(() => {
         handleItemSideBar('projects');
@@ -126,31 +127,24 @@ export default function NewProject() {
                     setHasErrors(true);
                 });
 
-                api.get('customers').then(res => {
-                    const customersRes: Customer[] = res.data;
+                if (customer) {
+                    api.get(`customers/${customer}`).then(res => {
+                        const customersRes: Customer = res.data;
+                        setSelectedCustomer(customersRes);
 
-                    if (customer) {
-                        customersRes.forEach(customerItem => {
-                            if (customerItem.id === customer) {
-                                setSelectedCustomer(customerItem);
-
-                                api.get(`customers/${customerItem.id}/properties`).then(res => {
-                                    setProperties(res.data);
-                                }).catch(err => {
-                                    console.log('Error to get customer properties ', err);
-                                });
-                            }
+                        api.get(`customers/${customersRes.id}/properties`).then(res => {
+                            setProperties(res.data);
+                        }).catch(err => {
+                            console.log('Error to get customer properties ', err);
                         });
-                    }
+                    }).catch(err => {
+                        console.log('Error to get project status, ', err);
 
-                    setCustomers(customersRes);
-                }).catch(err => {
-                    console.log('Error to get project status, ', err);
-
-                    setTypeLoadingMessage("error");
-                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setHasErrors(true);
-                });
+                        setTypeLoadingMessage("error");
+                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                        setHasErrors(true);
+                    });
+                }
 
                 api.get('projects/types').then(res => {
                     setProjectTypes(res.data);
@@ -210,25 +204,26 @@ export default function NewProject() {
         }
     }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    function handleSearch(event: ChangeEvent<HTMLInputElement>) {
-        if (customers) {
-            const term = event.target.value;
+    function handleCustomer(customer: Customer) {
+        setSelectedCustomer(customer);
 
-            if (term === "") {
-                setCustomerResults([]);
-                return;
-            }
+        api.get(`customers/${customer.id}/properties`).then(res => {
+            setProperties(res.data);
 
-            let resultsUpdated: Customer[] = [];
+            setSelectedProperty(undefined);
 
-            const customersFound = customers.filter(product => {
-                return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
-            });
+            setErrorSelectedCustomer(false);
+            setErrorSelectedProperty(false);
+            handleCloseSearchModal();
+        }).catch(err => {
+            console.log('Error to get customer properties ', err);
+        });
+    }
 
-            if (!!customersFound.length) resultsUpdated = customersFound;
+    function handleProperty(propertyId: String) {
+        const property = properties.find(property => { return property.id === propertyId });
 
-            setCustomerResults(resultsUpdated);
-        }
+        if (property) setSelectedProperty(property);
     }
 
     function createMember(userId: string) {
@@ -383,11 +378,15 @@ export default function NewProject() {
                                                     line: '',
                                                     status: '',
                                                     bank: '',
-                                                    property: '',
                                                 }}
                                                 onSubmit={async values => {
                                                     if (!selectedCustomer) {
                                                         setErrorSelectedCustomer(true);
+                                                        return;
+                                                    }
+
+                                                    if (!selectedProperty) {
+                                                        setErrorSelectedProperty(true);
                                                         return;
                                                     }
 
@@ -404,8 +403,8 @@ export default function NewProject() {
 
                                                     try {
                                                         const res = await api.post('projects', {
-                                                            value: Number(values.value.replace(".", "").replace(",", ".")),
-                                                            deal: Number(values.deal.replace(".", "").replace(",", ".")),
+                                                            value: Number(values.value.replaceAll(".", "").replaceAll(",", ".")),
+                                                            deal: Number(values.deal.replaceAll(".", "").replaceAll(",", ".")),
                                                             paid: values.paid,
                                                             paid_date: values.paid_date,
                                                             contract: values.contract,
@@ -419,7 +418,7 @@ export default function NewProject() {
                                                             line: values.line,
                                                             status: values.status,
                                                             bank: values.bank,
-                                                            property: values.property,
+                                                            property: selectedProperty.id,
                                                             docs,
                                                             members,
                                                         });
@@ -459,7 +458,7 @@ export default function NewProject() {
                                                                     <Button
                                                                         id="btnGroupAddon"
                                                                         variant="success"
-                                                                        onClick={handleShowModalChooseCustomer}
+                                                                        onClick={handleShowSearchModal}
                                                                     >
                                                                         <FaSearchPlus />
                                                                     </Button>
@@ -469,14 +468,14 @@ export default function NewProject() {
 
                                                             <Form.Group as={Col} sm={6} controlId="formGridProperty">
                                                                 <Form.Label>Fazenda/imóvel</Form.Label>
-                                                                <Form.Control
-                                                                    as="select"
-                                                                    onChange={handleChange}
-                                                                    onBlur={handleBlur}
-                                                                    value={values.property}
+                                                                <Form.Select
+                                                                    onChange={e => {
+                                                                        handleProperty(e.currentTarget.value);
+                                                                    }}
+                                                                    value={selectedProperty ? selectedProperty.id : ''}
                                                                     name="property"
                                                                     disabled={!selectedCustomer}
-                                                                    isInvalid={!!errors.property && touched.property}
+                                                                    isInvalid={errorSelectedProperty}
                                                                 >
                                                                     <option hidden>...</option>
                                                                     {
@@ -484,8 +483,8 @@ export default function NewProject() {
                                                                             return <option key={index} value={property.id}>{property.name}</option>
                                                                         })
                                                                     }
-                                                                </Form.Control>
-                                                                <Form.Control.Feedback type="invalid">{touched.property && errors.property}</Form.Control.Feedback>
+                                                                </Form.Select>
+                                                                <Form.Control.Feedback type="invalid">{errorSelectedProperty && 'Obrigatório!'}</Form.Control.Feedback>
                                                             </Form.Group>
                                                         </Row>
 
@@ -742,76 +741,16 @@ export default function NewProject() {
 
                                                             }
                                                         </Row>
-
-                                                        <Modal show={showModalChooseCustomer} onHide={handleCloseModalChooseCustomer}>
-                                                            <Modal.Header closeButton>
-                                                                <Modal.Title>Lista de clientes</Modal.Title>
-                                                            </Modal.Header>
-
-                                                            <Modal.Body>
-                                                                <Form.Group controlId="categoryFormGridName">
-                                                                    <Form.Label>Nome do cliente</Form.Label>
-                                                                    <Form.Control type="search"
-                                                                        placeholder="Digite para pesquisar"
-                                                                        autoComplete="off"
-                                                                        onChange={handleSearch}
-                                                                    />
-                                                                </Form.Group>
-                                                            </Modal.Body>
-
-                                                            <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
-                                                                <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
-                                                                    <Row>
-                                                                        <Col>
-                                                                            <ListGroup className="mt-3 mb-3">
-                                                                                {
-                                                                                    customerResults.map((customer, index) => {
-                                                                                        return <ListGroup.Item
-                                                                                            key={index}
-                                                                                            action
-                                                                                            variant="light"
-                                                                                            onClick={() => {
-                                                                                                setSelectedCustomer(customer);
-                                                                                                setErrorSelectedCustomer(false);
-
-                                                                                                api.get(`customers/${customer.id}/properties`).then(res => {
-                                                                                                    setProperties(res.data);
-
-                                                                                                    handleCloseModalChooseCustomer();
-                                                                                                }).catch(err => {
-                                                                                                    console.log('Error to get customer properties ', err);
-                                                                                                });
-                                                                                            }}
-                                                                                        >
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <h6>{customer.name}</h6>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <span
-                                                                                                        className="text-italic"
-                                                                                                    >
-                                                                                                        {`${customer.document} - ${customer.city}/${customer.state}`}
-                                                                                                    </span>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                        </ListGroup.Item>
-                                                                                    })
-                                                                                }
-                                                                            </ListGroup>
-                                                                        </Col>
-                                                                    </Row>
-                                                                </Modal.Body>
-                                                                <Modal.Footer>
-                                                                    <Button variant="secondary" onClick={handleCloseModalChooseCustomer}>Cancelar</Button>
-                                                                </Modal.Footer>
-                                                            </Modal.Dialog>
-                                                        </Modal>
                                                     </Form>
                                                 )}
                                             </Formik>
+
+
+                                            <SearchCustomers
+                                                show={showSearchModal}
+                                                handleCustomer={handleCustomer}
+                                                handleCloseSearchModal={handleCloseSearchModal}
+                                            />
                                         </Container>
                                 }
                             </> :

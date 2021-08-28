@@ -29,6 +29,7 @@ import LicensingAttachments from '../../../components/LicensingAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
+import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
 import styles from './styles.module.css';
 
@@ -39,7 +40,6 @@ const validationSchema = Yup.object().shape({
     deadline: Yup.string().notRequired().nullable(),
     process_number: Yup.string().notRequired().nullable(),
     customer: Yup.string().required('Obrigatório!'),
-    property: Yup.string().notRequired().nullable(),
     infringement: Yup.string().notRequired().nullable(),
     authorization: Yup.string().required('Obrigatório!'),
     agency: Yup.string().required('Obrigatório!'),
@@ -73,8 +73,12 @@ export default function NewCustomer() {
     const [data, setData] = useState<Licensing>();
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
-    const [customers, setCustomers] = useState<Customer[]>([]);
-    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
+    const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
+
+    const [selectedProperty, setSelectedProperty] = useState<Property>();
+
     const [licensingAgencies, setLicensingAgencies] = useState<LicensingAgency[]>([]);
     const [licensingAuthorizations, setLicensingAuthorizations] = useState<LicensingAuthorization[]>([]);
     const [licensingInfringements, setLicensingInfringements] = useState<LicensingInfringement[]>([]);
@@ -97,10 +101,10 @@ export default function NewCustomer() {
 
     const toggleShowUsers = () => setShowUsers(!showUsers);
 
-    const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
+    const [showSearchModal, setShowSearchModal] = useState(false);
 
-    const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
-    const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
+    const handleCloseSearchModal = () => setShowSearchModal(false);
+    const handleShowSearchModal = () => setShowSearchModal(true);
 
     const [showModalNewEvent, setShowModalNewEvent] = useState(false);
 
@@ -119,6 +123,13 @@ export default function NewCustomer() {
     const [fileToSave, setFileToSave] = useState<File>();
     const [filePreview, setFilePreview] = useState('');
 
+    const [deletingMessageShow, setDeletingMessageShow] = useState(false);
+
+    const [showItemDelete, setShowItemDelete] = useState(false);
+
+    const handleCloseItemDelete = () => setShowItemDelete(false);
+    const handelShowItemDelete = () => setShowItemDelete(true);
+
     useEffect(() => {
         handleItemSideBar('licensings');
         handleSelectedMenu('licensings-index');
@@ -129,6 +140,8 @@ export default function NewCustomer() {
                 api.get(`licensings/${licensing}`).then(res => {
                     const licensingRes: Licensing = res.data;
 
+                    setSelectedCustomer(licensingRes.customer);
+
                     api.get('users').then(res => {
                         setUsers(res.data);
                         const usersRes: User[] = res.data;
@@ -136,16 +149,6 @@ export default function NewCustomer() {
                         handleUsersToAdd(usersRes, licensingRes);
                     }).catch(err => {
                         console.log('Error to get users on licensing edit, ', err);
-
-                        setTypeLoadingMessage("error");
-                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                        setHasErrors(true);
-                    });
-
-                    api.get('customers').then(res => {
-                        setCustomers(res.data);
-                    }).catch(err => {
-                        console.log('Error to get licensings customers, ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
@@ -184,6 +187,9 @@ export default function NewCustomer() {
 
                     api.get('licensings/status').then(res => {
                         setLicensingStatus(res.data);
+
+                        setData(licensingRes);
+                        setLoadingData(false);
                     }).catch(err => {
                         console.log('Error to get licensings status, ', err);
 
@@ -193,10 +199,15 @@ export default function NewCustomer() {
                     });
 
                     api.get(`customers/${licensingRes.customer.id}/properties`).then(res => {
-                        setProperties(res.data);
+                        const propertiesRes: Property[] = res.data;
 
-                        setData(licensingRes);
-                        setLoadingData(false);
+                        if (licensingRes.property) {
+                            const property = propertiesRes.find(property => { return property.id === licensingRes.property.id });
+
+                            if (property) setSelectedProperty(property);
+                        }
+
+                        setProperties(propertiesRes);
                     }).catch(err => {
                         console.log('Error to get customer properties ', err);
 
@@ -204,6 +215,7 @@ export default function NewCustomer() {
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
                         setHasErrors(true);
                     });
+
                 }).catch(err => {
                     console.log('Error to get licensing, ', err);
 
@@ -221,25 +233,30 @@ export default function NewCustomer() {
         setData(res.data);
     }
 
-    function handleSearch(event: ChangeEvent<HTMLInputElement>) {
-        if (customers) {
-            const term = event.target.value;
+    function handleCustomer(customer: Customer) {
+        setSelectedCustomer(customer);
 
-            if (term === "") {
-                setCustomerResults([]);
-                return;
-            }
+        api.get(`customers/${customer.id}/properties`).then(res => {
+            setProperties(res.data);
 
-            let resultsUpdated: Customer[] = [];
+            setSelectedProperty(undefined);
 
-            const customersFound = customers.filter(product => {
-                return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
-            });
+            setErrorSelectedCustomer(false);
+            handleCloseSearchModal();
+        }).catch(err => {
+            console.log('Error to get customer properties ', err);
+        });
+    }
 
-            if (!!customersFound.length) resultsUpdated = customersFound;
+    function handleProperty(propertyId: String) {
+        const property = properties.find(property => { return property.id === propertyId });
 
-            setCustomerResults(resultsUpdated);
+        if (!property) {
+            setSelectedProperty(undefined);
+            return;
         }
+
+        setSelectedProperty(property);
     }
 
     async function handleListMembers() {
@@ -301,6 +318,35 @@ export default function NewCustomer() {
             const imagesToPreview = image.name;
 
             setFilePreview(imagesToPreview);
+        }
+    }
+
+    async function handleItemDelete() {
+        if (user && licensing) {
+            setTypeMessage("waiting");
+            setDeletingMessageShow(true);
+
+            try {
+                if (can(user, "licensings", "delete")) {
+                    await api.delete(`licensings/${licensing}`);
+
+                    setTypeMessage("success");
+
+                    setTimeout(() => {
+                        router.push('/licensings');
+                    }, 1000);
+                }
+            }
+            catch (err) {
+                console.log('error deleting licensing');
+                console.log(err);
+
+                setTypeMessage("error");
+
+                setTimeout(() => {
+                    setDeletingMessageShow(false);
+                }, 4000);
+            }
         }
     }
 
@@ -413,13 +459,17 @@ export default function NewCustomer() {
                                                                 process_number: data.process_number,
                                                                 customer: data.customer.id,
                                                                 customerName: data.customer.name,
-                                                                property: data.property ? data.property.id : '0',
                                                                 infringement: data.infringement ? data.infringement.id : '0',
                                                                 authorization: data.authorization.id,
                                                                 agency: data.agency.id,
                                                                 status: data.status.id,
                                                             }}
                                                             onSubmit={async values => {
+                                                                if (!selectedCustomer) {
+                                                                    setErrorSelectedCustomer(true);
+                                                                    return;
+                                                                }
+
                                                                 setTypeMessage("waiting");
                                                                 setMessageShow(true);
 
@@ -430,8 +480,8 @@ export default function NewCustomer() {
                                                                         renovation: values.renovation,
                                                                         deadline: values.deadline,
                                                                         process_number: values.process_number,
-                                                                        customer: values.customer,
-                                                                        property: values.property,
+                                                                        customer: selectedCustomer.id,
+                                                                        property: selectedProperty ? selectedProperty.id : '0',
                                                                         infringement: values.infringement,
                                                                         authorization: values.authorization,
                                                                         agency: values.agency,
@@ -454,7 +504,7 @@ export default function NewCustomer() {
                                                             }}
                                                             validationSchema={validationSchema}
                                                         >
-                                                            {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                                                            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                                                                 <Form onSubmit={handleSubmit}>
 
 
@@ -467,22 +517,22 @@ export default function NewCustomer() {
                                                                                     type="name"
                                                                                     onChange={handleChange}
                                                                                     onBlur={handleBlur}
-                                                                                    value={values.customerName}
+                                                                                    value={selectedCustomer ? selectedCustomer.name : ''}
                                                                                     name="customerName"
                                                                                     aria-label="Nome do cliente"
                                                                                     aria-describedby="btnGroupAddon"
-                                                                                    isInvalid={!!errors.customerName}
+                                                                                    isInvalid={errorSelectedCustomer}
                                                                                     readOnly
                                                                                 />
                                                                                 <Button
                                                                                     id="btnGroupAddon"
                                                                                     variant="success"
-                                                                                    onClick={handleShowModalChooseCustomer}
+                                                                                    onClick={handleShowSearchModal}
                                                                                 >
                                                                                     <FaSearchPlus />
                                                                                 </Button>
                                                                             </InputGroup>
-                                                                            <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
+                                                                            <Form.Control.Feedback type="invalid">{errorSelectedCustomer && 'Obrigatório!'}</Form.Control.Feedback>
                                                                         </Col>
 
                                                                         <Form.Group as={Col} sm={6} controlId="formGridAuthorizatioin">
@@ -607,12 +657,12 @@ export default function NewCustomer() {
                                                                             <Form.Label>Fazenda/imóvel</Form.Label>
                                                                             <Form.Control
                                                                                 as="select"
-                                                                                onChange={handleChange}
-                                                                                onBlur={handleBlur}
-                                                                                value={values.property}
+                                                                                onChange={e => {
+                                                                                    handleProperty(e.currentTarget.value);
+                                                                                }}
+                                                                                value={selectedProperty ? selectedProperty.id : '0'}
                                                                                 name="property"
                                                                                 disabled={!!!values.customer}
-                                                                                isInvalid={!!errors.property && touched.property}
                                                                             >
                                                                                 <option value="0">Nenhuma</option>
                                                                                 {
@@ -621,10 +671,9 @@ export default function NewCustomer() {
                                                                                     })
                                                                                 }
                                                                             </Form.Control>
-                                                                            <Form.Control.Feedback type="invalid">{touched.property && errors.property}</Form.Control.Feedback>
                                                                         </Form.Group>
 
-                                                                        <Form.Group as={Col} sm={5} controlId="formGridInfringement">
+                                                                        <Form.Group as={Col} sm={6} controlId="formGridInfringement">
                                                                             <Form.Label>Infração</Form.Label>
                                                                             <Form.Control
                                                                                 as="select"
@@ -648,84 +697,34 @@ export default function NewCustomer() {
                                                                     <Row className="justify-content-end">
                                                                         {
                                                                             messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                                                                <Col sm={1}>
-                                                                                    <Button variant="success" type="submit">Salvar</Button>
-                                                                                </Col>
+                                                                                <>
+                                                                                    {
+                                                                                        can(user, "licensings", "delete") && <Col className="col-row">
+                                                                                            <Button
+                                                                                                variant="danger"
+                                                                                                title="Excluir licenciamento."
+                                                                                                onClick={handelShowItemDelete}
+                                                                                            >
+                                                                                                Excluir
+                                                                                            </Button>
+                                                                                        </Col>
+                                                                                    }
 
+                                                                                    <Col sm={1}>
+                                                                                        <Button variant="success" type="submit">Salvar</Button>
+                                                                                    </Col>
+                                                                                </>
                                                                         }
                                                                     </Row>
-
-                                                                    <Modal show={showModalChooseCustomer} onHide={handleCloseModalChooseCustomer}>
-                                                                        <Modal.Header closeButton>
-                                                                            <Modal.Title>Lista de clientes</Modal.Title>
-                                                                        </Modal.Header>
-
-                                                                        <Modal.Body>
-                                                                            <Form.Group controlId="categoryFormGridName">
-                                                                                <Form.Label>Nome do cliente</Form.Label>
-                                                                                <Form.Control type="search"
-                                                                                    placeholder="Digite para pesquisar"
-                                                                                    autoComplete="off"
-                                                                                    onChange={handleSearch}
-                                                                                />
-                                                                            </Form.Group>
-                                                                        </Modal.Body>
-
-                                                                        <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
-                                                                            <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
-                                                                                <Row>
-                                                                                    <Col>
-                                                                                        <ListGroup className="mt-3 mb-3">
-                                                                                            {
-                                                                                                customerResults.map((customer, index) => {
-                                                                                                    return <ListGroup.Item
-                                                                                                        key={index}
-                                                                                                        action
-                                                                                                        variant="light"
-                                                                                                        onClick={() => {
-                                                                                                            setFieldValue('customer', customer.id);
-                                                                                                            setFieldValue('customerName', customer.name);
-
-                                                                                                            api.get(`customers/${customer.id}/properties`).then(res => {
-                                                                                                                setProperties(res.data);
-
-                                                                                                                setFieldValue('property', '');
-
-                                                                                                                handleCloseModalChooseCustomer();
-                                                                                                            }).catch(err => {
-                                                                                                                console.log('Error to get customer properties ', err);
-                                                                                                            });
-                                                                                                        }}
-                                                                                                    >
-                                                                                                        <Row>
-                                                                                                            <Col>
-                                                                                                                <h6>{customer.name}</h6>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                        <Row>
-                                                                                                            <Col>
-                                                                                                                <span
-                                                                                                                    className="text-italic"
-                                                                                                                >
-                                                                                                                    {`${customer.document} - ${customer.city}/${customer.state}`}
-                                                                                                                </span>
-                                                                                                            </Col>
-                                                                                                        </Row>
-                                                                                                    </ListGroup.Item>
-                                                                                                })
-                                                                                            }
-                                                                                        </ListGroup>
-                                                                                    </Col>
-                                                                                </Row>
-                                                                            </Modal.Body>
-                                                                            <Modal.Footer>
-                                                                                <Button variant="secondary" onClick={handleCloseModalChooseCustomer}>Cancelar</Button>
-                                                                            </Modal.Footer>
-                                                                        </Modal.Dialog>
-                                                                    </Modal>
                                                                 </Form>
                                                             )}
                                                         </Formik>
+
+                                                        <SearchCustomers
+                                                            show={showSearchModal}
+                                                            handleCustomer={handleCustomer}
+                                                            handleCloseSearchModal={handleCloseSearchModal}
+                                                        />
 
                                                         <Col className="border-top mt-3 mb-3"></Col>
 
@@ -1158,6 +1157,44 @@ export default function NewCustomer() {
                                                                     </Form>
                                                                 )}
                                                             </Formik>
+                                                        </Modal>
+
+                                                        <Modal show={showItemDelete} onHide={handleCloseItemDelete}>
+                                                            <Modal.Header closeButton>
+                                                                <Modal.Title>Excluir licenciamento</Modal.Title>
+                                                            </Modal.Header>
+                                                            <Modal.Body>
+                                                                Você tem certeza que deseja excluir o licenciamento <b>{data.customer.name}</b>? Essa ação não poderá ser desfeita.
+                                                            </Modal.Body>
+                                                            <Modal.Footer>
+                                                                <Row>
+                                                                    {
+                                                                        deletingMessageShow ? <Col><AlertMessage status={typeMessage} /></Col> :
+                                                                            <>
+                                                                                {
+                                                                                    can(user, "licensings", "delete") && <Col className="col-row">
+                                                                                        <Button
+                                                                                            variant="danger"
+                                                                                            type="button"
+                                                                                            onClick={handleItemDelete}
+                                                                                        >
+                                                                                            Excluir
+                                                                                        </Button>
+                                                                                    </Col>
+                                                                                }
+
+                                                                                <Col className="col-row">
+                                                                                    <Button
+                                                                                        variant="outline-secondary"
+                                                                                        onClick={handleCloseItemDelete}
+                                                                                    >
+                                                                                        Cancelar
+                                                                                    </Button>
+                                                                                </Col>
+                                                                            </>
+                                                                    }
+                                                                </Row>
+                                                            </Modal.Footer>
                                                         </Modal>
                                                     </Container>
                                             }

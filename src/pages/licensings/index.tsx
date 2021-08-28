@@ -93,9 +93,9 @@ export default function Licensings() {
 
             if (property) query = `&property=${property}`;
 
-            let requestUrl = `licensings?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+            let requestUrl = `licensings?limit=${limit}&page=${page}${!!query ? query : ''}`;
 
-            if (userId) requestUrl = `members/licensings/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+            if (userId) requestUrl = `members/licensings/user/${userId}?limit=${limit}&page=${page}${!!query ? query : ''}`;
 
             const res = await api.get(requestUrl);
 

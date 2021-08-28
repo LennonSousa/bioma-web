@@ -22,6 +22,7 @@ import { Property } from '../../../components/Properties';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
+import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
 const validationSchema = Yup.object().shape({
     licensing_number: Yup.string().notRequired().nullable(),
@@ -29,7 +30,6 @@ const validationSchema = Yup.object().shape({
     renovation: Yup.string().notRequired().nullable(),
     deadline: Yup.string().notRequired().nullable(),
     process_number: Yup.string().notRequired().nullable(),
-    property: Yup.string().notRequired().nullable(),
     infringement: Yup.string().notRequired().nullable(),
     authorization: Yup.string().required('Obrigatório!'),
     agency: Yup.string().required('Obrigatório!'),
@@ -47,10 +47,10 @@ export default function NewLicensing() {
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
     const [membersAdded, setMembersAdded] = useState<Member[]>([]);
 
-    const [customers, setCustomers] = useState<Customer[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
     const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
-    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+
+    const [selectedProperty, setSelectedProperty] = useState<Property>();
 
     const [licensingAgencies, setLicensingAgencies] = useState<LicensingAgency[]>([]);
     const [licensingAuthorizations, setLicensingAuthorizations] = useState<LicensingAuthorization[]>([]);
@@ -70,17 +70,17 @@ export default function NewLicensing() {
 
     const toggleShowUsers = () => setShowUsers(!showUsers);
 
-    const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
+    const [showSearchModal, setShowSearchModal] = useState(false);
 
-    const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
-    const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
+    const handleCloseSearchModal = () => setShowSearchModal(false);
+    const handleShowSearchModal = () => setShowSearchModal(true);
 
     useEffect(() => {
         handleItemSideBar('licensings');
         handleSelectedMenu('licensings-new');
 
         if (user) {
-            if (can(user, "customers", "read:any")) {
+            if (can(user, "licensings", "create")) {
 
                 api.get('users').then(res => {
                     setUsers(res.data);
@@ -119,31 +119,25 @@ export default function NewLicensing() {
                     setHasErrors(true);
                 });
 
-                api.get('customers').then(res => {
-                    const customersRes: Customer[] = res.data;
+                if (customer) {
+                    api.get(`customers/${customer}`).then(res => {
+                        const customerRes: Customer = res.data;
 
-                    if (customer) {
-                        customersRes.forEach(customerItem => {
-                            if (customerItem.id === customer) {
-                                setSelectedCustomer(customerItem);
+                        setSelectedCustomer(customerRes);
 
-                                api.get(`customers/${customerItem.id}/properties`).then(res => {
-                                    setProperties(res.data);
-                                }).catch(err => {
-                                    console.log('Error to get customer properties ', err);
-                                });
-                            }
+                        api.get(`customers/${customerRes.id}/properties`).then(res => {
+                            setProperties(res.data);
+                        }).catch(err => {
+                            console.log('Error to get customer properties ', err);
                         });
-                    }
+                    }).catch(err => {
+                        console.log('Error to get licensings customers, ', err);
 
-                    setCustomers(customersRes);
-                }).catch(err => {
-                    console.log('Error to get licensings customers, ', err);
-
-                    setTypeLoadingMessage("error");
-                    setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                    setHasErrors(true);
-                });
+                        setTypeLoadingMessage("error");
+                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                        setHasErrors(true);
+                    });
+                }
 
                 api.get('licensings/agencies').then(res => {
                     setLicensingAgencies(res.data);
@@ -189,25 +183,30 @@ export default function NewLicensing() {
         }
     }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    function handleSearch(event: ChangeEvent<HTMLInputElement>) {
-        if (customers) {
-            const term = event.target.value;
+    function handleCustomer(customer: Customer) {
+        setSelectedCustomer(customer);
 
-            if (term === "") {
-                setCustomerResults([]);
-                return;
-            }
+        api.get(`customers/${customer.id}/properties`).then(res => {
+            setProperties(res.data);
 
-            let resultsUpdated: Customer[] = [];
+            setSelectedProperty(undefined);
 
-            const customersFound = customers.filter(product => {
-                return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
-            });
+            setErrorSelectedCustomer(false);
+            handleCloseSearchModal();
+        }).catch(err => {
+            console.log('Error to get customer properties ', err);
+        });
+    }
 
-            if (!!customersFound.length) resultsUpdated = customersFound;
+    function handleProperty(propertyId: String) {
+        const property = properties.find(property => { return property.id === propertyId });
 
-            setCustomerResults(resultsUpdated);
+        if (!property) {
+            setSelectedProperty(undefined);
+            return;
         }
+
+        setSelectedProperty(property);
     }
 
     function createMember(userId: string) {
@@ -353,7 +352,6 @@ export default function NewLicensing() {
                                                     renovation: '',
                                                     deadline: '',
                                                     process_number: '',
-                                                    property: '0',
                                                     infringement: '0',
                                                     authorization: '',
                                                     agency: '',
@@ -380,7 +378,7 @@ export default function NewLicensing() {
                                                             deadline: values.deadline,
                                                             process_number: values.process_number,
                                                             customer: selectedCustomer.id,
-                                                            property: values.property,
+                                                            property: selectedProperty ? selectedProperty.id : '0',
                                                             infringement: values.infringement,
                                                             authorization: values.authorization,
                                                             agency: values.agency,
@@ -423,7 +421,7 @@ export default function NewLicensing() {
                                                                     <Button
                                                                         id="btnGroupAddon"
                                                                         variant="success"
-                                                                        onClick={handleShowModalChooseCustomer}
+                                                                        onClick={handleShowSearchModal}
                                                                     >
                                                                         <FaSearchPlus />
                                                                     </Button>
@@ -551,14 +549,14 @@ export default function NewLicensing() {
                                                         <Row className="mb-2">
                                                             <Form.Group as={Col} sm={6} controlId="formGridProperty">
                                                                 <Form.Label>Fazenda/imóvel</Form.Label>
-                                                                <Form.Control
+                                                                <Form.Select
                                                                     as="select"
-                                                                    onChange={handleChange}
-                                                                    onBlur={handleBlur}
-                                                                    value={values.property}
+                                                                    onChange={e => {
+                                                                        handleProperty(e.currentTarget.value);
+                                                                    }}
+                                                                    value={selectedProperty ? selectedProperty.id : '0'}
                                                                     name="property"
                                                                     disabled={!selectedCustomer}
-                                                                    isInvalid={!!errors.property && touched.property}
                                                                 >
                                                                     <option value="0">Nenhuma</option>
                                                                     {
@@ -566,11 +564,10 @@ export default function NewLicensing() {
                                                                             return <option key={index} value={property.id}>{property.name}</option>
                                                                         })
                                                                     }
-                                                                </Form.Control>
-                                                                <Form.Control.Feedback type="invalid">{touched.property && errors.property}</Form.Control.Feedback>
+                                                                </Form.Select>
                                                             </Form.Group>
 
-                                                            <Form.Group as={Col} sm={5} controlId="formGridInfringement">
+                                                            <Form.Group as={Col} sm={6} controlId="formGridInfringement">
                                                                 <Form.Label>Infração</Form.Label>
                                                                 <Form.Control
                                                                     as="select"
@@ -602,76 +599,15 @@ export default function NewLicensing() {
 
                                                             }
                                                         </Row>
-
-                                                        <Modal show={showModalChooseCustomer} onHide={handleCloseModalChooseCustomer}>
-                                                            <Modal.Header closeButton>
-                                                                <Modal.Title>Lista de clientes</Modal.Title>
-                                                            </Modal.Header>
-
-                                                            <Modal.Body>
-                                                                <Form.Group controlId="categoryFormGridName">
-                                                                    <Form.Label>Nome do cliente</Form.Label>
-                                                                    <Form.Control type="search"
-                                                                        placeholder="Digite para pesquisar"
-                                                                        autoComplete="off"
-                                                                        onChange={handleSearch}
-                                                                    />
-                                                                </Form.Group>
-                                                            </Modal.Body>
-
-                                                            <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
-                                                                <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
-                                                                    <Row>
-                                                                        <Col>
-                                                                            <ListGroup className="mt-3 mb-3">
-                                                                                {
-                                                                                    customerResults.map((customer, index) => {
-                                                                                        return <ListGroup.Item
-                                                                                            key={index}
-                                                                                            action
-                                                                                            variant="light"
-                                                                                            onClick={() => {
-                                                                                                setSelectedCustomer(customer);
-                                                                                                setErrorSelectedCustomer(false);
-
-                                                                                                api.get(`customers/${customer.id}/properties`).then(res => {
-                                                                                                    setProperties(res.data);
-
-                                                                                                    handleCloseModalChooseCustomer();
-                                                                                                }).catch(err => {
-                                                                                                    console.log('Error to get customer properties ', err);
-                                                                                                });
-                                                                                            }}
-                                                                                        >
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <h6>{customer.name}</h6>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                            <Row>
-                                                                                                <Col>
-                                                                                                    <span
-                                                                                                        className="text-italic"
-                                                                                                    >
-                                                                                                        {`${customer.document} - ${customer.city}/${customer.state}`}
-                                                                                                    </span>
-                                                                                                </Col>
-                                                                                            </Row>
-                                                                                        </ListGroup.Item>
-                                                                                    })
-                                                                                }
-                                                                            </ListGroup>
-                                                                        </Col>
-                                                                    </Row>
-                                                                </Modal.Body>
-                                                                <Modal.Footer>
-                                                                    <Button variant="secondary" onClick={handleCloseModalChooseCustomer}>Cancelar</Button>
-                                                                </Modal.Footer>
-                                                            </Modal.Dialog>
-                                                        </Modal>
                                                     </Form>
                                                 )}
                                             </Formik>
+
+                                            <SearchCustomers
+                                                show={showSearchModal}
+                                                handleCustomer={handleCustomer}
+                                                handleCloseSearchModal={handleCloseSearchModal}
+                                            />
                                         </Container>
                                 }
                             </> :

@@ -88,9 +88,9 @@ export default function Properties() {
 
             if (customer) query = `&customer=${customer}`;
 
-            let requestUrl = `properties?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+            let requestUrl = `properties?limit=${limit}&page=${page}${!!query ? query : ''}`;
 
-            if (userId) requestUrl = `members/properties/user/${userId}?limit=${limit}&page=${activePage}${!!query ? query : ''}`;
+            if (userId) requestUrl = `members/properties/user/${userId}?limit=${limit}&page=${page}${!!query ? query : ''}`;
 
             const res = await api.get(requestUrl);
 

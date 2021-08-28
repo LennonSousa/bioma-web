@@ -140,7 +140,7 @@ export default function PropertyDetails() {
                 setProjectsErrorShow(false);
                 setLoadingProjects(true);
 
-                api.get(`projects?property=${propertyData.id}`).then(res => {
+                api.get(`projects?customer=${propertyData.customer.id}`).then(res => {
                     setProjectsData(res.data);
 
                     setLoadingProjects(false);

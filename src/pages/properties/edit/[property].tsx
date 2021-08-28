@@ -24,8 +24,9 @@ import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import filesize from "filesize";
 import { CircularProgressbar } from 'react-circular-progressbar';
-import "react-circular-progressbar/dist/styles.css";
+import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
+import "react-circular-progressbar/dist/styles.css";
 import styles from './styles.module.css';
 
 const validationSchema = Yup.object().shape({
@@ -39,8 +40,6 @@ const validationSchema = Yup.object().shape({
     notes: Yup.string().notRequired().nullable(),
     warnings: Yup.boolean().notRequired(),
     warnings_text: Yup.string().notRequired().nullable(),
-    customer: Yup.string().required('Obrigatório!'),
-    customerName: Yup.string().required('Obrigatório!'),
 });
 
 const attachmentValidationSchema = Yup.object().shape({
@@ -62,11 +61,12 @@ export default function NewProperty() {
     const { handleItemSideBar, handleSelectedMenu } = useContext(SideBarContext);
     const { loading, user } = useContext(AuthContext);
 
-    const [customers, setCustomers] = useState<Customer[]>([]);
-    const [customerResults, setCustomerResults] = useState<Customer[]>([]);
     const [propertyData, setPropertyData] = useState<Property>();
     const [users, setUsers] = useState<User[]>([]);
     const [usersToAdd, setUsersToAdd] = useState<User[]>([]);
+
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer>();
+    const [errorSelectedCustomer, setErrorSelectedCustomer] = useState(false);
 
     const [loadingData, setLoadingData] = useState(true);
     const [hasErrors, setHasErrors] = useState(false);
@@ -80,10 +80,10 @@ export default function NewProperty() {
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
     const [cities, setCities] = useState<string[]>([]);
 
-    const [showModalChooseCustomer, setShowModalChooseCustomer] = useState(false);
+    const [showSearchModal, setShowSearchModal] = useState(false);
 
-    const handleCloseModalChooseCustomer = () => setShowModalChooseCustomer(false);
-    const handleShowModalChooseCustomer = () => setShowModalChooseCustomer(true);
+    const handleCloseSearchModal = () => setShowSearchModal(false);
+    const handleShowSearchModal = () => setShowSearchModal(true);
 
     const [showUsers, setShowUsers] = useState(false);
 
@@ -98,6 +98,13 @@ export default function NewProperty() {
         setShowModalNewAttachment(true);
     }
 
+    const [deletingMessageShow, setDeletingMessageShow] = useState(false);
+
+    const [showItemDelete, setShowItemDelete] = useState(false);
+
+    const handleCloseItemDelete = () => setShowItemDelete(false);
+    const handelShowItemDelete = () => setShowItemDelete(true);
+
     const [fileToSave, setFileToSave] = useState<File>();
     const [filePreview, setFilePreview] = useState('');
 
@@ -107,75 +114,66 @@ export default function NewProperty() {
 
         if (user && property) {
             if (can(user, "properties", "update:any")) {
+                api.get(`properties/${property}`).then(res => {
+                    let propertyRes: Property = res.data;
 
-                api.get('customers').then(res => {
-                    setCustomers(res.data);
+                    setSelectedCustomer(propertyRes.customer);
 
-                    api.get(`properties/${property}`).then(res => {
-                        let propertyRes: Property = res.data;
+                    try {
+                        const stateCities = statesCities.estados.find(item => { return item.nome === res.data.state })
 
-                        try {
-                            const stateCities = statesCities.estados.find(item => { return item.nome === res.data.state })
+                        if (stateCities)
+                            setCities(stateCities.cidades);
+                    }
+                    catch { }
 
-                            if (stateCities)
-                                setCities(stateCities.cidades);
-                        }
-                        catch { }
+                    api.get('users').then(res => {
+                        setUsers(res.data);
+                        const usersRes: User[] = res.data;
 
-                        api.get('users').then(res => {
-                            setUsers(res.data);
-                            const usersRes: User[] = res.data;
-
-                            handleUsersToAdd(usersRes, propertyRes);
-                        }).catch(err => {
-                            console.log('Error to get users on property edit, ', err);
-
-                            setTypeLoadingMessage("error");
-                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                            setHasErrors(true);
-                        });
-
-                        api.get('docs/property').then(res => {
-                            let docsProperty: DocsProperty[] = res.data;
-
-                            docsProperty = docsProperty.filter(docProperty => { return docProperty.active });
-
-                            propertyRes = {
-                                ...propertyRes, docs: docsProperty.map(docProperty => {
-                                    const propertyDoc = propertyRes.docs.find(propertyDoc => { return propertyDoc.doc.id === docProperty.id });
-
-                                    if (propertyDoc)
-                                        return { ...propertyDoc, property: propertyRes };
-
-                                    return {
-                                        id: '0',
-                                        path: '',
-                                        received_at: new Date(),
-                                        checked: false,
-                                        property: propertyRes,
-                                        doc: docProperty,
-                                    };
-                                })
-                            }
-
-                            setPropertyData(propertyRes);
-                            setLoadingData(false);
-                        }).catch(err => {
-                            console.log('Error to get docs property to edit, ', err);
-
-                            setTypeLoadingMessage("error");
-                            setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
-                            setHasErrors(true);
-                        });
+                        handleUsersToAdd(usersRes, propertyRes);
                     }).catch(err => {
-                        console.log('Error to get property to edit, ', err);
+                        console.log('Error to get users on property edit, ', err);
+
+                        setTypeLoadingMessage("error");
+                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                        setHasErrors(true);
+                    });
+
+                    api.get('docs/property').then(res => {
+                        let docsProperty: DocsProperty[] = res.data;
+
+                        docsProperty = docsProperty.filter(docProperty => { return docProperty.active });
+
+                        propertyRes = {
+                            ...propertyRes, docs: docsProperty.map(docProperty => {
+                                const propertyDoc = propertyRes.docs.find(propertyDoc => { return propertyDoc.doc.id === docProperty.id });
+
+                                if (propertyDoc)
+                                    return { ...propertyDoc, property: propertyRes };
+
+                                return {
+                                    id: '0',
+                                    path: '',
+                                    received_at: new Date(),
+                                    checked: false,
+                                    property: propertyRes,
+                                    doc: docProperty,
+                                };
+                            })
+                        }
+
+                        setPropertyData(propertyRes);
+                        setLoadingData(false);
+                    }).catch(err => {
+                        console.log('Error to get docs property to edit, ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
                         setHasErrors(true);
                     });
                 }).catch(err => {
-                    console.log('Error to get customers, ', err);
+                    console.log('Error to get property to edit, ', err);
 
                     setTypeLoadingMessage("error");
                     setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
@@ -185,25 +183,10 @@ export default function NewProperty() {
         }
     }, [user, property]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    function handleSearch(event: ChangeEvent<HTMLInputElement>) {
-        if (customers) {
-            const term = event.target.value;
-
-            if (term === "") {
-                setCustomerResults([]);
-                return;
-            }
-
-            let resultsUpdated: Customer[] = [];
-
-            const customersFound = customers.filter(product => {
-                return product.name.toLocaleLowerCase().includes(term.toLocaleLowerCase());
-            });
-
-            if (!!customersFound.length) resultsUpdated = customersFound;
-
-            setCustomerResults(resultsUpdated);
-        }
+    function handleCustomer(customer: Customer) {
+        setSelectedCustomer(customer);
+        setErrorSelectedCustomer(false);
+        handleCloseSearchModal();
     }
 
     async function handleListMembers() {
@@ -291,6 +274,35 @@ export default function NewProperty() {
             });
 
             setPropertyData({ ...propertyData, docs: updatedDocs });
+        }
+    }
+
+    async function handleItemDelete() {
+        if (user && property) {
+            setTypeMessage("waiting");
+            setDeletingMessageShow(true);
+
+            try {
+                if (can(user, "properties", "delete")) {
+                    await api.delete(`properties/${property}`);
+
+                    setTypeMessage("success");
+
+                    setTimeout(() => {
+                        router.push('/properties');
+                    }, 1000);
+                }
+            }
+            catch (err) {
+                console.log('error deleting property');
+                console.log(err);
+
+                setTypeMessage("error");
+
+                setTimeout(() => {
+                    setDeletingMessageShow(false);
+                }, 4000);
+            }
         }
     }
 
@@ -407,10 +419,13 @@ export default function NewProperty() {
                                                                     notes: propertyData.notes,
                                                                     warnings: propertyData.warnings,
                                                                     warnings_text: propertyData.warnings_text,
-                                                                    customer: propertyData.customer.id,
-                                                                    customerName: propertyData.customer.name,
                                                                 }}
                                                                 onSubmit={async values => {
+                                                                    if (!selectedCustomer) {
+                                                                        setErrorSelectedCustomer(true);
+                                                                        return;
+                                                                    }
+
                                                                     setTypeMessage("waiting");
                                                                     setMessageShow(true);
 
@@ -426,7 +441,7 @@ export default function NewProperty() {
                                                                             notes: values.notes,
                                                                             warnings: values.warnings,
                                                                             warnings_text: values.warnings_text,
-                                                                            customer: values.customer,
+                                                                            customer: selectedCustomer.id,
                                                                         });
 
                                                                         propertyData.docs.forEach(async doc => {
@@ -488,22 +503,22 @@ export default function NewProperty() {
                                                                                         type="name"
                                                                                         onChange={handleChange}
                                                                                         onBlur={handleBlur}
-                                                                                        value={values.customerName}
+                                                                                        value={selectedCustomer ? selectedCustomer.name : ''}
                                                                                         name="customerName"
                                                                                         aria-label="Nome do cliente"
                                                                                         aria-describedby="btnGroupAddon"
-                                                                                        isInvalid={!!errors.customerName}
+                                                                                        isInvalid={errorSelectedCustomer}
                                                                                         readOnly
                                                                                     />
                                                                                     <Button
                                                                                         id="btnGroupAddon"
                                                                                         variant="success"
-                                                                                        onClick={handleShowModalChooseCustomer}
+                                                                                        onClick={handleShowSearchModal}
                                                                                     >
                                                                                         <FaSearchPlus />
                                                                                     </Button>
                                                                                 </InputGroup>
-                                                                                <Form.Control.Feedback type="invalid">{errors.customerName}</Form.Control.Feedback>
+                                                                                <Form.Control.Feedback type="invalid">{errorSelectedCustomer && 'Obrigatório!'}</Form.Control.Feedback>
                                                                             </Col>
                                                                         </Row>
 
@@ -627,12 +642,14 @@ export default function NewProperty() {
                                                                         </Row>
 
                                                                         <Row className="mb-2">
-                                                                            <Form.Switch
-                                                                                id="warnings"
-                                                                                label="Pendências"
-                                                                                checked={values.warnings}
-                                                                                onChange={() => { setFieldValue('warnings', !values.warnings) }}
-                                                                            />
+                                                                            <Col>
+                                                                                <Form.Switch
+                                                                                    id="warnings"
+                                                                                    label="Pendências"
+                                                                                    checked={values.warnings}
+                                                                                    onChange={() => { setFieldValue('warnings', !values.warnings) }}
+                                                                                />
+                                                                            </Col>
                                                                         </Row>
 
                                                                         <Row className="mb-3">
@@ -738,71 +755,34 @@ export default function NewProperty() {
                                                                         <Row className="justify-content-end">
                                                                             {
                                                                                 messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
-                                                                                    <Col sm={1}>
-                                                                                        <Button variant="success" type="submit">Salvar</Button>
-                                                                                    </Col>
+                                                                                    <>
+                                                                                        {
+                                                                                            can(user, "properties", "delete") && <Col className="col-row">
+                                                                                                <Button
+                                                                                                    variant="danger"
+                                                                                                    title="Excluir cliente."
+                                                                                                    onClick={handelShowItemDelete}
+                                                                                                >
+                                                                                                    Excluir
+                                                                                                </Button>
+                                                                                            </Col>
+                                                                                        }
 
+                                                                                        <Col className="col-row">
+                                                                                            <Button variant="success" type="submit">Salvar</Button>
+                                                                                        </Col>
+                                                                                    </>
                                                                             }
                                                                         </Row>
-
-                                                                        <Modal show={showModalChooseCustomer} onHide={handleCloseModalChooseCustomer}>
-                                                                            <Modal.Header closeButton>
-                                                                                <Modal.Title>Lista de clientes</Modal.Title>
-                                                                            </Modal.Header>
-
-                                                                            <Modal.Body>
-                                                                                <Form.Group controlId="categoryFormGridName">
-                                                                                    <Form.Label>Nome do cliente</Form.Label>
-                                                                                    <Form.Control type="search"
-                                                                                        placeholder="Digite para pesquisar"
-                                                                                        autoComplete="off"
-                                                                                        onChange={handleSearch}
-                                                                                    />
-                                                                                </Form.Group>
-                                                                            </Modal.Body>
-
-                                                                            <Modal.Dialog scrollable style={{ marginTop: 0, width: '100%' }}>
-                                                                                <Modal.Body style={{ maxHeight: 'calc(100vh - 3.5rem)' }}>
-                                                                                    <Row>
-                                                                                        <Col>
-                                                                                            <ListGroup className="mt-3 mb-3">
-                                                                                                {
-                                                                                                    customerResults.map((customer, index) => {
-                                                                                                        return <ListGroup.Item
-                                                                                                            key={index}
-                                                                                                            action
-                                                                                                            variant="light"
-                                                                                                            onClick={() => {
-                                                                                                                setFieldValue('customer', customer.id);
-                                                                                                                setFieldValue('customerName', customer.name);
-                                                                                                                handleCloseModalChooseCustomer();
-                                                                                                            }}
-                                                                                                        >
-                                                                                                            <Row>
-                                                                                                                <Col>
-                                                                                                                    <h6>{customer.name}</h6>
-                                                                                                                </Col>
-                                                                                                            </Row>
-                                                                                                            <Row>
-                                                                                                                <Col>
-                                                                                                                    <span className="text-italic">{`${customer.document} - ${customer.city}/${customer.state}`}</span>
-                                                                                                                </Col>
-                                                                                                            </Row>
-                                                                                                        </ListGroup.Item>
-                                                                                                    })
-                                                                                                }
-                                                                                            </ListGroup>
-                                                                                        </Col>
-                                                                                    </Row>
-                                                                                </Modal.Body>
-                                                                                <Modal.Footer>
-                                                                                    <Button variant="secondary" onClick={handleCloseModalChooseCustomer}>Cancelar</Button>
-                                                                                </Modal.Footer>
-                                                                            </Modal.Dialog>
-                                                                        </Modal>
                                                                     </Form>
                                                                 )}
                                                             </Formik>
+
+                                                            <SearchCustomers
+                                                                show={showSearchModal}
+                                                                handleCustomer={handleCustomer}
+                                                                handleCloseSearchModal={handleCloseSearchModal}
+                                                            />
 
                                                             <Modal show={showModalNewAttachment} onHide={handleCloseModalNewAttachment}>
                                                                 <Modal.Header closeButton>
@@ -1051,6 +1031,44 @@ export default function NewProperty() {
                                                                         </Form>
                                                                     )}
                                                                 </Formik>
+                                                            </Modal>
+
+                                                            <Modal show={showItemDelete} onHide={handleCloseItemDelete}>
+                                                                <Modal.Header closeButton>
+                                                                    <Modal.Title>Excluir cliente</Modal.Title>
+                                                                </Modal.Header>
+                                                                <Modal.Body>
+                                                                    Você tem certeza que deseja excluir o imóvel <b>{propertyData.name}</b>? Essa ação não poderá ser desfeita.
+                                                                </Modal.Body>
+                                                                <Modal.Footer>
+                                                                    <Row>
+                                                                        {
+                                                                            deletingMessageShow ? <Col><AlertMessage status={typeMessage} /></Col> :
+                                                                                <>
+                                                                                    {
+                                                                                        can(user, "properties", "delete") && <Col className="col-row">
+                                                                                            <Button
+                                                                                                variant="danger"
+                                                                                                type="button"
+                                                                                                onClick={handleItemDelete}
+                                                                                            >
+                                                                                                Excluir
+                                                                                            </Button>
+                                                                                        </Col>
+                                                                                    }
+
+                                                                                    <Col className="col-row">
+                                                                                        <Button
+                                                                                            variant="outline-secondary"
+                                                                                            onClick={handleCloseItemDelete}
+                                                                                        >
+                                                                                            Cancelar
+                                                                                        </Button>
+                                                                                    </Col>
+                                                                                </>
+                                                                        }
+                                                                    </Row>
+                                                                </Modal.Footer>
                                                             </Modal>
                                                         </>
                                                     </Container>
