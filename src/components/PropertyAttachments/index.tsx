@@ -21,6 +21,7 @@ export interface PropertyAttachment {
     expire_at: Date;
     schedule: boolean;
     schedule_at: Date;
+    order: number;
     property: Property;
     logs: LogPropertyAttachment[];
 }
