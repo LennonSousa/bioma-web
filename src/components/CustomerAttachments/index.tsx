@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Accordion, AccordionButton, Card, Row, Col, ListGroup, Modal, Form, Button, Spinner, Table } from 'react-bootstrap';
-import { FaHourglassHalf, FaHourglassEnd, FaPencilAlt, FaCloudDownloadAlt, FaFingerprint } from 'react-icons/fa';
+import { Accordion, Row, Col, ListGroup, Modal, Form, Button, Spinner, Table } from 'react-bootstrap';
+import { FaBars, FaHourglassHalf, FaHourglassEnd, FaPencilAlt, FaCloudDownloadAlt, FaFingerprint } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format, differenceInDays, formatDistanceToNow, isBefore, subDays } from 'date-fns';
@@ -21,12 +21,14 @@ export interface CustomerAttachment {
     expire_at: Date;
     schedule: boolean;
     schedule_at: Date;
+    order: number;
     customer: Customer;
     logs: LogCustomerAttachment[];
 }
 
 interface CustomerAttachmentsProps {
     attachment: CustomerAttachment;
+    listAttachments?: CustomerAttachment[];
     canEdit?: boolean;
     handleListAttachments?: () => Promise<void>;
 }
@@ -40,7 +42,7 @@ const validationSchema = Yup.object().shape({
     schedule_at: Yup.number().required('Obrigatório!'),
 });
 
-const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, canEdit = true, handleListAttachments }) => {
+const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, listAttachments, canEdit = true, handleListAttachments }) => {
     const [showModalEditDoc, setShowModalEditDoc] = useState(false);
 
     const handleCloseModalEditDoc = () => { setShowModalEditDoc(false); setIconDeleteConfirm(false); setIconDelete(true); }
@@ -100,6 +102,24 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
         try {
             await api.delete(`customers/attachments/${attachment.id}`);
 
+            if (listAttachments) {
+                const list = listAttachments.filter(item => { return item.id !== attachment.id });
+
+                list.forEach(async (item, index) => {
+                    try {
+                        await api.put(`customers/attachments/${item.id}`, {
+                            name: item.name,
+                            received_at: item.received_at,
+                            order: index
+                        });
+                    }
+                    catch (err) {
+                        console.log('error to save customer attachments order after deleting.');
+                        console.log(err)
+                    }
+                });
+            }
+
             handleCloseModalEditDoc();
 
             if (handleListAttachments) handleListAttachments();
@@ -124,6 +144,12 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
         <>
             <ListGroup.Item variant={attachmentExpired ? "warning" : "light"}>
                 <Row className="align-items-center">
+                    {
+                        canEdit && <Col sm={1}>
+                            <FaBars />
+                        </Col>
+                    }
+
                     <Col><span>{attachment.name}</span></Col>
 
                     <Col sm={3}>
@@ -174,6 +200,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                             expire_at: format(new Date(attachment.expire_at), 'yyyy-MM-dd'),
                             schedule: attachment.schedule,
                             schedule_at: differenceInDays(new Date(attachment.expire_at), new Date(attachment.schedule_at)),
+                            order: attachment.order,
                         }
                     }
                     onSubmit={async values => {
@@ -190,6 +217,7 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, c
                                 expire_at: `${values.expire_at} 12:00:00`,
                                 schedule: values.schedule,
                                 schedule_at: `${scheduleAt} 12:00:00`,
+                                order: values.order,
                             });
 
                             if (handleListAttachments) await handleListAttachments();

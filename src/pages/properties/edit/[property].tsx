@@ -2,11 +2,13 @@ import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row, Toast } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format, subDays } from 'date-fns';
 import { FaSearchPlus, FaPlus, FaUserTie } from 'react-icons/fa';
+import produce from 'immer';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
@@ -17,7 +19,7 @@ import Members from '../../../components/PropertyMembers';
 import { User, can } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
 import { DocsProperty } from '../../../components/DocsProperty';
-import PropertyAttachments from '../../../components/PropertyAttachments';
+import PropertyAttachments, { PropertyAttachment } from '../../../components/PropertyAttachments';
 import { statesCities } from '../../../components/StatesCities';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
@@ -248,6 +250,46 @@ export default function NewProperty() {
 
             setFilePreview(imagesToPreview);
         }
+    }
+
+    function handleOnDragEnd(result: DropResult) {
+        if (propertyData && result.destination) {
+            const from = result.source.index;
+            const to = result.destination.index;
+
+            const updatedListAttachments = produce(propertyData.attachments, draft => {
+                if (draft) {
+                    const dragged = draft[from];
+
+                    draft.splice(from, 1);
+                    draft.splice(to, 0, dragged);
+                }
+            });
+
+            if (updatedListAttachments) {
+                setPropertyData({ ...propertyData, attachments: updatedListAttachments });
+
+                saveOrder(updatedListAttachments);
+            }
+        }
+    }
+
+    async function saveOrder(list: PropertyAttachment[]) {
+        list.forEach(async (item, index) => {
+            try {
+                await api.put(`properties/attachments/${item.id}`, {
+                    name: item.name,
+                    received_at: item.received_at,
+                    order: index
+                });
+
+                handleListAttachments();
+            }
+            catch (err) {
+                console.log('error to save property attachments order');
+                console.log(err)
+            }
+        });
     }
 
     function handleChecks(event: ChangeEvent<HTMLInputElement>) {
@@ -729,17 +771,40 @@ export default function NewProperty() {
                                                                                 <Row className="mt-2">
                                                                                     {
                                                                                         !!propertyData.attachments.length ? <Col>
-                                                                                            <ListGroup>
-                                                                                                {
-                                                                                                    propertyData.attachments.map(attachment => {
-                                                                                                        return <PropertyAttachments
-                                                                                                            key={attachment.id}
-                                                                                                            attachment={attachment}
-                                                                                                            handleListAttachments={handleListAttachments}
-                                                                                                        />
-                                                                                                    })
-                                                                                                }
-                                                                                            </ListGroup>
+                                                                                            <DragDropContext onDragEnd={handleOnDragEnd}>
+                                                                                                <Droppable droppableId="attachments">
+                                                                                                    {provided => (
+                                                                                                        <div
+                                                                                                            {...provided.droppableProps}
+                                                                                                            ref={provided.innerRef}
+                                                                                                        >
+                                                                                                            <ListGroup>
+                                                                                                                {
+                                                                                                                    propertyData.attachments.map((attachment, index) => {
+                                                                                                                        return <Draggable key={attachment.id} draggableId={attachment.id} index={index}>
+                                                                                                                            {(provided) => (
+                                                                                                                                <div
+                                                                                                                                    {...provided.draggableProps}
+                                                                                                                                    {...provided.dragHandleProps}
+                                                                                                                                    ref={provided.innerRef}
+                                                                                                                                >
+                                                                                                                                    <PropertyAttachments
+                                                                                                                                        attachment={attachment}
+                                                                                                                                        listAttachments={propertyData.attachments}
+                                                                                                                                        handleListAttachments={handleListAttachments}
+                                                                                                                                    />
+                                                                                                                                </div>
+                                                                                                                            )}
+
+                                                                                                                        </Draggable>
+                                                                                                                    })
+                                                                                                                }
+                                                                                                            </ListGroup>
+                                                                                                            {provided.placeholder}
+                                                                                                        </div>
+                                                                                                    )}
+                                                                                                </Droppable>
+                                                                                            </DragDropContext>
                                                                                         </Col> :
                                                                                             <Col>
                                                                                                 <AlertMessage

@@ -3,6 +3,7 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
 import { FaUserTie, FaHistory, FaPlus, FaSearchPlus, FaFileAlt, FaIdCard } from 'react-icons/fa';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import {
     Button,
     Col,
@@ -20,6 +21,7 @@ import * as Yup from 'yup';
 import { format, subDays } from 'date-fns';
 import filesize from "filesize";
 import { CircularProgressbar } from 'react-circular-progressbar';
+import produce from 'immer';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
@@ -36,7 +38,7 @@ import { Bank } from '../../../components/Banks';
 import { Property } from '../../../components/Properties';
 import { DocsProject } from '../../../components/DocsProject';
 import EventsProject from '../../../components/EventsProject';
-import ProjectAttachments from '../../../components/ProjectAttachments';
+import ProjectAttachments, { ProjectAttachment } from '../../../components/ProjectAttachments';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
@@ -361,6 +363,46 @@ export default function NewCustomer() {
 
             setFilePreview(imagesToPreview);
         }
+    }
+
+    function handleOnDragEnd(result: DropResult) {
+        if (projectData && result.destination) {
+            const from = result.source.index;
+            const to = result.destination.index;
+
+            const updatedListAttachments = produce(projectData.attachments, draft => {
+                if (draft) {
+                    const dragged = draft[from];
+
+                    draft.splice(from, 1);
+                    draft.splice(to, 0, dragged);
+                }
+            });
+
+            if (updatedListAttachments) {
+                setProjectData({ ...projectData, attachments: updatedListAttachments });
+
+                saveOrder(updatedListAttachments);
+            }
+        }
+    }
+
+    async function saveOrder(list: ProjectAttachment[]) {
+        list.forEach(async (item, index) => {
+            try {
+                await api.put(`projects/attachments/${item.id}`, {
+                    name: item.name,
+                    received_at: item.received_at,
+                    order: index
+                });
+
+                handleListAttachments();
+            }
+            catch (err) {
+                console.log('error to save project attachments order');
+                console.log(err)
+            }
+        });
     }
 
     function handleChecks(event: ChangeEvent<HTMLInputElement>) {
@@ -1050,17 +1092,40 @@ export default function NewCustomer() {
                                                                     <Row className="mt-2">
                                                                         {
                                                                             !!projectData.attachments.length ? <Col>
-                                                                                <ListGroup>
-                                                                                    {
-                                                                                        projectData.attachments.map(attachment => {
-                                                                                            return <ProjectAttachments
-                                                                                                key={attachment.id}
-                                                                                                attachment={attachment}
-                                                                                                handleListAttachments={handleListAttachments}
-                                                                                            />
-                                                                                        })
-                                                                                    }
-                                                                                </ListGroup>
+                                                                                <DragDropContext onDragEnd={handleOnDragEnd}>
+                                                                                    <Droppable droppableId="attachments">
+                                                                                        {provided => (
+                                                                                            <div
+                                                                                                {...provided.droppableProps}
+                                                                                                ref={provided.innerRef}
+                                                                                            >
+                                                                                                <ListGroup>
+                                                                                                    {
+                                                                                                        projectData.attachments.map((attachment, index) => {
+                                                                                                            return <Draggable key={attachment.id} draggableId={attachment.id} index={index}>
+                                                                                                                {(provided) => (
+                                                                                                                    <div
+                                                                                                                        {...provided.draggableProps}
+                                                                                                                        {...provided.dragHandleProps}
+                                                                                                                        ref={provided.innerRef}
+                                                                                                                    >
+                                                                                                                        <ProjectAttachments
+                                                                                                                            attachment={attachment}
+                                                                                                                            listAttachments={projectData.attachments}
+                                                                                                                            handleListAttachments={handleListAttachments}
+                                                                                                                        />
+                                                                                                                    </div>
+                                                                                                                )}
+
+                                                                                                            </Draggable>
+                                                                                                        })
+                                                                                                    }
+                                                                                                </ListGroup>
+                                                                                                {provided.placeholder}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </Droppable>
+                                                                                </DragDropContext>
                                                                             </Col> :
                                                                                 <Col>
                                                                                     <AlertMessage

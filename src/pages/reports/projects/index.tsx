@@ -92,7 +92,7 @@ export default function Reports() {
                     </Col>
                 </Row>
 
-                <Row className="mb-3 d-print-none">
+                <Row className="mb-3">
                     <Col>
                         <Formik
                             initialValues={

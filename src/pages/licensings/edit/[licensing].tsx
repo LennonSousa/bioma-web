@@ -2,6 +2,7 @@ import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { FaFileAlt, FaHistory, FaPlus, FaSearchPlus, FaUserTie } from 'react-icons/fa';
 import { Button, Col, Container, Form, FormControl, InputGroup, ListGroup, Modal, Row, Toast } from 'react-bootstrap';
 import { Formik } from 'formik';
@@ -9,7 +10,7 @@ import * as Yup from 'yup';
 import { format, subDays } from 'date-fns';
 import filesize from "filesize";
 import { CircularProgressbar } from 'react-circular-progressbar';
-import "react-circular-progressbar/dist/styles.css";
+import produce from 'immer';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
@@ -25,12 +26,13 @@ import { LicensingInfringement } from '../../../components/LicensingInfringement
 import { LicensingStatus } from '../../../components/LicensingStatus';
 import { Property } from '../../../components/Properties';
 import EventsLicensing from '../../../components/EventsLicensing';
-import LicensingAttachments from '../../../components/LicensingAttachments';
+import LicensingAttachments, { LicensingAttachment } from '../../../components/LicensingAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
+import "react-circular-progressbar/dist/styles.css";
 import styles from './styles.module.css';
 
 const validationSchema = Yup.object().shape({
@@ -319,6 +321,46 @@ export default function NewCustomer() {
 
             setFilePreview(imagesToPreview);
         }
+    }
+
+    function handleOnDragEnd(result: DropResult) {
+        if (data && result.destination) {
+            const from = result.source.index;
+            const to = result.destination.index;
+
+            const updatedListAttachments = produce(data.attachments, draft => {
+                if (draft) {
+                    const dragged = draft[from];
+
+                    draft.splice(from, 1);
+                    draft.splice(to, 0, dragged);
+                }
+            });
+
+            if (updatedListAttachments) {
+                setData({ ...data, attachments: updatedListAttachments });
+
+                saveOrder(updatedListAttachments);
+            }
+        }
+    }
+
+    async function saveOrder(list: LicensingAttachment[]) {
+        list.forEach(async (item, index) => {
+            try {
+                await api.put(`licensings/attachments/${item.id}`, {
+                    name: item.name,
+                    received_at: item.received_at,
+                    order: index
+                });
+
+                handleListAttachments();
+            }
+            catch (err) {
+                console.log('error to save licensing attachments order');
+                console.log(err)
+            }
+        });
     }
 
     async function handleItemDelete() {
@@ -810,17 +852,40 @@ export default function NewCustomer() {
                                                                 <Row className="mt-2">
                                                                     {
                                                                         !!data.attachments.length ? <Col>
-                                                                            <ListGroup>
-                                                                                {
-                                                                                    data.attachments.map(attachment => {
-                                                                                        return <LicensingAttachments
-                                                                                            key={attachment.id}
-                                                                                            attachment={attachment}
-                                                                                            handleListAttachments={handleListAttachments}
-                                                                                        />
-                                                                                    })
-                                                                                }
-                                                                            </ListGroup>
+                                                                            <DragDropContext onDragEnd={handleOnDragEnd}>
+                                                                                <Droppable droppableId="attachments">
+                                                                                    {provided => (
+                                                                                        <div
+                                                                                            {...provided.droppableProps}
+                                                                                            ref={provided.innerRef}
+                                                                                        >
+                                                                                            <ListGroup>
+                                                                                                {
+                                                                                                    data.attachments.map((attachment, index) => {
+                                                                                                        return <Draggable key={attachment.id} draggableId={attachment.id} index={index}>
+                                                                                                            {(provided) => (
+                                                                                                                <div
+                                                                                                                    {...provided.draggableProps}
+                                                                                                                    {...provided.dragHandleProps}
+                                                                                                                    ref={provided.innerRef}
+                                                                                                                >
+                                                                                                                    <LicensingAttachments
+                                                                                                                        attachment={attachment}
+                                                                                                                        listAttachments={data.attachments}
+                                                                                                                        handleListAttachments={handleListAttachments}
+                                                                                                                    />
+                                                                                                                </div>
+                                                                                                            )}
+
+                                                                                                        </Draggable>
+                                                                                                    })
+                                                                                                }
+                                                                                            </ListGroup>
+                                                                                            {provided.placeholder}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </Droppable>
+                                                                            </DragDropContext>
                                                                         </Col> :
                                                                             <Col>
                                                                                 <AlertMessage
@@ -925,6 +990,7 @@ export default function NewCustomer() {
                                                                         expire_at: format(new Date(), 'yyyy-MM-dd'),
                                                                         schedule: false,
                                                                         schedule_at: 0,
+                                                                        order: data.attachments.length,
                                                                         customer: data.id,
                                                                     }
                                                                 }
@@ -949,6 +1015,7 @@ export default function NewCustomer() {
                                                                             formData.append('expire_at', `${values.expire_at} 12:00:00`);
                                                                             formData.append('schedule', String(values.schedule));
                                                                             formData.append('schedule_at', `${scheduleAt} 12:00:00`);
+                                                                            formData.append('order', String(values.order));
                                                                             formData.append('licensing', values.customer);
 
                                                                             await api.post(`licensings/${data.id}/attachments`, formData, {
