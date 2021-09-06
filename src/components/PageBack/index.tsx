@@ -11,7 +11,7 @@ const PageBack: React.FC<DocsCustomerProps> = ({ title = "voltar", subTitle = "V
 
     return (
         <Link href={href}>
-            <a title={subTitle} data-title={subTitle}>
+            <a title={subTitle} className="d-print-none" data-title={subTitle}>
                 <FaLongArrowAltLeft /> {title}</a>
         </Link>
     )

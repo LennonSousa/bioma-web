@@ -49,7 +49,7 @@ export function Header() {
         router.push(route);
     }
 
-    return showPageHeader ? <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+    return showPageHeader ? <Navbar className="d-print-none" collapseOnSelect expand="lg" bg="dark" variant="dark">
         <Container>
             <Navbar.Brand href="#home">
                 <Image

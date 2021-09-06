@@ -55,7 +55,7 @@ const Sidebar: React.FC = () => {
     }
 
     return (
-        showPageHeader && user ? <div className={styles.sideBarContainer}>
+        showPageHeader && user ? <div className={`${styles.sideBarContainer} d-print-none`}>
             <Accordion activeKey={itemSideBar} className={styles.accordionContainer}>
                 <Card className={styles.menuCard}>
                     <AccordionButton

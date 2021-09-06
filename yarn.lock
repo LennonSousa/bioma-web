@@ -557,6 +557,11 @@ bn.js@^5.0.0, bn.js@^5.1.1:
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.2.0.tgz#358860674396c6997771a9d051fcc1b57d4ae002"
   integrity sha512-D7iWRBvnZE8ecXiLj/9wbxH7Tk79fAh8IHaTNq1RWRixsS02W+5qS+iE9yq6RYl0asXx5tw0bLhmT5pIfbSquw==
 
+bootstrap-print-css@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/bootstrap-print-css/-/bootstrap-print-css-1.0.1.tgz#acc0264388caebbad0805e60c869d42cd6fe55bf"
+  integrity sha512-I73Cw87BaxCccTjo3qEbvn7KRb55msMxTuT7mpkAAY4Obq8iG9xCybdxnJqq+RrykLD79O3092AiJwaKiEex7w==
+
 bootstrap@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-5.1.0.tgz#543ef8f44f4b9af67b0230f19508542fec38ef55"

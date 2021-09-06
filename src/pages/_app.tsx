@@ -9,6 +9,7 @@ import { Header } from '../components/Header';
 import Sidebar from '../components/Sidebar';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-print-css/css/bootstrap-print.min.css';
 import '../styles/global.css';
 
 import styles from '../styles/app.module.css';

@@ -72,7 +72,7 @@ export default function Reports() {
             />
 
             <Container className="content-page">
-                <Row className="mb-3">
+                <Row className="mb-3 d-print-none">
                     <Col>
                         <Row>
                             <Col>
@@ -82,7 +82,7 @@ export default function Reports() {
                     </Col>
                 </Row>
 
-                <Row className="mb-3">
+                <Row className="mb-3 d-print-none">
                     <Col>
                         <Formik
                             initialValues={
