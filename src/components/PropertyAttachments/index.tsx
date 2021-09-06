@@ -201,7 +201,6 @@ const PropertyAttachments: React.FC<PropertyAttachmentsProps> = ({ attachment, l
                             schedule: attachment.schedule,
                             schedule_at: differenceInDays(new Date(attachment.expire_at), new Date(attachment.schedule_at)),
                             order: attachment.order,
-                            order: values.order,
                         }
                     }
                     onSubmit={async values => {
@@ -218,6 +217,7 @@ const PropertyAttachments: React.FC<PropertyAttachmentsProps> = ({ attachment, l
                                 expire_at: `${values.expire_at} 12:00:00`,
                                 schedule: values.schedule,
                                 schedule_at: `${scheduleAt} 12:00:00`,
+                                order: values.order,
                             });
 
                             if (handleListAttachments) await handleListAttachments();
