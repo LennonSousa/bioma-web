@@ -28,6 +28,7 @@ export default function Reports() {
 
     const tableHeader = [
         "Nome",
+        "CPF/CNPJ",
         "Celular",
         "Cidade",
         "Estado",
@@ -107,6 +108,7 @@ export default function Reports() {
                                             link: `/customers/details/${customer.id}`,
                                             item: [
                                                 customer.name,
+                                                customer.document,
                                                 customer.cellphone,
                                                 customer.city,
                                                 customer.state,
