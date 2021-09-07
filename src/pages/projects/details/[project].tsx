@@ -399,7 +399,7 @@ export default function PropertyDetails() {
                                                                     <Col >
                                                                         <Row>
                                                                             <Col>
-                                                                                <h6 className="text-success">Observação {projectData.warnings && <FaStickyNote />}</h6>
+                                                                                <h6 className="text-success">Observação <FaStickyNote /></h6>
                                                                             </Col>
                                                                         </Row>
 

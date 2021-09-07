@@ -24,11 +24,15 @@ import { LicensingAgency } from '../../../components/LicensingAgencies';
 import { LicensingAuthorization } from '../../../components/LicensingAuthorizations';
 import { LicensingInfringement } from '../../../components/LicensingInfringements';
 import { LicensingStatus } from '../../../components/LicensingStatus';
+import { ProjectType } from '../../../components/ProjectTypes';
+import { ProjectLine } from '../../../components/ProjectLines';
+import { Bank } from '../../../components/Banks';
 import { Property } from '../../../components/Properties';
 import EventsLicensing from '../../../components/EventsLicensing';
 import LicensingAttachments, { LicensingAttachment } from '../../../components/LicensingAttachments';
 import PageBack from '../../../components/PageBack';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
+import { prettifyCurrency } from '../../../components/InputMask/masks';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import SearchCustomers from '../../../components/Interfaces/SearchCustomers';
 
@@ -41,11 +45,20 @@ const validationSchema = Yup.object().shape({
     renovation: Yup.string().notRequired().nullable(),
     deadline: Yup.string().notRequired().nullable(),
     process_number: Yup.string().notRequired().nullable(),
+    value: Yup.string().notRequired(),
+    deal: Yup.string().notRequired(),
+    paid: Yup.boolean().notRequired(),
+    paid_date: Yup.string().notRequired().nullable(),
+    contract: Yup.string().notRequired().nullable(),
+    notes: Yup.string().notRequired().nullable(),
     customer: Yup.string().required('Obrigatório!'),
     infringement: Yup.string().notRequired().nullable(),
     authorization: Yup.string().required('Obrigatório!'),
     agency: Yup.string().required('Obrigatório!'),
     status: Yup.string().required('Obrigatório!'),
+    type: Yup.string().required('Obrigatório!'),
+    line: Yup.string().required('Obrigatório!'),
+    bank: Yup.string().required('Obrigatório!'),
 });
 
 const validationSchemaEvents = Yup.object().shape({
@@ -85,6 +98,9 @@ export default function NewCustomer() {
     const [licensingAuthorizations, setLicensingAuthorizations] = useState<LicensingAuthorization[]>([]);
     const [licensingInfringements, setLicensingInfringements] = useState<LicensingInfringement[]>([]);
     const [licensingStatus, setLicensingStatus] = useState<LicensingStatus[]>([]);
+    const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
+    const [projectLines, setProjectLines] = useState<ProjectLine[]>([]);
+    const [banks, setBanks] = useState<Bank[]>([]);
     const [properties, setProperties] = useState<Property[]>([]);
 
     const [loadingData, setLoadingData] = useState(true);
@@ -181,6 +197,36 @@ export default function NewCustomer() {
                         setLicensingInfringements(res.data);
                     }).catch(err => {
                         console.log('Error to get licensings infringements, ', err);
+
+                        setTypeLoadingMessage("error");
+                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                        setHasErrors(true);
+                    });
+
+                    api.get('projects/types').then(res => {
+                        setProjectTypes(res.data);
+                    }).catch(err => {
+                        console.log('Error to get project types, ', err);
+
+                        setTypeLoadingMessage("error");
+                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                        setHasErrors(true);
+                    });
+
+                    api.get('projects/lines').then(res => {
+                        setProjectLines(res.data);
+                    }).catch(err => {
+                        console.log('Error to get project lines, ', err);
+
+                        setTypeLoadingMessage("error");
+                        setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
+                        setHasErrors(true);
+                    });
+
+                    api.get('banks').then(res => {
+                        setBanks(res.data);
+                    }).catch(err => {
+                        console.log('Error to get banks, ', err);
 
                         setTypeLoadingMessage("error");
                         setTextLoadingMessage("Não foi possível carregar os dados, verifique a sua internet e tente novamente em alguns minutos.");
@@ -499,12 +545,21 @@ export default function NewCustomer() {
                                                                 renovation: data.renovation,
                                                                 deadline: data.deadline,
                                                                 process_number: data.process_number,
+                                                                value: prettifyCurrency(String(data.value)),
+                                                                deal: prettifyCurrency(String(data.deal)),
+                                                                paid: data.paid,
+                                                                paid_date: data.paid_date,
+                                                                contract: data.contract,
+                                                                notes: data.notes,
                                                                 customer: data.customer.id,
                                                                 customerName: data.customer.name,
                                                                 infringement: data.infringement ? data.infringement.id : '0',
                                                                 authorization: data.authorization.id,
                                                                 agency: data.agency.id,
                                                                 status: data.status.id,
+                                                                type: data.type && data.type.id,
+                                                                line: data.line && data.line.id,
+                                                                bank: data.bank && data.bank.id,
                                                             }}
                                                             onSubmit={async values => {
                                                                 if (!selectedCustomer) {
@@ -522,12 +577,21 @@ export default function NewCustomer() {
                                                                         renovation: values.renovation,
                                                                         deadline: values.deadline,
                                                                         process_number: values.process_number,
+                                                                        value: Number(values.value.replaceAll(".", "").replaceAll(",", ".")),
+                                                                        deal: Number(values.deal.replaceAll(".", "").replaceAll(",", ".")),
+                                                                        paid: values.paid,
+                                                                        paid_date: values.paid_date,
+                                                                        contract: values.contract,
+                                                                        notes: values.notes,
                                                                         customer: selectedCustomer.id,
                                                                         property: selectedProperty ? selectedProperty.id : '0',
                                                                         infringement: values.infringement,
                                                                         authorization: values.authorization,
                                                                         agency: values.agency,
                                                                         status: values.status,
+                                                                        type: values.type,
+                                                                        line: values.line,
+                                                                        bank: values.bank,
                                                                     });
 
                                                                     setTypeMessage("success");
@@ -546,7 +610,7 @@ export default function NewCustomer() {
                                                             }}
                                                             validationSchema={validationSchema}
                                                         >
-                                                            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                                                            {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
                                                                 <Form onSubmit={handleSubmit}>
 
 
@@ -736,6 +800,172 @@ export default function NewCustomer() {
                                                                         </Form.Group>
                                                                     </Row>
 
+                                                                    <Row className="mb-3">
+                                                                        <Form.Group as={Col} sm={6} controlId="formGridType">
+                                                                            <Form.Label>Tipo de projeto</Form.Label>
+                                                                            <Form.Select
+                                                                                onChange={handleChange}
+                                                                                onBlur={handleBlur}
+                                                                                value={values.type}
+                                                                                name="type"
+                                                                                isInvalid={!!errors.type && touched.type}
+                                                                            >
+                                                                                <option hidden>...</option>
+                                                                                {
+                                                                                    projectTypes.map((type, index) => {
+                                                                                        return <option key={index} value={type.id}>{type.name}</option>
+                                                                                    })
+                                                                                }
+                                                                            </Form.Select>
+                                                                            <Form.Control.Feedback type="invalid">{touched.type && errors.type}</Form.Control.Feedback>
+                                                                        </Form.Group>
+
+                                                                        <Form.Group as={Col} sm={6} controlId="formGridLine">
+                                                                            <Form.Label>Linha de crédito</Form.Label>
+                                                                            <Form.Select
+                                                                                onChange={handleChange}
+                                                                                onBlur={handleBlur}
+                                                                                value={values.line}
+                                                                                name="line"
+                                                                                isInvalid={!!errors.line && touched.line}
+                                                                            >
+                                                                                <option hidden>...</option>
+                                                                                {
+                                                                                    projectLines.map((line, index) => {
+                                                                                        return <option key={index} value={line.id}>{line.name}</option>
+                                                                                    })
+                                                                                }
+                                                                            </Form.Select>
+                                                                            <Form.Control.Feedback type="invalid">{touched.line && errors.line}</Form.Control.Feedback>
+                                                                        </Form.Group>
+                                                                    </Row>
+
+                                                                    <Row className="mb-3">
+                                                                        <Form.Group as={Col} sm={6} controlId="formGridBank">
+                                                                            <Form.Label>Banco</Form.Label>
+                                                                            <Form.Select
+                                                                                onChange={handleChange}
+                                                                                onBlur={handleBlur}
+                                                                                value={values.bank}
+                                                                                name="bank"
+                                                                                isInvalid={!!errors.bank && touched.bank}
+                                                                            >
+                                                                                <option hidden>...</option>
+                                                                                {
+                                                                                    banks.map((bank, index) => {
+                                                                                        return <option
+                                                                                            key={index}
+                                                                                            value={bank.id}
+                                                                                        >
+                                                                                            {`${bank.institution.name} - ${bank.sector}`}
+                                                                                        </option>
+                                                                                    })
+                                                                                }
+                                                                            </Form.Select>
+                                                                            <Form.Control.Feedback type="invalid">{touched.bank && errors.bank}</Form.Control.Feedback>
+                                                                        </Form.Group>
+                                                                    </Row>
+
+                                                                    <Row className="align-items-center mb-2">
+                                                                        <Form.Group as={Col} sm={2} controlId="formGridValue">
+                                                                            <Form.Label>Valor</Form.Label>
+                                                                            <InputGroup className="mb-2">
+                                                                                <InputGroup.Text id="btnGroupValue">R$</InputGroup.Text>
+                                                                                <Form.Control
+                                                                                    type="text"
+                                                                                    onChange={(e) => {
+                                                                                        setFieldValue('value', prettifyCurrency(e.target.value));
+                                                                                    }}
+                                                                                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                                                                        setFieldValue('value', prettifyCurrency(e.target.value));
+                                                                                    }}
+                                                                                    value={values.value}
+                                                                                    name="value"
+                                                                                    isInvalid={!!errors.value && touched.value}
+                                                                                    aria-label="Valor do projeto"
+                                                                                    aria-describedby="btnGroupValue"
+                                                                                />
+                                                                            </InputGroup>
+                                                                            <Form.Control.Feedback type="invalid">{touched.value && errors.value}</Form.Control.Feedback>
+                                                                        </Form.Group>
+
+                                                                        <Form.Group as={Col} sm={2} controlId="formGridDeal">
+                                                                            <Form.Label>Acordo</Form.Label>
+                                                                            <InputGroup className="mb-2">
+                                                                                <InputGroup.Text id="btnGroupDeal">%</InputGroup.Text>
+                                                                                <Form.Control
+                                                                                    type="text"
+                                                                                    onChange={(e) => {
+                                                                                        setFieldValue('deal', prettifyCurrency(e.target.value));
+                                                                                    }}
+                                                                                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                                                                        setFieldValue('deal', prettifyCurrency(e.target.value));
+                                                                                    }}
+                                                                                    value={values.deal}
+                                                                                    name="deal"
+                                                                                    isInvalid={!!errors.deal && touched.deal}
+                                                                                    aria-label="Acordo"
+                                                                                    aria-describedby="btnGroupDeal"
+                                                                                />
+                                                                            </InputGroup>
+                                                                            <Form.Control.Feedback type="invalid">{touched.deal && errors.deal}</Form.Control.Feedback>
+                                                                        </Form.Group>
+
+                                                                        <Form.Group as={Col} sm={2} controlId="formGridPaid">
+                                                                            <Form.Switch
+                                                                                id="paid"
+                                                                                label="Pago?"
+                                                                                checked={values.paid}
+                                                                                onChange={() => { setFieldValue('paid', !values.paid) }}
+                                                                            />
+                                                                        </Form.Group>
+
+                                                                        {
+                                                                            values.paid && <Form.Group as={Col} sm={2} controlId="formGridPaidDate">
+                                                                                <Form.Label>Data do pagamento</Form.Label>
+                                                                                <Form.Control
+                                                                                    type="date"
+                                                                                    onChange={handleChange}
+                                                                                    onBlur={handleBlur}
+                                                                                    value={values.paid_date}
+                                                                                    name="paid_date"
+                                                                                    isInvalid={!!errors.paid_date && touched.paid_date}
+                                                                                />
+                                                                                <Form.Control.Feedback type="invalid">{touched.paid_date && errors.paid_date}</Form.Control.Feedback>
+                                                                            </Form.Group>
+                                                                        }
+
+                                                                        <Form.Group as={Col} sm={4} controlId="formGridContract">
+                                                                            <Form.Label>Contrato</Form.Label>
+                                                                            <Form.Control
+                                                                                type="text"
+                                                                                onChange={handleChange}
+                                                                                onBlur={handleBlur}
+                                                                                value={values.contract}
+                                                                                name="contract"
+                                                                                isInvalid={!!errors.contract && touched.contract}
+                                                                            />
+                                                                            <Form.Control.Feedback type="invalid">{touched.contract && errors.contract}</Form.Control.Feedback>
+                                                                        </Form.Group>
+                                                                    </Row>
+
+                                                                    <Row className="mb-3">
+                                                                        <Form.Group as={Col} controlId="formGridNotes">
+                                                                            <Form.Label>Observações</Form.Label>
+                                                                            <Form.Control
+                                                                                as="textarea"
+                                                                                rows={4}
+                                                                                style={{ resize: 'none' }}
+                                                                                onChange={handleChange}
+                                                                                onBlur={handleBlur}
+                                                                                value={values.notes}
+                                                                                name="notes"
+                                                                            />
+                                                                        </Form.Group>
+                                                                    </Row>
+
+                                                                    <Col className="border-top mb-3"></Col>
+
                                                                     <Row className="justify-content-end">
                                                                         {
                                                                             messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
@@ -770,7 +1000,7 @@ export default function NewCustomer() {
 
                                                         <Col className="border-top mt-3 mb-3"></Col>
 
-                                                        <Row className="mb-3">
+                                                        <Row className="mt-5 mb-3">
                                                             <Col>
                                                                 <Row>
                                                                     <div className="member-container">
@@ -830,7 +1060,7 @@ export default function NewCustomer() {
                                                             </Col>
                                                         </Row>
 
-                                                        <Row className="mb-3">
+                                                        <Row className="mt-5 mb-3">
                                                             <Form.Group as={Col} controlId="formGridAttachments">
                                                                 <Row>
                                                                     <div className="member-container">

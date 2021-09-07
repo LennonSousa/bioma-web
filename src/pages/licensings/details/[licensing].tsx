@@ -11,6 +11,7 @@ import {
     FaHistory,
     FaPencilAlt,
     FaPlus,
+    FaStickyNote,
 } from 'react-icons/fa';
 
 import api from '../../../api/api';
@@ -305,6 +306,150 @@ export default function LicensingDetails() {
                                                                                 <h6 className="text-secondary">
                                                                                     {licensingData.infringement ? licensingData.infringement.name : ''}
                                                                                 </h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={4}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Tipo de projeto</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{licensingData.type && licensingData.type.name}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Linha de crédito</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{licensingData.line && licensingData.line.name}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={4}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Banco</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                {
+                                                                                    licensingData.bank && <Link href={`/banks/details/${licensingData.bank.id}`}>
+                                                                                        <a title="Ir para detalhes do banco." data-title="Ir para detalhes do banco.">
+                                                                                            <h6 className="text-secondary">{`${licensingData.bank.institution.name} - ${licensingData.bank.sector}`}</h6>
+                                                                                        </a>
+                                                                                    </Link>
+                                                                                }
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col sm={2}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Valor</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6
+                                                                                    className="text-secondary"
+                                                                                >
+                                                                                    {licensingData.value && `R$ ${Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(licensingData.value)}`}
+                                                                                </h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={2} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Acordo %</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{String(licensingData.deal).replaceAll(".", ",")}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    <Col sm={2} >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Pago?</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{licensingData.paid ? "Sim" : "Não"}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+
+                                                                    {
+                                                                        licensingData.paid && <Col sm={2} >
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <span className="text-success">Data do pagemento</span>
+                                                                                </Col>
+                                                                            </Row>
+
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <h6 className="text-secondary">{format(new Date(licensingData.paid_date), 'dd/MM/yyyy')}</h6>
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </Col>
+                                                                    }
+
+                                                                    <Col sm={4}>
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-success">Contrato</span>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-secondary">{licensingData.contract}</h6>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    </Col>
+                                                                </Row>
+
+                                                                <Row className="mb-3">
+                                                                    <Col >
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <h6 className="text-success">Observação <FaStickyNote /></h6>
+                                                                            </Col>
+                                                                        </Row>
+
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <span className="text-secondary text-wrap">{licensingData.notes}</span>
                                                                             </Col>
                                                                         </Row>
                                                                     </Col>
