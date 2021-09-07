@@ -5,5 +5,6 @@ export interface LogPropertyAttachment {
     accessed_at: Date;
     user: string;
     action: string;
+    client_ip: string;
     attachment: PropertyAttachment;
 }

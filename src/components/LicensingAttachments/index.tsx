@@ -348,6 +348,7 @@ const LicensingAttachments: React.FC<LicensingAttachmentsProps> = ({ attachment,
                                                         <th>Data</th>
                                                         <th>Usuário</th>
                                                         <th>Acesso</th>
+                                                        <th>IP</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -362,6 +363,7 @@ const LicensingAttachments: React.FC<LicensingAttachmentsProps> = ({ attachment,
                                                                 <td>{format(new Date(log.accessed_at), 'dd/MM/yyyy HH:mm')}</td>
                                                                 <td>{log.user}</td>
                                                                 <td>{action}</td>
+                                                                <td>{log.client_ip}</td>
                                                             </tr>
                                                         })
                                                     }
