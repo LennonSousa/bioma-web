@@ -104,7 +104,7 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                 </Row>
             </ListGroup.Item>
 
-            <Modal show={showModalEditEvent} onHide={() => handleCloseModalEditEvent()}>
+            <Modal show={showModalEditEvent} size="lg" onHide={handleCloseModalEditEvent}>
                 <Modal.Header closeButton>
                     <Modal.Title>Edtiar evento</Modal.Title>
                 </Modal.Header>
@@ -152,7 +152,7 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                                     <Form.Label>Descrição</Form.Label>
                                     <Form.Control
                                         as="textarea"
-                                        rows={4}
+                                        rows={6}
                                         style={{ resize: 'none' }}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
@@ -162,22 +162,6 @@ const EventsProject: React.FC<EventsProjectProps> = ({ event, handleListEvents, 
                                     />
                                     <Form.Control.Feedback type="invalid">{touched.description && errors.description}</Form.Control.Feedback>
                                 </Form.Group>
-
-                                {/* <Button
-                                    variant={values.done ? 'success' : 'secondary'}
-                                    type="button"
-                                    onClick={() => {
-                                        setFieldValue('done', !values.done);
-                                        setFieldValue('finished_at', new Date());
-                                    }}
-                                    style={{ width: '100%' }}
-                                >
-                                    {
-                                        values.done ? <span><FaCheck /> concluído</span> :
-                                            <span><FaClock /> marcar como concluído</span>
-                                    }
-                                </Button> */}
-
                             </Modal.Body>
                             <Modal.Footer>
                                 {

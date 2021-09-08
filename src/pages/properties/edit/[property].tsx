@@ -864,6 +864,7 @@ export default function NewProperty() {
                                                                             expire_at: format(new Date(), 'yyyy-MM-dd'),
                                                                             schedule: false,
                                                                             schedule_at: 0,
+                                                                            order: propertyData.attachments.length,
                                                                             property: propertyData.id,
                                                                         }
                                                                     }

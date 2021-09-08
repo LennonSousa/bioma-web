@@ -105,7 +105,7 @@ const EventsLicensing: React.FC<EventsLicensingProps> = ({ event, handleListEven
                 </Row>
             </ListGroup.Item>
 
-            <Modal show={showModalEditEvent} onHide={() => handleCloseModalEditEvent()}>
+            <Modal show={showModalEditEvent} size="lg" onHide={handleCloseModalEditEvent}>
                 <Modal.Header closeButton>
                     <Modal.Title>Edtiar evento</Modal.Title>
                 </Modal.Header>
@@ -153,7 +153,7 @@ const EventsLicensing: React.FC<EventsLicensingProps> = ({ event, handleListEven
                                     <Form.Label>Descrição</Form.Label>
                                     <Form.Control
                                         as="textarea"
-                                        rows={4}
+                                        rows={6}
                                         style={{ resize: 'none' }}
                                         onChange={handleChange}
                                         onBlur={handleBlur}

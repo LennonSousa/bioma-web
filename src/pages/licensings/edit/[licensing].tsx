@@ -1128,7 +1128,7 @@ export default function NewCustomer() {
                                                             </Form.Group>
                                                         </Row>
 
-                                                        <Modal show={showModalNewEvent} onHide={handleCloseModalNewEvent}>
+                                                        <Modal show={showModalNewEvent} size="lg" onHide={handleCloseModalNewEvent}>
                                                             <Modal.Header closeButton>
                                                                 <Modal.Title>Criar evento</Modal.Title>
                                                             </Modal.Header>
@@ -1178,7 +1178,7 @@ export default function NewCustomer() {
                                                                                 <Form.Label>Descrição</Form.Label>
                                                                                 <Form.Control
                                                                                     as="textarea"
-                                                                                    rows={4}
+                                                                                    rows={6}
                                                                                     style={{ resize: 'none' }}
                                                                                     onChange={handleChange}
                                                                                     onBlur={handleBlur}
