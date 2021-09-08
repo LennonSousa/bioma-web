@@ -1255,6 +1255,7 @@ export default function NewCustomer() {
                                                                                 data.append('expire_at', `${values.expire_at} 12:00:00`);
                                                                                 data.append('schedule', String(values.schedule));
                                                                                 data.append('schedule_at', `${scheduleAt} 12:00:00`);
+                                                                                data.append('order', String(values.order));
                                                                                 data.append('project', values.customer);
 
                                                                                 await api.post(`projects/${projectData.id}/attachments`, data, {
