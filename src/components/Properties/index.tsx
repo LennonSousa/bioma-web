@@ -2,6 +2,7 @@ import { Customer } from '../Customers';
 import { PropertyDocs } from '../PropertyDocs';
 import { PropertyAttachment } from '../PropertyAttachments';
 import { Member } from '../PropertyMembers';
+import { LogProperty } from '../LogsProperties';
 
 export interface Property {
     id: string;
@@ -21,4 +22,5 @@ export interface Property {
     docs: PropertyDocs[];
     attachments: PropertyAttachment[];
     members: Member[];
+    logs: LogProperty[];
 }

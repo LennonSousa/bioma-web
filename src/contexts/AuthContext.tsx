@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 
 import api from '../api/api';
 import { NotificationsContext } from './NotificationsContext';
-import { User, Grants } from '../components/Users';
+import { User } from '../components/Users';
 
 interface AuthContextData {
     user: User | undefined;
@@ -46,7 +46,7 @@ const AuthProvider: React.FC = ({ children }) => {
             handleNotifications(userRes.notifications);
 
             setSigned(true);
-            setUser({ ...userRes, grants: setUserGrants(userRes) });
+            setUser(userRes);
 
             setLoading(false);
         }
@@ -75,7 +75,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
                 handleNotifications(userRes.notifications);
 
-                setUser({ ...userRes, grants: setUserGrants(userRes) });
+                setUser(userRes);
 
                 api.defaults.headers['Authorization'] = `Bearer ${token}`;
 
@@ -97,63 +97,63 @@ const AuthProvider: React.FC = ({ children }) => {
         }
     }
 
-    function setUserGrants(user: User) {
-        let listGrants: Grants[] = [];
+    // function setUserGrants(user: User) {
+    //     let listGrants: Grants[] = [];
 
-        user.roles.forEach(role => {
-            if (role.view) {
-                listGrants.push({
-                    role: user.id,
-                    resource: role.role,
-                    action: 'read:any'
-                });
-            }
+    //     user.roles.forEach(role => {
+    //         if (role.view) {
+    //             listGrants.push({
+    //                 role: user.id,
+    //                 resource: role.role,
+    //                 action: 'view'
+    //             });
+    //         }
 
-            if (role.view_self) {
-                listGrants.push({
-                    role: user.id,
-                    resource: role.role,
-                    action: 'read:own'
-                });
-            }
+    //         if (role.view_self) {
+    //             listGrants.push({
+    //                 role: user.id,
+    //                 resource: role.role,
+    //                 action: 'view_self'
+    //             });
+    //         }
 
-            if (role.create) {
-                listGrants.push({
-                    role: user.id,
-                    resource: role.role,
-                    action: 'create'
-                });
-            }
+    //         if (role.create) {
+    //             listGrants.push({
+    //                 role: user.id,
+    //                 resource: role.role,
+    //                 action: 'create'
+    //             });
+    //         }
 
-            if (role.update) {
-                listGrants.push({
-                    role: user.id,
-                    resource: role.role,
-                    action: 'update:any'
-                });
+    //         if (role.update) {
+    //             listGrants.push({
+    //                 role: user.id,
+    //                 resource: role.role,
+    //                 action: 'update'
+    //             });
 
-            }
+    //         }
 
-            if (role.update_self) {
-                listGrants.push({
-                    role: user.id,
-                    resource: role.role,
-                    action: 'update:own'
-                });
+    //         if (role.update_self) {
+    //             listGrants.push({
+    //                 role: user.id,
+    //                 resource: role.role,
+    //                 action: 'update_self'
+    //             });
 
-            }
+    //         }
 
-            if (role.remove) {
-                listGrants.push({
-                    role: user.id,
-                    resource: role.role,
-                    action: 'delete'
-                });
-            }
-        });
+    //         if (role.remove) {
+    //             listGrants.push({
+    //                 role: user.id,
+    //                 resource: role.role,
+    //                 action: 'remove'
+    //             });
+    //         }
+    //     });
 
-        return listGrants;
-    }
+    //     return listGrants;
+    // }
 
     async function handleLogout() {
         setLoading(true);

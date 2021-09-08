@@ -45,7 +45,7 @@ export default function Lines() {
         handleSelectedMenu('projects-lines');
 
         if (user) {
-            if (can(user, "projects", "update:any")) {
+            if (can(user, "projects", "update")) {
                 api.get('projects/lines').then(res => {
                     setProjectLines(res.data);
 
@@ -127,7 +127,7 @@ export default function Lines() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "projects", "update:any") ? <Container className="content-page">
+                            can(user, "projects", "update") ? <Container className="content-page">
                                 <Row>
                                     <Col>
                                         <Button variant="outline-success" onClick={handleShowModalNewLine}>

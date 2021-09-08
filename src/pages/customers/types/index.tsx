@@ -45,7 +45,7 @@ export default function Types() {
         handleSelectedMenu('customers-types');
 
         if (user) {
-            if (can(user, "customers", "read:any")) {
+            if (can(user, "customers", "view")) {
 
                 api.get('customers/types').then(res => {
                     setCustomerTypes(res.data);
@@ -128,7 +128,7 @@ export default function Types() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "customers", "update:any") ? <Container className="content-page">
+                            can(user, "customers", "update") ? <Container className="content-page">
                                 <Row>
                                     <Col>
                                         <Button variant="outline-success" onClick={handleShowModalNewType}>

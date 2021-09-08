@@ -54,7 +54,7 @@ export default function EditBank() {
         handleSelectedMenu('banks-index');
 
         if (user && bank) {
-            if (can(user, "banks", "update:any")) {
+            if (can(user, "banks", "update")) {
 
                 api.get(`banks/${bank}`).then(res => {
                     setBankData(res.data);
@@ -110,7 +110,7 @@ export default function EditBank() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "banks", "update:any") ? <>
+                            can(user, "banks", "update") ? <>
                                 {
                                     loadingData || hasErrors ? <PageWaiting
                                         status={typeLoadingMessage}

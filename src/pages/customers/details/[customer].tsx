@@ -2,11 +2,12 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
-import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
+import { Accordion, Button, ButtonGroup, Col, Container, ListGroup, Row, Table, Tabs, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
     FaAngleRight,
     FaFileAlt,
+    FaFingerprint,
     FaIdCard,
     FaExclamationCircle,
     FaStickyNote,
@@ -19,7 +20,7 @@ import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
-import { can } from '../../../components/Users';
+import { can, translateGrant } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
 import Members from '../../../components/CustomerMembers';
 import { DocsCustomer } from '../../../components/DocsCustomer';
@@ -71,7 +72,7 @@ export default function CustomerDetails() {
         handleSelectedMenu('customers-index');
 
         if (user) {
-            if (can(user, "customers", "read:any")) {
+            if (can(user, "customers", "view")) {
                 if (customer) {
                     api.get(`customers/${customer}`).then(res => {
                         let customerRes: Customer = res.data;
@@ -208,7 +209,7 @@ export default function CustomerDetails() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "customers", "read:any") ? <>
+                            can(user, "customers", "view") ? <>
                                 {
                                     loadingData || hasErrors ? <PageWaiting
                                         status={typeLoadingMessage}
@@ -743,6 +744,40 @@ export default function CustomerDetails() {
                                                                         </Row>
                                                                     </Tab>
                                                                 </Tabs>
+
+                                                                <Col className="border-top mt-5 mb-3"></Col>
+
+                                                                <Accordion>
+                                                                    <Accordion.Item eventKey="0">
+                                                                        <Accordion.Header><h6 className="text-success">Acessos <FaFingerprint /></h6></Accordion.Header>
+                                                                        <Accordion.Body>
+                                                                            <Table striped hover size="sm" responsive>
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Data</th>
+                                                                                        <th>Usuário</th>
+                                                                                        <th>Acesso</th>
+                                                                                        <th>Descrição</th>
+                                                                                        <th>IP</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {
+                                                                                        customerData.logs.map(log => {
+                                                                                            return <tr key={log.id}>
+                                                                                                <td>{format(new Date(log.accessed_at), 'dd/MM/yyyy HH:mm')}</td>
+                                                                                                <td>{log.user}</td>
+                                                                                                <td>{translateGrant(log.action)}</td>
+                                                                                                <td>{log.description}</td>
+                                                                                                <td>{log.client_ip}</td>
+                                                                                            </tr>
+                                                                                        })
+                                                                                    }
+                                                                                </tbody>
+                                                                            </Table>
+                                                                        </Accordion.Body>
+                                                                    </Accordion.Item>
+                                                                </Accordion>
                                                             </Col>
                                                         </Row>
                                                     </Container>

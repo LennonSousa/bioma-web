@@ -45,7 +45,7 @@ export default function Types() {
         handleSelectedMenu('licensings-infringements');
 
         if (user) {
-            if (can(user, "licensings", "update:any")) {
+            if (can(user, "licensings", "update")) {
                 api.get('licensings/infringements').then(res => {
                     setInfringements(res.data);
 
@@ -127,7 +127,7 @@ export default function Types() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "licensings", "update:any") ? <Container className="content-page">
+                            can(user, "licensings", "update") ? <Container className="content-page">
                                 <Row>
                                     <Col>
                                         <Button variant="outline-success" onClick={handleShowModalNewInfringement}>

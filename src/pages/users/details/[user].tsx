@@ -2,15 +2,15 @@ import { useContext, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
-import { Button, ButtonGroup, Col, Container, Tab, Tabs, ListGroup, Row } from 'react-bootstrap';
-import { FaAngleRight, FaKey, FaUserEdit } from 'react-icons/fa';
+import { Accordion, Button, ButtonGroup, Col, Container, Tab, Tabs, Table, ListGroup, Row } from 'react-bootstrap';
+import { FaAngleRight, FaFingerprint, FaKey, FaUserEdit } from 'react-icons/fa';
 import { format } from 'date-fns';
 
 import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
-import { User, UserRole, can, translatedRoles } from '../../../components/Users';
+import { User, UserRole, can, translateRole, translateGrant } from '../../../components/Users';
 
 import { Customer } from '../../../components/Customers';
 import CustomerListItem from '../../../components/CustomerListItem';
@@ -74,7 +74,7 @@ export default function UserDetails() {
         handleSelectedMenu('users-index');
 
         if (user) {
-            if (can(user, "users", "read:any") || userId === user.id) {
+            if (can(user, "users", "view") || userId === user.id) {
                 api.get(`users/${userId}`).then(res => {
                     let userRes: User = res.data;
 
@@ -232,7 +232,7 @@ export default function UserDetails() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "users", "read:any") || userId === user.id ? <>
+                            can(user, "users", "view") || userId === user.id ? <>
                                 {
                                     loadingData ? <PageWaiting
                                         status={typeLoadingMessage}
@@ -245,7 +245,7 @@ export default function UserDetails() {
                                                         <Row>
                                                             <Col>
                                                                 {
-                                                                    can(user, "users", "read:any") && <Row className="mb-3">
+                                                                    can(user, "users", "view") && <Row className="mb-3">
                                                                         <Col>
                                                                             <PageBack href="/users" subTitle="Voltar para a lista de usuários" />
                                                                         </Col>
@@ -260,8 +260,8 @@ export default function UserDetails() {
                                                                             </Col>
 
                                                                             {
-                                                                                can(user, "users", "update:any") ||
-                                                                                    can(user, "users", "update:own") &&
+                                                                                can(user, "users", "update") ||
+                                                                                    can(user, "users", "update_self") &&
                                                                                     userId === user.id ?
                                                                                     <Col className="col-row">
                                                                                         <ButtonGroup size="sm" className="col-12">
@@ -340,14 +340,12 @@ export default function UserDetails() {
                                                                                 <ListGroup className="mb-3">
                                                                                     {
                                                                                         usersRoles.map((role, index) => {
-                                                                                            const translatedRole = translatedRoles.find(item => { return item.role === role.role });
-
                                                                                             return <ListGroup.Item key={index} as="div" variant="light">
                                                                                                 <Row>
                                                                                                     <Col>
                                                                                                         <h6 className="text-success" >
                                                                                                             {
-                                                                                                                translatedRole ? translatedRole.translated : role.role
+                                                                                                                translateRole(role.role)
                                                                                                             }
                                                                                                         </h6>
                                                                                                     </Col>
@@ -393,7 +391,6 @@ export default function UserDetails() {
                                                                     </Col>
                                                                 </Row>
 
-
                                                                 <Col className="border-top mb-3"></Col>
 
                                                                 <Tabs
@@ -402,7 +399,7 @@ export default function UserDetails() {
                                                                     onSelect={(k) => k && setTabKey(k)}
                                                                 >
                                                                     {
-                                                                        can(user, "customers", "read:any") && <Tab eventKey="customers" title="Clientes">
+                                                                        can(user, "customers", "view") && <Tab eventKey="customers" title="Clientes">
                                                                             <Row className={styles.relationsContainer}>
                                                                                 <Col>
                                                                                     <Row className={`justify-content-center ${styles.relationsContent}`}>
@@ -459,7 +456,7 @@ export default function UserDetails() {
                                                                     }
 
                                                                     {
-                                                                        can(user, "properties", "read:any") && <Tab eventKey="properties" title="Imóveis">
+                                                                        can(user, "properties", "view") && <Tab eventKey="properties" title="Imóveis">
                                                                             <Row className={styles.relationsContainer}>
                                                                                 <Col>
                                                                                     <Row className={`justify-content-center ${styles.relationsContent}`}>
@@ -515,7 +512,7 @@ export default function UserDetails() {
                                                                     }
 
                                                                     {
-                                                                        can(user, "projects", "read:any") && <Tab eventKey="projects" title="Projetos">
+                                                                        can(user, "projects", "view") && <Tab eventKey="projects" title="Projetos">
                                                                             <Row className={styles.relationsContainer}>
                                                                                 <Col>
                                                                                     <Row className={`justify-content-center ${styles.relationsContent}`}>
@@ -572,7 +569,7 @@ export default function UserDetails() {
                                                                     }
 
                                                                     {
-                                                                        can(user, "licensings", "read:any") && <Tab eventKey="licensings" title="Licenciamentos">
+                                                                        can(user, "licensings", "view") && <Tab eventKey="licensings" title="Licenciamentos">
                                                                             <Row className={styles.relationsContainer}>
                                                                                 <Col>
                                                                                     <Row className={`justify-content-center ${styles.relationsContent}`}>
@@ -628,6 +625,45 @@ export default function UserDetails() {
                                                                         </Tab>
                                                                     }
                                                                 </Tabs>
+
+                                                                {
+                                                                    can(user, "users", "view") && <>
+                                                                        <Col className="border-top mt-5 mb-3"></Col>
+
+                                                                        <Accordion>
+                                                                            <Accordion.Item eventKey="0">
+                                                                                <Accordion.Header><h6 className="text-success">Acessos <FaFingerprint /></h6></Accordion.Header>
+                                                                                <Accordion.Body>
+                                                                                    <Table striped hover size="sm" responsive>
+                                                                                        <thead>
+                                                                                            <tr>
+                                                                                                <th>Data</th>
+                                                                                                <th>Item</th>
+                                                                                                <th>Descrição</th>
+                                                                                                <th>Acesso</th>
+                                                                                                <th>IP</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                            {
+                                                                                                userData.logs.map(log => {
+                                                                                                    return <tr key={log.id}>
+                                                                                                        <td>{format(new Date(log.accessed_at), 'dd/MM/yyyy HH:mm')}</td>
+                                                                                                        <td>{translateRole(log.item)}</td>
+                                                                                                        <td>{log.description}</td>
+                                                                                                        <td>{translateGrant(log.action)}</td>
+                                                                                                        <td>{log.client_ip}</td>
+                                                                                                    </tr>
+                                                                                                })
+                                                                                            }
+                                                                                        </tbody>
+                                                                                    </Table>
+                                                                                </Accordion.Body>
+                                                                            </Accordion.Item>
+                                                                        </Accordion>
+                                                                    </>
+                                                                }
+
                                                             </Col>
                                                         </Row>
                                                     </Container>

@@ -47,7 +47,7 @@ export default function Lines() {
         handleSelectedMenu('licensings-authorizations');
 
         if (user) {
-            if (can(user, "licensings", "update:any")) {
+            if (can(user, "licensings", "update")) {
                 api.get('licensings/authorizations').then(res => {
                     setAuthorizations(res.data);
 

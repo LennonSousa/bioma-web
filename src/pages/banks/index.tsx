@@ -33,7 +33,7 @@ export default function Banks() {
         handleSelectedMenu('banks-index');
 
         if (user) {
-            if (can(user, "banks", "read:any")) {
+            if (can(user, "banks", "view")) {
                 api.get(`banks?limit=${limit}&page=${activePage}`).then(res => {
                     setBanks(res.data);
 
@@ -95,7 +95,7 @@ export default function Banks() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "banks", "read:any") ? <>
+                            can(user, "banks", "view") ? <>
                                 <Container className="page-container">
                                     <Row>
                                         {

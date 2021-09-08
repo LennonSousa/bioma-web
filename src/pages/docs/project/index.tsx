@@ -45,7 +45,7 @@ export default function DocsProjectPage() {
         handleSelectedMenu('projects-docs');
 
         if (user) {
-            if (can(user, "projects", "update:any")) {
+            if (can(user, "projects", "update")) {
                 api.get('docs/project').then(res => {
                     setDocsProject(res.data);
 
@@ -128,9 +128,9 @@ export default function DocsProjectPage() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "projects", "update:any") ? <Container className="content-page">
+                            can(user, "projects", "update") ? <Container className="content-page">
                                 {
-                                    can(user, "projects", "update:any") && <Row>
+                                    can(user, "projects", "update") && <Row>
                                         <Col>
                                             <Button variant="outline-success" onClick={handleShowModalNewDoc}>
                                                 <FaPlus /> Criar um documento
@@ -221,7 +221,7 @@ export default function DocsProjectPage() {
                                             }
                                         }
                                         onSubmit={async values => {
-                                            if (can(user, "projects", "update:any")) {
+                                            if (can(user, "projects", "update")) {
                                                 setTypeMessage("waiting");
                                                 setMessageShow(true);
 

@@ -28,7 +28,7 @@ export default function UsersPage() {
         handleItemSideBar('users');
         handleSelectedMenu('users-index');
 
-        if (user && can(user, "users", "read:any")) {
+        if (user && can(user, "users", "view")) {
             api.get('users').then(res => {
                 setUsers(res.data);
 
@@ -75,7 +75,7 @@ export default function UsersPage() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "users", "read:any") ? <Container className="content-page">
+                            can(user, "users", "view") ? <Container className="content-page">
                                 {
                                     can(user, "users", "create") && <Row>
                                         <Col>

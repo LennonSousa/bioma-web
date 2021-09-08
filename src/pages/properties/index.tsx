@@ -39,7 +39,7 @@ export default function Properties() {
         handleSelectedMenu('properties-index');
 
         if (user) {
-            if (can(user, "properties", "read:any")) {
+            if (can(user, "properties", "view")) {
                 let query = '';
 
                 if (customer) query = `&customer=${customer}`;
@@ -141,7 +141,7 @@ export default function Properties() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "properties", "read:any") ? <>
+                            can(user, "properties", "view") ? <>
                                 <Container className="page-container">
                                     <Row>
                                         {

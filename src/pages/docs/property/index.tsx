@@ -46,7 +46,7 @@ export default function DocsPropertyPage() {
         handleSelectedMenu('properties-docs');
 
         if (user) {
-            if (can(user, "properties", "update:any")) {
+            if (can(user, "properties", "update")) {
                 api.get('docs/property').then(res => {
                     setDocsProperty(res.data);
 
@@ -128,7 +128,7 @@ export default function DocsPropertyPage() {
             {!user || loading ? <PageWaiting status="waiting" /> :
                 <>
                     {
-                        can(user, "properties", "update:any") ? <Container className="content-page">
+                        can(user, "properties", "update") ? <Container className="content-page">
                             {
                                 can(user, "properties", "create") && <Row>
                                     <Col>
@@ -221,7 +221,7 @@ export default function DocsPropertyPage() {
                                         }
                                     }
                                     onSubmit={async values => {
-                                        if (can(user, "properties", "update:any")) {
+                                        if (can(user, "properties", "update")) {
                                             setTypeMessage("waiting");
                                             setMessageShow(true);
 

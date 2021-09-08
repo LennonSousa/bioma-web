@@ -10,6 +10,7 @@ import { ProjectType } from '../ProjectTypes';
 import { EventLicensing } from '../EventsLicensing';
 import { LicensingAttachment } from '../LicensingAttachments';
 import { Member } from '../LicensingMembers';
+import { LogLicensing } from '../LogsLicensings';
 
 export interface Licensing {
     id: string;
@@ -40,4 +41,5 @@ export interface Licensing {
     events: EventLicensing[];
     attachments: LicensingAttachment[];
     members: Member[];
+    logs: LogLicensing[];
 }

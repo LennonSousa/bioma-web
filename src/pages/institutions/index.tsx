@@ -42,7 +42,7 @@ export default function Institutions() {
         handleSelectedMenu('institutions-index');
 
         if (user) {
-            if (can(user, "institutions", "read:any")) {
+            if (can(user, "institutions", "view")) {
                 api.get('institutions').then(res => {
                     setInstitutions(res.data);
 
@@ -86,7 +86,7 @@ export default function Institutions() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "customers", "read:any") ? <Container className="content-page">
+                            can(user, "customers", "view") ? <Container className="content-page">
                                 <Row>
                                     <Col>
                                         <Button variant="outline-success" onClick={handleShowModalNewInstitution}>

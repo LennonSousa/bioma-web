@@ -3,11 +3,12 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
-import { Button, ButtonGroup, Col, Container, ListGroup, Row } from 'react-bootstrap';
+import { Accordion, Button, ButtonGroup, Col, Container, ListGroup, Row, Table } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
     FaFileAlt,
     FaFileContract,
+    FaFingerprint,
     FaHistory,
     FaPencilAlt,
     FaPlus,
@@ -18,7 +19,7 @@ import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
-import { can } from '../../../components/Users';
+import { can, translateGrant } from '../../../components/Users';
 import Members from '../../../components/LicensingMembers';
 import { Licensing } from '../../../components/Licensings';
 import EventsLicensing from '../../../components/EventsLicensing';
@@ -45,7 +46,7 @@ export default function LicensingDetails() {
         handleSelectedMenu('licensings-index');
 
         if (user) {
-            if (can(user, "licensings", "read:any")) {
+            if (can(user, "licensings", "view")) {
                 if (licensing) {
                     api.get(`licensings/${licensing}`).then(res => {
                         setLicensingData(res.data);
@@ -89,7 +90,7 @@ export default function LicensingDetails() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "licensings", "read:any") ? <>
+                            can(user, "licensings", "view") ? <>
                                 {
                                     loadingData ? <PageWaiting
                                         status={typeLoadingMessage}
@@ -598,6 +599,40 @@ export default function LicensingDetails() {
                                                                             </Col>
                                                                     }
                                                                 </Row>
+
+                                                                <Col className="border-top mt-5 mb-3"></Col>
+
+                                                                <Accordion>
+                                                                    <Accordion.Item eventKey="0">
+                                                                        <Accordion.Header><h6 className="text-success">Acessos <FaFingerprint /></h6></Accordion.Header>
+                                                                        <Accordion.Body>
+                                                                            <Table striped hover size="sm" responsive>
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Data</th>
+                                                                                        <th>Usuário</th>
+                                                                                        <th>Acesso</th>
+                                                                                        <th>Descrição</th>
+                                                                                        <th>IP</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {
+                                                                                        licensingData.logs.map(log => {
+                                                                                            return <tr key={log.id}>
+                                                                                                <td>{format(new Date(log.accessed_at), 'dd/MM/yyyy HH:mm')}</td>
+                                                                                                <td>{log.user}</td>
+                                                                                                <td>{translateGrant(log.action)}</td>
+                                                                                                <td>{log.description}</td>
+                                                                                                <td>{log.client_ip}</td>
+                                                                                            </tr>
+                                                                                        })
+                                                                                    }
+                                                                                </tbody>
+                                                                            </Table>
+                                                                        </Accordion.Body>
+                                                                    </Accordion.Item>
+                                                                </Accordion>
                                                             </Col>
                                                         </Row>
 

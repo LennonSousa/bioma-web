@@ -40,7 +40,7 @@ export default function Projects() {
         handleSelectedMenu('projects-index');
 
         if (user) {
-            if (can(user, "projects", "read:any")) {
+            if (can(user, "projects", "view")) {
                 let query = '';
 
                 if (customer) query = `&customer=${customer}`;
@@ -149,7 +149,7 @@ export default function Projects() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "projects", "read:any") ? <>
+                            can(user, "projects", "view") ? <>
                                 <Container className="page-container">
                                     <Row>
                                         {

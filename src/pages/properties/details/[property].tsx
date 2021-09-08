@@ -3,12 +3,13 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
-import { Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Tab } from 'react-bootstrap';
+import { Accordion, Button, ButtonGroup, Col, Container, ListGroup, Row, Tabs, Table, Tab } from 'react-bootstrap';
 import { format } from 'date-fns';
 import {
     FaAngleRight,
     FaIdCard,
     FaExclamationCircle,
+    FaFingerprint,
     FaCheck,
     FaMapSigns,
     FaPencilAlt,
@@ -22,7 +23,7 @@ import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
-import { can } from '../../../components/Users';
+import { can, translateGrant } from '../../../components/Users';
 import { Property } from '../../../components/Properties';
 import { Project } from '../../../components/Projects';
 import Members from '../../../components/PropertyMembers';
@@ -66,7 +67,7 @@ export default function PropertyDetails() {
         handleSelectedMenu('properties-index');
 
         if (user) {
-            if (can(user, "properties", "read:any")) {
+            if (can(user, "properties", "view")) {
                 if (property) {
 
                     api.get(`properties/${property}`).then(res => {
@@ -183,7 +184,7 @@ export default function PropertyDetails() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "properties", "read:any") ? <>
+                            can(user, "properties", "view") ? <>
                                 {
                                     loadingData || hasErrors ? <PageWaiting
                                         status={typeLoadingMessage}
@@ -625,6 +626,40 @@ export default function PropertyDetails() {
                                                                         </Row>
                                                                     </Tab>
                                                                 </Tabs>
+
+                                                                <Col className="border-top mt-5 mb-3"></Col>
+
+                                                                <Accordion>
+                                                                    <Accordion.Item eventKey="0">
+                                                                        <Accordion.Header><h6 className="text-success">Acessos <FaFingerprint /></h6></Accordion.Header>
+                                                                        <Accordion.Body>
+                                                                            <Table striped hover size="sm" responsive>
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Data</th>
+                                                                                        <th>Usuário</th>
+                                                                                        <th>Acesso</th>
+                                                                                        <th>Descrição</th>
+                                                                                        <th>IP</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {
+                                                                                        propertyData.logs.map(log => {
+                                                                                            return <tr key={log.id}>
+                                                                                                <td>{format(new Date(log.accessed_at), 'dd/MM/yyyy HH:mm')}</td>
+                                                                                                <td>{log.user}</td>
+                                                                                                <td>{translateGrant(log.action)}</td>
+                                                                                                <td>{log.description}</td>
+                                                                                                <td>{log.client_ip}</td>
+                                                                                            </tr>
+                                                                                        })
+                                                                                    }
+                                                                                </tbody>
+                                                                            </Table>
+                                                                        </Accordion.Body>
+                                                                    </Accordion.Item>
+                                                                </Accordion>
                                                             </Col>
                                                         </Row>
                                                     </Container>

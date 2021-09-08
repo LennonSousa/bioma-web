@@ -154,7 +154,7 @@ export default function NewCustomer() {
         handleSelectedMenu('projects-index');
 
         if (user) {
-            if (can(user, "projects", "update:any")) {
+            if (can(user, "projects", "update")) {
                 if (project) {
 
                     api.get(`projects/${project}`).then(res => {
@@ -438,7 +438,7 @@ export default function NewCustomer() {
             setDeletingMessageShow(true);
 
             try {
-                if (can(user, "projects", "delete")) {
+                if (can(user, "projects", "remove")) {
                     await api.delete(`projects/${project}`);
 
                     setTypeMessage("success");
@@ -484,7 +484,7 @@ export default function NewCustomer() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "projects", "update:any") ? <>
+                            can(user, "projects", "update") ? <>
                                 {
                                     loadingData || hasErrors ? <PageWaiting
                                         status={typeLoadingMessage}
@@ -980,7 +980,7 @@ export default function NewCustomer() {
                                                                                 messageShow ? <Col sm={3}><AlertMessage status={typeMessage} /></Col> :
                                                                                     <>
                                                                                         {
-                                                                                            can(user, "projects", "delete") && <Col className="col-row">
+                                                                                            can(user, "projects", "remove") && <Col className="col-row">
                                                                                                 <Button
                                                                                                     variant="danger"
                                                                                                     title="Excluir projeto."
@@ -1474,33 +1474,26 @@ export default function NewCustomer() {
                                                                     Você tem certeza que deseja excluir o projeto <b>{projectData.customer.name}</b>? Essa ação não poderá ser desfeita.
                                                                 </Modal.Body>
                                                                 <Modal.Footer>
-                                                                    <Row>
-                                                                        {
-                                                                            deletingMessageShow ? <Col><AlertMessage status={typeMessage} /></Col> :
-                                                                                <>
-                                                                                    {
-                                                                                        can(user, "projects", "delete") && <Col className="col-row">
-                                                                                            <Button
-                                                                                                variant="danger"
-                                                                                                type="button"
-                                                                                                onClick={handleItemDelete}
-                                                                                            >
-                                                                                                Excluir
-                                                                                            </Button>
-                                                                                        </Col>
-                                                                                    }
+                                                                    {
+                                                                        deletingMessageShow ? <AlertMessage status={typeMessage} /> :
+                                                                            <>
+                                                                                {
+                                                                                    can(user, "projects", "remove") && <Button
+                                                                                        variant="danger"
+                                                                                        onClick={handleItemDelete}
+                                                                                    >
+                                                                                        Excluir
+                                                                                    </Button>
+                                                                                }
 
-                                                                                    <Col className="col-row">
-                                                                                        <Button
-                                                                                            variant="outline-secondary"
-                                                                                            onClick={handleCloseItemDelete}
-                                                                                        >
-                                                                                            Cancelar
-                                                                                        </Button>
-                                                                                    </Col>
-                                                                                </>
-                                                                        }
-                                                                    </Row>
+                                                                                <Button
+                                                                                    variant="outline-secondary"
+                                                                                    onClick={handleCloseItemDelete}
+                                                                                >
+                                                                                    Cancelar
+                                                                                </Button>
+                                                                            </>
+                                                                    }
                                                                 </Modal.Footer>
                                                             </Modal>
                                                         </>

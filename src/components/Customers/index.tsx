@@ -5,6 +5,7 @@ import { Project } from '../Projects';
 import { Licensing } from '../Licensings';
 import { CustomerAttachment } from '../CustomerAttachments';
 import { Member } from '../CustomerMembers';
+import { LogCustomer } from '../LogsCustomers';
 
 export interface Customer {
     id: string;
@@ -31,4 +32,5 @@ export interface Customer {
     licensings: Licensing[];
     attachments: CustomerAttachment[];
     members: Member[];
+    logs: LogCustomer[];
 }

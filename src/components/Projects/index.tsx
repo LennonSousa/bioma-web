@@ -8,6 +8,7 @@ import { ProjectDocs } from '../ProjectDocs';
 import { EventProject } from '../EventsProject';
 import { ProjectAttachment } from '../ProjectAttachments';
 import { Member } from '../ProjectMembers';
+import { LogProject } from '../LogsProjects';
 
 export interface Project {
     id: string;
@@ -35,4 +36,5 @@ export interface Project {
     events: EventProject[];
     attachments: ProjectAttachment[];
     members: Member[];
+    logs: LogProject[];
 }

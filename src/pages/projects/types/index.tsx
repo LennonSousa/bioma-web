@@ -45,7 +45,7 @@ export default function Types() {
         handleSelectedMenu('projects-types');
 
         if (user) {
-            if (can(user, "projects", "update:any")) {
+            if (can(user, "projects", "update")) {
                 api.get('projects/types').then(res => {
                     setProjectTypes(res.data);
 
@@ -127,7 +127,7 @@ export default function Types() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "projects", "update:any") ? <Container className="content-page">
+                            can(user, "projects", "update") ? <Container className="content-page">
                                 <Row>
                                     <Col>
                                         <Button variant="outline-success" onClick={handleShowModalNewType}>

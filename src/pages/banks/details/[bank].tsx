@@ -45,7 +45,7 @@ export default function BankDetails() {
         handleSelectedMenu('banks-index');
 
         if (user) {
-            if (can(user, "banks", "read:any")) {
+            if (can(user, "banks", "view")) {
                 if (bank) {
                     api.get(`banks/${bank}`).then(res => {
                         setBankData(res.data);
@@ -109,7 +109,7 @@ export default function BankDetails() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "banks", "read:any") ? <>
+                            can(user, "banks", "view") ? <>
                                 {
                                     loadingData ? <PageWaiting
                                         status={typeLoadingMessage}

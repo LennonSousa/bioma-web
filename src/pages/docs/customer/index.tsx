@@ -46,7 +46,7 @@ export default function DocsCustomerPage() {
         handleSelectedMenu('customers-docs');
 
         if (user) {
-            if (can(user, "customers", "update:any")) {
+            if (can(user, "customers", "update")) {
                 api.get('docs/customer').then(res => {
                     setDocsCustomer(res.data);
 
@@ -129,9 +129,9 @@ export default function DocsCustomerPage() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "customers", "update:any") ? <Container className="content-page">
+                            can(user, "customers", "update") ? <Container className="content-page">
                                 {
-                                    can(user, "customers", "update:any") && <Row>
+                                    can(user, "customers", "update") && <Row>
                                         <Col>
                                             <Button variant="outline-success" onClick={handleShowModalNewDoc}>
                                                 <FaPlus /> Criar um documento
@@ -222,7 +222,7 @@ export default function DocsCustomerPage() {
                                             }
                                         }
                                         onSubmit={async values => {
-                                            if (can(user, "customers", "update:any")) {
+                                            if (can(user, "customers", "update")) {
                                                 setTypeMessage("waiting");
                                                 setMessageShow(true);
 

@@ -40,7 +40,7 @@ export default function Licensings() {
         handleSelectedMenu('licensings-index');
 
         if (user) {
-            if (can(user, "licensings", "read:any")) {
+            if (can(user, "licensings", "view")) {
                 let query = '';
 
                 if (customer) query = `&customer=${customer}`;
@@ -146,7 +146,7 @@ export default function Licensings() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "licensings", "read:any") ? <>
+                            can(user, "licensings", "view") ? <>
                                 <Container className="page-container">
                                     <Row>
                                         {

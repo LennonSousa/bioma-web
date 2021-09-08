@@ -9,9 +9,10 @@ import { Member as LicensingMember } from '../../components/LicensingMembers';
 import { Member as ProjectMember } from '../../components/ProjectMembers';
 import { Member as PropertyMember } from '../../components/PropertyMembers';
 import { Notification } from '../../components/Notifications';
+import { LogUser } from '../../components/LogsUsers';
 
-type Resource = 'customers' | 'institutions' | 'licensings' | 'properties' | 'projects' | 'banks' | 'users';
-type Action = 'read:any' | 'read:own' | 'create' | 'update:any' | 'update:own' | 'delete';
+export type Role = 'customers' | 'institutions' | 'licensings' | 'properties' | 'projects' | 'banks' | 'users';
+export type Grant = 'view' | 'view_self' | 'create' | 'update' | 'update_self' | 'remove';
 
 export interface User {
     id: string,
@@ -24,17 +25,17 @@ export interface User {
     sudo: boolean;
     created_at: Date;
     roles: UserRole[];
-    grants: Grants[];
     customerMembers: CustomerMember[];
     licensingMembers: LicensingMember[];
     projectMembers: ProjectMember[];
     propertyMembers: PropertyMember[];
     notifications: Notification[];
+    logs: LogUser[];
 }
 
 export interface UserRole {
     id: string;
-    role: string;
+    role: Role;
     view: boolean;
     view_self: boolean;
     create: boolean;
@@ -43,45 +44,66 @@ export interface UserRole {
     remove: boolean;
 }
 
-export interface Grants {
-    role: string;
-    resource: string;
-    action: string;
-}
-
-interface TranslateRoles {
-    role: string,
+interface TranslateItem {
+    item: string,
     translated: string;
 }
 
-export const translatedRoles: TranslateRoles[] = [
+const translatedRoles: TranslateItem[] = [
     {
-        role: 'customers',
+        item: 'customers',
         translated: 'Clientes',
     },
     {
-        role: 'institutions',
+        item: 'institutions',
         translated: 'Instituições',
     },
     {
-        role: 'licensings',
+        item: 'licensings',
         translated: 'Licenciamentos',
     },
     {
-        role: 'properties',
+        item: 'properties',
         translated: 'Imóveis',
     },
     {
-        role: 'projects',
+        item: 'projects',
         translated: 'Projetos',
     },
     {
-        role: 'banks',
+        item: 'banks',
         translated: 'Bancos',
     },
     {
-        role: 'users',
+        item: 'users',
         translated: 'Usuários',
+    },
+];
+
+const translatedGrants: TranslateItem[] = [
+    {
+        item: 'view',
+        translated: 'Visualizar',
+    },
+    {
+        item: 'view_self',
+        translated: 'Visualizar próprio',
+    },
+    {
+        item: 'create',
+        translated: 'Criar',
+    },
+    {
+        item: 'update',
+        translated: 'Atualizar',
+    },
+    {
+        item: 'update_self',
+        translated: 'Atualizar próprio',
+    },
+    {
+        item: 'remove',
+        translated: 'Excluir',
     },
 ];
 
@@ -91,23 +113,39 @@ interface UsersProps {
     handleListUsers(): Promise<void>;
 }
 
-export function can(user: User, resource: Resource, action: Action) {
-    const foundResource = user.grants.find(grant => {
-        return grant.role === user.id && grant.resource === resource && grant.action === action
+export function can(user: User, userRole: Role, userGrant: Grant) {
+    const foundRole = user.roles.find(role => {
+        return role.role === userRole && role[userGrant] === true
     });
 
-    if (foundResource) return true;
+    if (foundRole) return true;
 
     return false;
+}
+
+export function translateRole(resource: Role) {
+    const translatedRole = translatedRoles.find(role => { return role.item === resource });
+
+    if (translatedRole) return translatedRole.translated;
+
+    return resource;
+}
+
+export function translateGrant(grant: Grant) {
+    const translatedGrant = translatedGrants.find(item => { return item.item === grant });
+
+    if (translatedGrant) return translatedGrant.translated;
+
+    return grant;
 }
 
 const Users: React.FC<UsersProps> = ({ user, userAuthenticated, handleListUsers }) => {
     const router = useRouter();
 
-    const [userPausing, setCategoryPausing] = useState(false);
+    const [userPausing, setPausing] = useState(false);
 
     const togglePauseUser = async () => {
-        setCategoryPausing(true);
+        setPausing(true);
 
         try {
             if (userAuthenticated.id !== user.id && !user.sudo) {
@@ -125,7 +163,7 @@ const Users: React.FC<UsersProps> = ({ user, userAuthenticated, handleListUsers 
             console.log(err);
         }
 
-        setCategoryPausing(false);
+        setPausing(false);
     }
 
     function handleRoute(route: string) {
@@ -145,7 +183,7 @@ const Users: React.FC<UsersProps> = ({ user, userAuthenticated, handleListUsers 
 
                 {
                     userAuthenticated.id !== user.id
-                    && can(userAuthenticated, "users", "update:any")
+                    && can(userAuthenticated, "users", "update")
                     && !user.sudo
                     && <Col className="col-row text-end">
                         <Button
@@ -179,9 +217,9 @@ const Users: React.FC<UsersProps> = ({ user, userAuthenticated, handleListUsers 
                 </Col>
 
                 {
-                    can(userAuthenticated, "users", "update:any")
+                    can(userAuthenticated, "users", "update")
                         || userAuthenticated.id === user.id
-                        && can(userAuthenticated, "users", "update:own")
+                        && can(userAuthenticated, "users", "update_self")
                         ? <Col className="col-row text-end">
                             <Button
                                 variant="outline-success"

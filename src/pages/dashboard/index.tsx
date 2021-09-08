@@ -52,21 +52,21 @@ export default function Dashboard() {
             handleItemSideBar('dashboard');
             handleSelectedMenu('dashboard');
 
-            if (can(user, "customers", "read:any")) {
+            if (can(user, "customers", "view")) {
                 handleCustomersWarnings();
             }
 
-            if (can(user, "projects", "read:any")) {
+            if (can(user, "projects", "view")) {
                 handleProjectsMonth();
 
                 handleProjectsWarnings();
             }
 
-            if (can(user, "properties", "read:any")) {
+            if (can(user, "properties", "view")) {
                 handlePropertiesWarnings();
             }
 
-            if (can(user, "licensings", "read:any")) {
+            if (can(user, "licensings", "view")) {
                 handleLicensingsMonth();
             }
         }
@@ -227,7 +227,7 @@ export default function Dashboard() {
                         <Container className="content-page mb-4">
                             <Row className="justify-content-center align-items-center">
                                 {
-                                    can(user, "projects", "read:any") && <Col sm={5}>
+                                    can(user, "projects", "view") && <Col sm={5}>
                                         {
                                             loadingProjectsData ? <Row>
                                                 <Col>
@@ -259,7 +259,7 @@ export default function Dashboard() {
                                 }
 
                                 {
-                                    can(user, "licensings", "read:any") && <Col sm={5}>
+                                    can(user, "licensings", "view") && <Col sm={5}>
                                         {
                                             loadingLicensingsData ? <Row>
                                                 <Col>
@@ -295,7 +295,7 @@ export default function Dashboard() {
                         <Container>
                             <Row className={styles.rowWarnings}>
                                 {
-                                    can(user, "customers", "read:any") && <Col className="content-page" sm={3}>
+                                    can(user, "customers", "view") && <Col className="content-page" sm={3}>
                                         <Row>
                                             <Col sm={9}>
                                                 <Row>
@@ -322,7 +322,7 @@ export default function Dashboard() {
                                 }
 
                                 {
-                                    can(user, "projects", "read:any") && <Col className="content-page" sm={3}>
+                                    can(user, "projects", "view") && <Col className="content-page" sm={3}>
                                         <Row>
                                             <Col sm={9}>
                                                 <Row>
@@ -349,7 +349,7 @@ export default function Dashboard() {
                                 }
 
                                 {
-                                    can(user, "properties", "read:any") && <Col className="content-page" sm={3}>
+                                    can(user, "properties", "view") && <Col className="content-page" sm={3}>
                                         <Row>
                                             <Col sm={9}>
                                                 <Row>

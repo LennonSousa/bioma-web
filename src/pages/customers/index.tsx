@@ -45,7 +45,7 @@ export default function Customers() {
         handleSelectedMenu('customers-index');
 
         if (user) {
-            if (can(user, "customers", "read:any")) {
+            if (can(user, "customers", "view")) {
                 let requestUrl = `customers?limit=${limit}&page=${activePage}`;
 
                 if (userId) requestUrl = `members/customers/user/${userId}?limit=${limit}&page=${activePage}`;
@@ -147,7 +147,7 @@ export default function Customers() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "customers", "read:any") ? <>
+                            can(user, "customers", "view") ? <>
                                 <Container className="page-container">
                                     <Row>
                                         {

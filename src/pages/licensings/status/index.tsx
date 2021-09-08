@@ -45,7 +45,7 @@ export default function Status() {
         handleSelectedMenu('licensings-status');
 
         if (user) {
-            if (can(user, "licensings", "update:any")) {
+            if (can(user, "licensings", "update")) {
                 api.get('licensings/status').then(res => {
                     setLicensingStatus(res.data);
 
@@ -127,7 +127,7 @@ export default function Status() {
                 !user || loading ? <PageWaiting status="waiting" /> :
                     <>
                         {
-                            can(user, "licensings", "update:any") ? <Container className="content-page">
+                            can(user, "licensings", "update") ? <Container className="content-page">
                                 <Row>
                                     <Col>
                                         <Button variant="outline-success" onClick={handleShowModalNewStatus}>

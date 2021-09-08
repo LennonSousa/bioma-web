@@ -45,7 +45,7 @@ export default function Status() {
         handleSelectedMenu('projects-status');
 
         if (user) {
-            if (can(user, "projects", "update:any")) {
+            if (can(user, "projects", "update")) {
                 api.get('projects/status').then(res => {
                     setProjectStatus(res.data);
 
@@ -126,7 +126,7 @@ export default function Status() {
             {
                 !user || loading ? <PageWaiting status="waiting" /> : <>
                     {
-                        can(user, "projects", "update:any") ? <Container className="content-page">
+                        can(user, "projects", "update") ? <Container className="content-page">
                             <Row>
                                 <Col>
                                     <Button variant="outline-success" onClick={handleShowModalNewLine}>

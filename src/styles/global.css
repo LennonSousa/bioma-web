@@ -101,4 +101,8 @@ a:hover {
     .content-page {
         box-shadow: none;
     }
+
+    button {
+        visibility: hidden;
+    }
  }

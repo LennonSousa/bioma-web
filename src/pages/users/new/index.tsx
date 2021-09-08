@@ -11,15 +11,10 @@ import api from '../../../api/api';
 import { TokenVerify } from '../../../utils/tokenVerify';
 import { SideBarContext } from '../../../contexts/SideBarContext';
 import { AuthContext } from '../../../contexts/AuthContext';
-import { UserRole, can, translatedRoles } from '../../../components/Users';
+import { UserRole, can, translateRole } from '../../../components/Users';
 import PageBack from '../../../components/PageBack';
 import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 import { PageWaiting, PageType } from '../../../components/PageWaiting';
-
-interface userRoles {
-    role: string,
-    grants: string[],
-};
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Obrigatório!'),
@@ -57,7 +52,7 @@ export default function NewUser() {
 
         if (user && can(user, "users", "create")) {
             api.get('user/roles').then(res => {
-                const roles: userRoles[] = res.data;
+                const roles: UserRole[] = res.data;
 
                 setUsersRoles(roles.map(role => {
                     return {
@@ -269,12 +264,10 @@ export default function NewUser() {
                                                                 <ListGroup className="mb-3">
                                                                     {
                                                                         usersRoles.map((role, index) => {
-                                                                            const translatedRole = translatedRoles.find(item => { return item.role === role.role });
-
                                                                             return <ListGroup.Item key={index} as="div" variant="light">
                                                                                 <Row>
                                                                                     <Col>
-                                                                                        <h6 className="text-success">{translatedRole ? translatedRole.translated : role.role} </h6>
+                                                                                        <h6 className="text-success">{translateRole(role.role)} </h6>
                                                                                     </Col>
 
                                                                                     <Col>
