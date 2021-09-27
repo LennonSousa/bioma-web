@@ -51,15 +51,20 @@ export function Header() {
 
     return showPageHeader ? <Navbar className="d-print-none" collapseOnSelect expand="lg" bg="dark" variant="dark">
         <Container>
-            <Navbar.Brand href="#home">
-                <Image
-                    alt=""
-                    src="/assets/images/logo-bioma.svg"
-                    width="30"
-                    height="30"
-                    className="d-inline-block align-top"
-                />{' '}Bioma
-            </Navbar.Brand>
+            <Row className="align-items-center">
+                <Col>
+                    <Image
+                        alt=""
+                        src="/assets/images/logo-bioma.svg"
+                        width="40"
+                        height="40"
+                        className="d-inline-block align-top"
+                    />
+                </Col>
+                <Col>
+                    <span className="text-light">App</span>
+                </Col>
+            </Row>
 
             <div className={styles.sideNavBarContainer}>
                 <Navbar.Toggle aria-controls="side-navbar-nav" />

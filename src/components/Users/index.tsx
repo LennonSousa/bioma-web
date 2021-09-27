@@ -14,6 +14,17 @@ import { LogUser } from '../../components/LogsUsers';
 export type Role = 'customers' | 'institutions' | 'licensings' | 'properties' | 'projects' | 'banks' | 'users';
 export type Grant = 'view' | 'view_self' | 'create' | 'update' | 'update_self' | 'remove';
 
+export interface UserRole {
+    id: string;
+    role: Role;
+    view: boolean;
+    view_self: boolean;
+    create: boolean;
+    update: boolean;
+    update_self: boolean;
+    remove: boolean;
+}
+
 export interface User {
     id: string,
     name: string;
@@ -31,17 +42,6 @@ export interface User {
     propertyMembers: PropertyMember[];
     notifications: Notification[];
     logs: LogUser[];
-}
-
-export interface UserRole {
-    id: string;
-    role: Role;
-    view: boolean;
-    view_self: boolean;
-    create: boolean;
-    update: boolean;
-    update_self: boolean;
-    remove: boolean;
 }
 
 interface TranslateItem {

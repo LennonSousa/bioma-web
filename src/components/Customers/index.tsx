@@ -1,5 +1,5 @@
 import { CustomerType } from '../CustomerTypes';
-import { CustomerDocs } from '../CustomerDocs';
+import { CustomerDoc } from '../CustomerDocs';
 import { Property } from '../Properties';
 import { Project } from '../Projects';
 import { Licensing } from '../Licensings';
@@ -26,7 +26,7 @@ export interface Customer {
     created_by: string;
     created_at: Date;
     type: CustomerType;
-    docs: CustomerDocs[];
+    docs: CustomerDoc[];
     properties: Property[];
     projects: Project[];
     licensings: Licensing[];

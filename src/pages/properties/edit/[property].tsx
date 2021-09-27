@@ -19,6 +19,7 @@ import Members from '../../../components/PropertyMembers';
 import { User, can } from '../../../components/Users';
 import { Customer } from '../../../components/Customers';
 import { DocsProperty } from '../../../components/DocsProperty';
+import PropertyDocs from '../../../components/PropertyDocs';
 import PropertyAttachments, { PropertyAttachment } from '../../../components/PropertyAttachments';
 import { statesCities } from '../../../components/StatesCities';
 import PageBack from '../../../components/PageBack';
@@ -292,10 +293,10 @@ export default function NewProperty() {
         });
     }
 
-    function handleChecks(event: ChangeEvent<HTMLInputElement>) {
+    function handleChecks(docId: string) {
         if (propertyData) {
             const updatedDocs = propertyData.docs.map(customerDoc => {
-                if (customerDoc.doc.id === event.target.value)
+                if (customerDoc.doc.id === docId)
                     return { ...customerDoc, checked: !customerDoc.checked }
 
                 return customerDoc;
@@ -307,15 +308,22 @@ export default function NewProperty() {
 
     function handleReceivedAt(docId: string, value: string) {
         if (propertyData) {
-            const updatedDocs = propertyData.docs.map(customerDoc => {
+            try {
+                const newDate = new Date(`${value} 12:00:00`);
 
-                if (customerDoc.doc.id === docId)
-                    return { ...customerDoc, received_at: new Date(new Date(`${value} 12:00:00`)) }
+                const updatedDocs = propertyData.docs.map(customerDoc => {
 
-                return customerDoc;
-            });
+                    if (customerDoc.doc.id === docId)
+                        return { ...customerDoc, received_at: newDate }
 
-            setPropertyData({ ...propertyData, docs: updatedDocs });
+                    return customerDoc;
+                });
+
+                setPropertyData({ ...propertyData, docs: updatedDocs });
+            }
+            catch {
+
+            }
         }
     }
 
@@ -717,32 +725,12 @@ export default function NewProperty() {
                                                                                 <ListGroup className="mb-3">
                                                                                     {
                                                                                         propertyData.docs.map((doc, index) => {
-                                                                                            return <ListGroup.Item key={index} action as="div" variant="light">
-                                                                                                <Row className="align-items-center">
-                                                                                                    <Col sm={8}>
-                                                                                                        <Form.Check
-                                                                                                            checked={doc.checked}
-                                                                                                            type="checkbox"
-                                                                                                            label={doc.doc.name}
-                                                                                                            name="type"
-                                                                                                            id={`formCustomerDocs${doc.doc.id}`}
-                                                                                                            value={doc.doc.id}
-                                                                                                            onChange={handleChecks}
-                                                                                                        />
-                                                                                                    </Col>
-
-                                                                                                    <Form.Label column sm={2}>Data do recebimento</Form.Label>
-                                                                                                    <Col sm={2}>
-                                                                                                        <Form.Control
-                                                                                                            type="date"
-                                                                                                            className="form-control"
-                                                                                                            onChange={e => handleReceivedAt(doc.doc.id, e.target.value)}
-                                                                                                            value={format(new Date(doc.received_at), 'yyyy-MM-dd')}
-                                                                                                            name={`receivedAt${doc.doc.id}`}
-                                                                                                        />
-                                                                                                    </Col>
-                                                                                                </Row>
-                                                                                            </ListGroup.Item>
+                                                                                            return <PropertyDocs
+                                                                                                key={index}
+                                                                                                doc={doc}
+                                                                                                handleChecks={handleChecks}
+                                                                                                handleReceivedAt={handleReceivedAt}
+                                                                                            />
                                                                                         })
                                                                                     }
                                                                                 </ListGroup>

@@ -1,5 +1,5 @@
 import { Customer } from '../Customers';
-import { PropertyDocs } from '../PropertyDocs';
+import { PropertyDoc } from '../PropertyDocs';
 import { PropertyAttachment } from '../PropertyAttachments';
 import { Member } from '../PropertyMembers';
 import { LogProperty } from '../LogsProperties';
@@ -19,7 +19,7 @@ export interface Property {
     created_by: string;
     created_at: Date;
     customer: Customer;
-    docs: PropertyDocs[];
+    docs: PropertyDoc[];
     attachments: PropertyAttachment[];
     members: Member[];
     logs: LogProperty[];
