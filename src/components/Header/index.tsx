@@ -18,7 +18,18 @@ export function Header() {
     const [showPageHeader, setShowPageHeader] = useState(false);
     const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-    const pathsNotShow = ['/', '/users/new/auth', '/users/reset', '/users/reset/auth', '/404', '500'];
+    const pathsNotShow = [
+        '/',
+        '/users/new/auth',
+        '/users/reset',
+        '/users/reset/auth',
+        '/404',
+        '500',
+        '/shares/customers/auth',
+        '/shares/licensings/auth',
+        '/shares/projects/auth',
+        '/shares/properties/auth',
+    ];
 
     const [showUserDetails, setShowUserDetails] = useState(false);
 

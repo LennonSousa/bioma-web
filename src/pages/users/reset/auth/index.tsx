@@ -249,7 +249,7 @@ export default function NewCustomer({ authenticated, user, token }: InferGetServ
 
                             <Modal.Body>
                                 <Row className="justify-content-center align-items-center mb-3">
-                                    <Col sm={8}>
+                                    <Col className="col-5" sm={8}>
                                         <Image fluid src="/assets/images/undraw_security_on_re_e491.svg" alt="Cadastro concluído!" />
                                     </Col>
                                 </Row>

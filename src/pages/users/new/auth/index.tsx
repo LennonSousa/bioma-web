@@ -238,7 +238,7 @@ export default function NewCustomer({ authenticated, user, token }: InferGetServ
                                         <Row className="justify-content-center align-items-center">
                                             <Col md={6} className="mt-1 mb-4">
                                                 <Row className="justify-content-center align-items-center">
-                                                    <Col sm={8}>
+                                                    <Col className="col-5" sm={8}>
                                                         <Image fluid src="/assets/images/undraw_server_down_s4lk.svg" alt="Erro na autenticação." />
                                                     </Col>
                                                 </Row>

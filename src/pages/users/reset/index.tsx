@@ -157,7 +157,7 @@ export default function NewCustomer() {
 
                             <Modal.Body>
                                 <Row className="justify-content-center align-items-center mb-3">
-                                    <Col sm={8}>
+                                    <Col className="col-5" sm={8}>
                                         <Image fluid src="/assets/images/undraw_mail_re_duel.svg" alt="Solicitação enviada!" />
                                     </Col>
                                 </Row>
