@@ -68,7 +68,6 @@ const CustomerAttachments: React.FC<CustomerAttachmentsProps> = ({ attachment, l
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
     const [downloadingAttachment, setDownloadingAttachment] = useState(false);
-    const [sharingAttachment, setSharingAttachment] = useState(false);
 
     const [iconDelete, setIconDelete] = useState(true);
     const [iconDeleteConfirm, setIconDeleteConfirm] = useState(false);

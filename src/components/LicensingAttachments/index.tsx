@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Accordion, Row, Col, ListGroup, Modal, Form, Button, Spinner, Table } from 'react-bootstrap';
-import { FaBars, FaHourglassHalf, FaHourglassEnd, FaPencilAlt, FaCloudDownloadAlt, FaFingerprint } from 'react-icons/fa';
+import { FaBars, FaHourglassHalf, FaHourglassEnd, FaPencilAlt, FaCloudDownloadAlt, FaFingerprint, FaShareAlt } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { format, differenceInDays, formatDistanceToNow, isBefore, subDays } from 'date-fns';
@@ -10,6 +10,7 @@ import FileSaver from 'file-saver';
 import api from '../../api/api';
 import { Licensing } from '../Licensings';
 import { LogLicensingAttachment } from '../LogsLicensingAttachment';
+import ShareLicensingAttachments, { ShareLicensingAttachment } from '../SharesLicensingAttachment';
 import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
 export interface LicensingAttachment {
@@ -24,6 +25,7 @@ export interface LicensingAttachment {
     order: number;
     licensing: Licensing;
     logs: LogLicensingAttachment[];
+    shares: ShareLicensingAttachment[];
 }
 
 interface LicensingAttachmentsProps {
@@ -42,17 +44,29 @@ const validationSchema = Yup.object().shape({
     schedule_at: Yup.number().required('Obrigatório!'),
 });
 
+const shareValidationSchema = Yup.object().shape({
+    email: Yup.string().email('E-mail inválido!').required('Obrigatório!'),
+    expire_at: Yup.date().required('Obrigatório!'),
+    attachment: Yup.string().required('Obrigatório!'),
+});
+
 const LicensingAttachments: React.FC<LicensingAttachmentsProps> = ({ attachment, listAttachments, canEdit = true, handleListAttachments }) => {
     const [showModalEditDoc, setShowModalEditDoc] = useState(false);
 
     const handleCloseModalEditDoc = () => { setShowModalEditDoc(false); setIconDeleteConfirm(false); setIconDelete(true); }
     const handleShowModalEditDoc = () => setShowModalEditDoc(true);
 
+    const [showModalShareIt, setShowModalShareIt] = useState(false);
+
+    const handleCloseModalShareIt = () => setShowModalShareIt(false);
+    const handleShowModalShareIt = () => setShowModalShareIt(true);
+
     const [attachmentExpired, setAttachmentExpired] = useState(false);
     const [attachmentExpireTime, setAttachmentExpireTime] = useState('');
 
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
+
     const [downloadingAttachment, setDownloadingAttachment] = useState(false);
 
     const [iconDelete, setIconDelete] = useState(true);
@@ -161,7 +175,7 @@ const LicensingAttachments: React.FC<LicensingAttachmentsProps> = ({ attachment,
                         }
                     </Col>
 
-                    <Col sm={1} className="text-right">
+                    <Col className="col-row text-right">
                         <Button
                             variant="outline-success"
                             className="button-link"
@@ -173,19 +187,122 @@ const LicensingAttachments: React.FC<LicensingAttachmentsProps> = ({ attachment,
                     </Col>
 
                     {
-                        canEdit && <Col sm={2} className="text-right">
-                            <Button
-                                variant="outline-success"
-                                className="button-link"
-                                onClick={handleShowModalEditDoc}
-                                title="Editar o anexo."
-                            >
-                                <FaPencilAlt /> Editar
-                            </Button>
-                        </Col>
+                        canEdit && <>
+                            <Col className="col-row text-right">
+                                <Button
+                                    variant="outline-success"
+                                    className="button-link"
+                                    onClick={handleShowModalShareIt}
+                                    title="Compartilhar o anexo."
+                                >
+                                    <FaShareAlt />
+                                </Button>
+                            </Col>
+
+                            <Col className="col-row text-right">
+                                <Button
+                                    variant="outline-success"
+                                    className="button-link"
+                                    onClick={handleShowModalEditDoc}
+                                    title="Editar o anexo."
+                                >
+                                    <FaPencilAlt /> Editar
+                                </Button>
+                            </Col>
+                        </>
                     }
                 </Row>
             </ListGroup.Item>
+
+            <Modal show={showModalShareIt} onHide={handleCloseModalShareIt}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Compartilhar anexo</Modal.Title>
+                </Modal.Header>
+                <Formik
+                    initialValues={
+                        {
+                            email: '',
+                            expire_at: format(new Date(), 'yyyy-MM-dd'),
+                            attachment: attachment.id,
+                        }
+                    }
+                    onSubmit={async values => {
+                        setTypeMessage("waiting");
+                        setMessageShow(true);
+
+                        try {
+                            await api.post('shares/licensings', {
+                                email: values.email,
+                                expire_at: `${values.expire_at} 23:59:59`,
+                                attachment: values.attachment,
+                            });
+
+                            if (handleListAttachments) await handleListAttachments();
+
+                            setTypeMessage("success");
+
+                            setTimeout(() => {
+                                setMessageShow(false);
+                                handleCloseModalShareIt();
+                            }, 1000);
+                        }
+                        catch (err) {
+                            console.log('error create share.');
+                            console.log(err);
+
+                            setTypeMessage("error");
+
+                            setTimeout(() => {
+                                setMessageShow(false);
+                            }, 4000);
+                        }
+                    }}
+                    validationSchema={shareValidationSchema}
+                >
+                    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                        <Form onSubmit={handleSubmit}>
+                            <Modal.Body>
+                                <Form.Group className="mb-3" controlId="formGridShareEmail">
+                                    <Form.Label>E-mail para compartilhar</Form.Label>
+                                    <Form.Control type="text"
+                                        placeholder="Nome"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.email}
+                                        name="email"
+                                        isInvalid={!!errors.email && touched.email}
+                                    />
+                                    <Form.Control.Feedback type="invalid">{touched.email && errors.email}</Form.Control.Feedback>
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="formGridShareExpireAt">
+                                    <Form.Label>Data de expiração</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.expire_at}
+                                        name="expire_at"
+                                        isInvalid={!!errors.expire_at && touched.expire_at}
+                                    />
+                                    <Form.Control.Feedback type="invalid">{touched.expire_at && errors.expire_at}</Form.Control.Feedback>
+                                </Form.Group>
+
+                            </Modal.Body>
+                            <Modal.Footer>
+                                {
+                                    messageShow ? <AlertMessage status={typeMessage} /> :
+                                        <>
+                                            <Button variant="secondary" onClick={handleCloseModalShareIt}>Cancelar</Button>
+                                            <Button variant="success" type="submit">Salvar</Button>
+                                        </>
+
+                                }
+                            </Modal.Footer>
+                        </Form>
+                    )}
+                </Formik>
+            </Modal>
 
             <Modal show={showModalEditDoc} onHide={handleCloseModalEditDoc}>
                 <Modal.Header closeButton>
@@ -340,6 +457,23 @@ const LicensingAttachments: React.FC<LicensingAttachmentsProps> = ({ attachment,
 
                                 <Accordion>
                                     <Accordion.Item eventKey="0">
+                                        <Accordion.Header><h6 className="text-success">Compartilhamentos <FaShareAlt /></h6></Accordion.Header>
+                                        <Accordion.Body>
+                                            <ListGroup>
+                                                {
+                                                    attachment.shares.map(share => {
+                                                        return <ShareLicensingAttachments
+                                                            key={share.id}
+                                                            shareAttachment={share}
+                                                            handleListAttachments={handleListAttachments}
+                                                        />
+                                                    })
+                                                }
+                                            </ListGroup>
+                                        </Accordion.Body>
+                                    </Accordion.Item>
+
+                                    <Accordion.Item eventKey="1">
                                         <Accordion.Header><h6 className="text-success">Acessos <FaFingerprint /></h6></Accordion.Header>
                                         <Accordion.Body>
                                             <Table striped hover size="sm" responsive>

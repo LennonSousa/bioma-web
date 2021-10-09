@@ -25,10 +25,7 @@ export function Header() {
         '/users/reset/auth',
         '/404',
         '500',
-        '/shares/customers/auth',
-        '/shares/licensings/auth',
-        '/shares/projects/auth',
-        '/shares/properties/auth',
+        '/shares/auth',
     ];
 
     const [showUserDetails, setShowUserDetails] = useState(false);

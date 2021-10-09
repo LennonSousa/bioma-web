@@ -9,19 +9,30 @@ import { FaCloudDownloadAlt, FaHandsHelping } from 'react-icons/fa';
 import Cookies from 'js-cookie';
 import FileSaver from 'file-saver';
 
-import api from '../../../../api/api';
-import { CustomerAttachment } from '../../../../components/CustomerAttachments';
-import { AlertMessage, statusModal } from '../../../../components/Interfaces/AlertMessage';
+import api from '../../../api/api';
+import { AlertMessage, statusModal } from '../../../components/Interfaces/AlertMessage';
 
-import styles from '../../../../styles/index.module.css';
+import styles from '../../../styles/index.module.css';
+
+interface Attachment {
+    id: string;
+    name: string;
+    path: string;
+    received_at: Date;
+    expire: boolean;
+    expire_at: Date;
+    schedule: boolean;
+    schedule_at: Date;
+    order: number;
+}
 
 const validationSchema = Yup.object().shape({
     email: Yup.string().email('E-mail inválido!').required('Obrigatório!'),
     terms: Yup.boolean().isTrue('Obrigatório aceitar os termos.'),
 });
 
-export default function ShareAuth({ share, token }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [attachment, setAttachment] = useState<CustomerAttachment>();
+export default function ShareAuth({ item, share, token }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const [attachment, setAttachment] = useState<Attachment>();
     const [authToken, setAuthToken] = useState<String>();
 
     const [messageShow, setMessageShow] = useState(false);
@@ -40,11 +51,11 @@ export default function ShareAuth({ share, token }: InferGetServerSidePropsType<
     }, []);
 
     async function handleDownloadAttachment() {
-        if (attachment && authToken) {
+        if (item && attachment && authToken) {
             setDownloadingAttachment(true);
 
             try {
-                const res = await api.get(`shares/customers/${attachment.id}`,
+                const res = await api.get(`shares/${item}/${attachment.id}`,
                     {
                         responseType: "blob",
                         headers: { 'Authorization': `Bearer ${authToken}` }
@@ -108,7 +119,7 @@ export default function ShareAuth({ share, token }: InferGetServerSidePropsType<
                                                 setMessageShow(true);
 
                                                 try {
-                                                    const res = await api.put(`shares/customers/${share}`, {
+                                                    const res = await api.put(`shares/${item}/${share}`, {
                                                         email: values.email,
                                                         token,
                                                     });
@@ -260,7 +271,7 @@ export default function ShareAuth({ share, token }: InferGetServerSidePropsType<
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-    const { share, token } = context.query;
+    const { item, share, token } = context.query;
 
     if (!share || !token) { // No share id or token!
         return {
@@ -273,6 +284,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     return {
         props: {
+            item,
             share,
             token,
         },

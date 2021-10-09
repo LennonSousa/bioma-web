@@ -3,10 +3,10 @@ import { Row, Col, ListGroup, Button } from 'react-bootstrap';
 import { format, isAfter } from 'date-fns';
 
 import api from '../../api/api';
-import { LicensingAttachment } from '../LicensingAttachments';
+import { ProjectAttachment } from '../ProjectAttachments';
 import { AlertMessage, statusModal } from '../Interfaces/AlertMessage';
 
-export interface ShareLicensingAttachment {
+export interface ShareProjectAttachment {
     id: string;
     email: string;
     expire_at: Date;
@@ -14,15 +14,15 @@ export interface ShareLicensingAttachment {
     activated_at: Date;
     created_by: string;
     created_at: Date;
-    attachment: LicensingAttachment[];
+    attachment: ProjectAttachment[];
 }
 
-interface ShareLicensingAttachmentsProps {
-    shareAttachment: ShareLicensingAttachment;
+interface ShareProjectAttachmentsProps {
+    shareAttachment: ShareProjectAttachment;
     handleListAttachments?: () => Promise<void>;
 }
 
-const ShareLicensingAttachments: React.FC<ShareLicensingAttachmentsProps> = ({ shareAttachment, handleListAttachments }) => {
+const ShareProjectAttachments: React.FC<ShareProjectAttachmentsProps> = ({ shareAttachment, handleListAttachments }) => {
     const [messageShow, setMessageShow] = useState(false);
     const [typeMessage, setTypeMessage] = useState<statusModal>("waiting");
 
@@ -41,7 +41,7 @@ const ShareLicensingAttachments: React.FC<ShareLicensingAttachmentsProps> = ({ s
         setMessageShow(true);
 
         try {
-            await api.delete(`shares/licensings/${shareAttachment.id}`);
+            await api.delete(`shares/projects/${shareAttachment.id}`);
 
             if (handleListAttachments) handleListAttachments();
         }
@@ -56,7 +56,7 @@ const ShareLicensingAttachments: React.FC<ShareLicensingAttachmentsProps> = ({ s
                 setMessageShow(false);
             }, 4000);
 
-            console.log("Error to delete share licensing attachment");
+            console.log("Error to delete share project attachment");
             console.log(err);
         }
     }
@@ -117,4 +117,4 @@ const ShareLicensingAttachments: React.FC<ShareLicensingAttachmentsProps> = ({ s
     )
 }
 
-export default ShareLicensingAttachments;
+export default ShareProjectAttachments;
